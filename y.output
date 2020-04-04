@@ -1,21 +1,92 @@
-   0  $accept : start $end
+   0  $accept : file $end
 
-   1  start :
+   1  file : program
+
+   2  program : PROGRAM START body END
+
+   3  body : instr
+
+   4  instr : expr '!'
+
+   5  expr : STR
 
 state 0
-	$accept : . start $end  (0)
-	start : .  (1)
+	$accept : . file $end  (0)
 
-	.  reduce 1
+	PROGRAM  shift 1
+	.  error
 
-	start  goto 1
+	file  goto 2
+	program  goto 3
 
 
 state 1
-	$accept : start . $end  (0)
+	program : PROGRAM . START body END  (2)
+
+	START  shift 4
+	.  error
+
+
+state 2
+	$accept : file . $end  (0)
 
 	$end  accept
 
 
-5 terminals, 2 nonterminals
-2 grammar rules, 2 states
+state 3
+	file : program .  (1)
+
+	.  reduce 1
+
+
+state 4
+	program : PROGRAM START . body END  (2)
+
+	STR  shift 5
+	.  error
+
+	body  goto 6
+	instr  goto 7
+	expr  goto 8
+
+
+state 5
+	expr : STR .  (5)
+
+	.  reduce 5
+
+
+state 6
+	program : PROGRAM START body . END  (2)
+
+	END  shift 9
+	.  error
+
+
+state 7
+	body : instr .  (3)
+
+	.  reduce 3
+
+
+state 8
+	instr : expr . '!'  (4)
+
+	'!'  shift 10
+	.  error
+
+
+state 9
+	program : PROGRAM START body END .  (2)
+
+	.  reduce 2
+
+
+state 10
+	instr : expr '!' .  (4)
+
+	.  reduce 4
+
+
+10 terminals, 6 nonterminals
+6 grammar rules, 11 states

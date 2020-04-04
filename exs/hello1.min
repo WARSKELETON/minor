@@ -1,0 +1,4 @@
+program
+start
+  "olá pessoal!\n"!
+end

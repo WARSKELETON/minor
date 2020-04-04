@@ -20,11 +20,14 @@
 #line 2 "gram.y"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdarg.h>
+#include <string.h>
+#include "node.h"
+#include "tabid.h"
 int yylex();
-void yyerror(char *);
-
-#line 10 "gram.y"
+void evaluate(Node *p);
+void yyerror(char *s);
+#line 13 "gram.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -35,9 +38,10 @@ typedef union {
     int i;          /* integer value */
     char *s;        /* symbol name or string literal */
     int *vi;        /* integer vector */
+    Node *n;	    /* tree node */
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 41 "y.tab.c"
+#line 45 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -73,54 +77,66 @@ extern int YYPARSE_DECL();
 #define INTEGER 257
 #define ID 258
 #define STR 259
+#define PROGRAM 260
+#define MODULE 261
+#define START 262
+#define END 263
 #define YYERRCODE 256
 typedef short YYINT;
 static const YYINT yylhs[] = {                           -1,
-    0,
+    0,    1,    2,    3,    4,
 };
 static const YYINT yylen[] = {                            2,
-    0,
+    1,    4,    1,    2,    1,
 };
-static const YYINT yydefred[] = {                         1,
-    0,
+static const YYINT yydefred[] = {                         0,
+    0,    0,    1,    0,    5,    0,    3,    0,    2,    4,
 };
-static const YYINT yydgoto[] = {                          1,
+static const YYINT yydgoto[] = {                          2,
+    3,    6,    7,    8,
 };
-static const YYINT yysindex[] = {                         0,
-    0,
+static const YYINT yysindex[] = {                      -260,
+ -261,    0,    0, -257,    0, -259,    0,  -30,    0,    0,
 };
 static const YYINT yyrindex[] = {                         0,
-    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
 static const YYINT yygindex[] = {                         0,
+    0,    0,    0,    0,
 };
-#define YYTABLESIZE 0
-static const YYINT yytable[] = {                          0,
+#define YYTABLESIZE 4
+static const YYINT yytable[] = {                          1,
+    4,    5,   10,    9,
 };
-static const YYINT yycheck[] = {                         -1,
+static const YYINT yycheck[] = {                        260,
+  262,  259,   33,  263,
 };
-#define YYFINAL 1
+#define YYFINAL 2
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 259
-#define YYUNDFTOKEN 262
+#define YYMAXTOKEN 263
+#define YYUNDFTOKEN 270
 #define YYTRANSLATE(a) ((a) > YYMAXTOKEN ? YYUNDFTOKEN : (a))
 #if YYDEBUG
 static const char *const yyname[] = {
 
-"end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+"end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+"'!'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"INTEGER","ID","STR",0,0,
-"illegal-symbol",
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"INTEGER","ID","STR",
+"PROGRAM","MODULE","START","END",0,0,0,0,0,0,"illegal-symbol",
 };
 static const char *const yyrule[] = {
-"$accept : start",
-"start :",
+"$accept : file",
+"file : program",
+"program : PROGRAM START body END",
+"body : instr",
+"instr : expr '!'",
+"expr : STR",
 
 };
 #endif
@@ -158,6 +174,15 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
+#line 41 "gram.y"
+
+char **yynames =
+#if YYDEBUG > 0
+		 (char**)yyname;
+#else
+		 0;
+#endif
+#line 186 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
