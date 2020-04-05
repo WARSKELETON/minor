@@ -1,92 +1,623 @@
    0  $accept : file $end
 
    1  file : program
+   2       | module
 
-   2  program : PROGRAM START body END
+   3  program : PROGRAM START body END
+   4          | PROGRAM decls START body END
 
-   3  body : instr
+   5  module : MODULE decls END
 
-   4  instr : expr '!'
+   6  decls : decl
+   7        | decls decl
 
-   5  expr : STR
+   8  decl : ';'
+   9       | func
+  10       | declpre var ATTR literal
+  11       | declpre var
+  12       | var ATTR literal
+  13       | var
+
+  14  func : FUNCTION qualifier functype ID vars funcend
+  15       | FUNCTION functype ID funcend
+  16       | FUNCTION qualifier functype ID funcend
+  17       | FUNCTION functype ID vars funcend
+
+  18  funcend : DONE
+  19          | DO body
+
+  20  functype : type
+  21           | VOID
+
+  22  declpre : qualifier CONST
+  23          | qualifier
+  24          | CONST
+
+  25  qualifier : PUBLIC
+  26            | FORWARD
+
+  27  vars : var
+  28       | vars ';' var
+
+  29  var : type ID
+
+  30  type : NUMBER
+  31       | ARRAY
+  32       | STRING
+
+  33  body : instr
+
+  34  instr : expr '!'
+
+  35  expr : literal
+
+  36  literal : STR
 
 state 0
 	$accept : . file $end  (0)
 
 	PROGRAM  shift 1
+	MODULE  shift 2
 	.  error
 
-	file  goto 2
-	program  goto 3
+	file  goto 3
+	program  goto 4
+	module  goto 5
 
 
 state 1
-	program : PROGRAM . START body END  (2)
+	program : PROGRAM . START body END  (3)
+	program : PROGRAM . decls START body END  (4)
 
-	START  shift 4
+	START  shift 6
+	FUNCTION  shift 7
+	PUBLIC  shift 8
+	FORWARD  shift 9
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	CONST  shift 13
+	';'  shift 14
 	.  error
+
+	decls  goto 15
+	decl  goto 16
+	func  goto 17
+	declpre  goto 18
+	var  goto 19
+	qualifier  goto 20
+	type  goto 21
 
 
 state 2
+	module : MODULE . decls END  (5)
+
+	FUNCTION  shift 7
+	PUBLIC  shift 8
+	FORWARD  shift 9
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	CONST  shift 13
+	';'  shift 14
+	.  error
+
+	decls  goto 22
+	decl  goto 16
+	func  goto 17
+	declpre  goto 18
+	var  goto 19
+	qualifier  goto 20
+	type  goto 21
+
+
+state 3
 	$accept : file . $end  (0)
 
 	$end  accept
 
 
-state 3
+state 4
 	file : program .  (1)
 
 	.  reduce 1
 
 
-state 4
-	program : PROGRAM START . body END  (2)
-
-	STR  shift 5
-	.  error
-
-	body  goto 6
-	instr  goto 7
-	expr  goto 8
-
-
 state 5
-	expr : STR .  (5)
-
-	.  reduce 5
-
-
-state 6
-	program : PROGRAM START body . END  (2)
-
-	END  shift 9
-	.  error
-
-
-state 7
-	body : instr .  (3)
-
-	.  reduce 3
-
-
-state 8
-	instr : expr . '!'  (4)
-
-	'!'  shift 10
-	.  error
-
-
-state 9
-	program : PROGRAM START body END .  (2)
+	file : module .  (2)
 
 	.  reduce 2
 
 
+state 6
+	program : PROGRAM START . body END  (3)
+
+	STR  shift 23
+	.  error
+
+	body  goto 24
+	literal  goto 25
+	instr  goto 26
+	expr  goto 27
+
+
+state 7
+	func : FUNCTION . qualifier functype ID vars funcend  (14)
+	func : FUNCTION . functype ID funcend  (15)
+	func : FUNCTION . qualifier functype ID funcend  (16)
+	func : FUNCTION . functype ID vars funcend  (17)
+
+	PUBLIC  shift 8
+	FORWARD  shift 9
+	NUMBER  shift 10
+	ARRAY  shift 11
+	VOID  shift 28
+	STRING  shift 12
+	.  error
+
+	qualifier  goto 29
+	functype  goto 30
+	type  goto 31
+
+
+state 8
+	qualifier : PUBLIC .  (25)
+
+	.  reduce 25
+
+
+state 9
+	qualifier : FORWARD .  (26)
+
+	.  reduce 26
+
+
 state 10
-	instr : expr '!' .  (4)
+	type : NUMBER .  (30)
+
+	.  reduce 30
+
+
+state 11
+	type : ARRAY .  (31)
+
+	.  reduce 31
+
+
+state 12
+	type : STRING .  (32)
+
+	.  reduce 32
+
+
+state 13
+	declpre : CONST .  (24)
+
+	.  reduce 24
+
+
+state 14
+	decl : ';' .  (8)
+
+	.  reduce 8
+
+
+state 15
+	program : PROGRAM decls . START body END  (4)
+	decls : decls . decl  (7)
+
+	START  shift 32
+	FUNCTION  shift 7
+	PUBLIC  shift 8
+	FORWARD  shift 9
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	CONST  shift 13
+	';'  shift 14
+	.  error
+
+	decl  goto 33
+	func  goto 17
+	declpre  goto 18
+	var  goto 19
+	qualifier  goto 20
+	type  goto 21
+
+
+state 16
+	decls : decl .  (6)
+
+	.  reduce 6
+
+
+state 17
+	decl : func .  (9)
+
+	.  reduce 9
+
+
+state 18
+	decl : declpre . var ATTR literal  (10)
+	decl : declpre . var  (11)
+
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	.  error
+
+	var  goto 34
+	type  goto 21
+
+
+state 19
+	decl : var . ATTR literal  (12)
+	decl : var .  (13)
+
+	ATTR  shift 35
+	START  reduce 13
+	END  reduce 13
+	FUNCTION  reduce 13
+	PUBLIC  reduce 13
+	FORWARD  reduce 13
+	NUMBER  reduce 13
+	ARRAY  reduce 13
+	STRING  reduce 13
+	CONST  reduce 13
+	';'  reduce 13
+
+
+state 20
+	declpre : qualifier . CONST  (22)
+	declpre : qualifier .  (23)
+
+	CONST  shift 36
+	NUMBER  reduce 23
+	ARRAY  reduce 23
+	STRING  reduce 23
+
+
+state 21
+	var : type . ID  (29)
+
+	ID  shift 37
+	.  error
+
+
+state 22
+	module : MODULE decls . END  (5)
+	decls : decls . decl  (7)
+
+	END  shift 38
+	FUNCTION  shift 7
+	PUBLIC  shift 8
+	FORWARD  shift 9
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	CONST  shift 13
+	';'  shift 14
+	.  error
+
+	decl  goto 33
+	func  goto 17
+	declpre  goto 18
+	var  goto 19
+	qualifier  goto 20
+	type  goto 21
+
+
+state 23
+	literal : STR .  (36)
+
+	.  reduce 36
+
+
+state 24
+	program : PROGRAM START body . END  (3)
+
+	END  shift 39
+	.  error
+
+
+state 25
+	expr : literal .  (35)
+
+	.  reduce 35
+
+
+state 26
+	body : instr .  (33)
+
+	.  reduce 33
+
+
+state 27
+	instr : expr . '!'  (34)
+
+	'!'  shift 40
+	.  error
+
+
+state 28
+	functype : VOID .  (21)
+
+	.  reduce 21
+
+
+state 29
+	func : FUNCTION qualifier . functype ID vars funcend  (14)
+	func : FUNCTION qualifier . functype ID funcend  (16)
+
+	NUMBER  shift 10
+	ARRAY  shift 11
+	VOID  shift 28
+	STRING  shift 12
+	.  error
+
+	functype  goto 41
+	type  goto 31
+
+
+state 30
+	func : FUNCTION functype . ID funcend  (15)
+	func : FUNCTION functype . ID vars funcend  (17)
+
+	ID  shift 42
+	.  error
+
+
+state 31
+	functype : type .  (20)
+
+	.  reduce 20
+
+
+state 32
+	program : PROGRAM decls START . body END  (4)
+
+	STR  shift 23
+	.  error
+
+	body  goto 43
+	literal  goto 25
+	instr  goto 26
+	expr  goto 27
+
+
+state 33
+	decls : decls decl .  (7)
+
+	.  reduce 7
+
+
+state 34
+	decl : declpre var . ATTR literal  (10)
+	decl : declpre var .  (11)
+
+	ATTR  shift 44
+	START  reduce 11
+	END  reduce 11
+	FUNCTION  reduce 11
+	PUBLIC  reduce 11
+	FORWARD  reduce 11
+	NUMBER  reduce 11
+	ARRAY  reduce 11
+	STRING  reduce 11
+	CONST  reduce 11
+	';'  reduce 11
+
+
+state 35
+	decl : var ATTR . literal  (12)
+
+	STR  shift 23
+	.  error
+
+	literal  goto 45
+
+
+state 36
+	declpre : qualifier CONST .  (22)
+
+	.  reduce 22
+
+
+state 37
+	var : type ID .  (29)
+
+	.  reduce 29
+
+
+state 38
+	module : MODULE decls END .  (5)
+
+	.  reduce 5
+
+
+state 39
+	program : PROGRAM START body END .  (3)
+
+	.  reduce 3
+
+
+state 40
+	instr : expr '!' .  (34)
+
+	.  reduce 34
+
+
+state 41
+	func : FUNCTION qualifier functype . ID vars funcend  (14)
+	func : FUNCTION qualifier functype . ID funcend  (16)
+
+	ID  shift 46
+	.  error
+
+
+state 42
+	func : FUNCTION functype ID . funcend  (15)
+	func : FUNCTION functype ID . vars funcend  (17)
+
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	DONE  shift 47
+	DO  shift 48
+	.  error
+
+	var  goto 49
+	vars  goto 50
+	funcend  goto 51
+	type  goto 21
+
+
+state 43
+	program : PROGRAM decls START body . END  (4)
+
+	END  shift 52
+	.  error
+
+
+state 44
+	decl : declpre var ATTR . literal  (10)
+
+	STR  shift 23
+	.  error
+
+	literal  goto 53
+
+
+state 45
+	decl : var ATTR literal .  (12)
+
+	.  reduce 12
+
+
+state 46
+	func : FUNCTION qualifier functype ID . vars funcend  (14)
+	func : FUNCTION qualifier functype ID . funcend  (16)
+
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	DONE  shift 47
+	DO  shift 48
+	.  error
+
+	var  goto 49
+	vars  goto 54
+	funcend  goto 55
+	type  goto 21
+
+
+state 47
+	funcend : DONE .  (18)
+
+	.  reduce 18
+
+
+state 48
+	funcend : DO . body  (19)
+
+	STR  shift 23
+	.  error
+
+	body  goto 56
+	literal  goto 25
+	instr  goto 26
+	expr  goto 27
+
+
+state 49
+	vars : var .  (27)
+
+	.  reduce 27
+
+
+state 50
+	func : FUNCTION functype ID vars . funcend  (17)
+	vars : vars . ';' var  (28)
+
+	DONE  shift 47
+	DO  shift 48
+	';'  shift 57
+	.  error
+
+	funcend  goto 58
+
+
+state 51
+	func : FUNCTION functype ID funcend .  (15)
+
+	.  reduce 15
+
+
+state 52
+	program : PROGRAM decls START body END .  (4)
 
 	.  reduce 4
 
 
-10 terminals, 6 nonterminals
-6 grammar rules, 11 states
+state 53
+	decl : declpre var ATTR literal .  (10)
+
+	.  reduce 10
+
+
+state 54
+	func : FUNCTION qualifier functype ID vars . funcend  (14)
+	vars : vars . ';' var  (28)
+
+	DONE  shift 47
+	DO  shift 48
+	';'  shift 57
+	.  error
+
+	funcend  goto 59
+
+
+state 55
+	func : FUNCTION qualifier functype ID funcend .  (16)
+
+	.  reduce 16
+
+
+state 56
+	funcend : DO body .  (19)
+
+	.  reduce 19
+
+
+state 57
+	vars : vars ';' . var  (28)
+
+	NUMBER  shift 10
+	ARRAY  shift 11
+	STRING  shift 12
+	.  error
+
+	var  goto 60
+	type  goto 21
+
+
+state 58
+	func : FUNCTION functype ID vars funcend .  (17)
+
+	.  reduce 17
+
+
+state 59
+	func : FUNCTION qualifier functype ID vars funcend .  (14)
+
+	.  reduce 14
+
+
+state 60
+	vars : vars ';' var .  (28)
+
+	.  reduce 28
+
+
+22 terminals, 18 nonterminals
+37 grammar rules, 61 states

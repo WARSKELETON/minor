@@ -5,6 +5,17 @@
 #define MODULE 261
 #define START 262
 #define END 263
+#define FUNCTION 264
+#define PUBLIC 265
+#define FORWARD 266
+#define NUMBER 267
+#define ARRAY 268
+#define VOID 269
+#define STRING 270
+#define CONST 271
+#define DONE 272
+#define DO 273
+#define ATTR 274
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

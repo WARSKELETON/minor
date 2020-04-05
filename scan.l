@@ -13,6 +13,17 @@ extern void yyerror(const char *msg);
 "module"	return MODULE;
 "start"		return START;
 "end"		return END;
+"function"	return FUNCTION;
+"public"	return PUBLIC;
+"forward"	return FORWARD;
+"number"	return NUMBER;
+"array"		return ARRAY;
+"void"		return VOID;
+"string"	return STRING;
+"const"		return CONST;
+"do"		return DO;
+"done"		return DONE;
+":="		return ATTR;
 
 [A-Za-z][A-Za-z0-9_]*	{ yylval.s = strdup(yytext); return ID; }
 \"[^"]*\"				{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
