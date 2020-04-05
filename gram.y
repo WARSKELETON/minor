@@ -40,29 +40,24 @@ file    : program
     | module
     ;
 
-program : PROGRAM START body END
-    | PROGRAM decls START body END
+program : PROGRAM decls START body END
     ;
 
 module  : MODULE decls END
     ;
 
-decls   : decl
-    | decls decl
+decls   : /* empty */
+    | decls ';' decl
     ;
 
-decl    : ';'
-    | func
-    | declpre var ATTR literal 
-    | declpre var
-    | var ATTR literal
-    | var
+decl    : func
+    | qualifier CONST var ATTR literal 
+    | qualifier CONST var
+    | qualifier var ATTR literal
+    | qualifier var
     ;
 
 func    : FUNCTION qualifier functype ID vars funcend
-    | FUNCTION functype ID funcend
-    | FUNCTION qualifier functype ID funcend
-    | FUNCTION functype ID vars funcend
     ;
 
 funcend : DONE
@@ -73,16 +68,12 @@ functype    : type
     | VOID
     ;
 
-declpre : qualifier CONST
-    | qualifier
-    | CONST
-    ;
-
-qualifier   : PUBLIC
+qualifier   : /* empty */
+    | PUBLIC
     | FORWARD
     ;
 
-vars    : var
+vars    : /* empty */
     | vars ';' var
     ;
 
@@ -94,23 +85,27 @@ type    : NUMBER
     | STRING
     ;
 
-body    : instr
+body    : instrs
     ;
 
-instr   : IF expr THEN instr FI
-    | IF expr THEN instr ELIF expr THEN instr ELSE instr FI
-    | IF expr THEN instr ELIF expr THEN instr FI
-    | IF expr THEN instr ELSE instr FI 
-    | FOR expr UNTIL expr STEP expr DO instr DONE
+instr   : IF expr THEN instrs FI
+    | IF expr THEN instrs ELIF expr THEN instrs ELSE instrs FI
+    | IF expr THEN instrs ELIF expr THEN instrs FI
+    | IF expr THEN instrs ELSE instrs FI 
+    | FOR expr UNTIL expr STEP expr DO instrs DONE
     | expr ';'
     | expr '!'
     | REPEAT
     | STOP
-    | RETURN expr
     | RETURN
     ;
 
-expr    : literal
+instrs  : /* empty */
+    | instrs instr
+    ;
+
+expr    : ID 
+    | literal
     | '-' expr %prec UMINUS
     | '&' expr %prec ADDR
     | expr '+' expr

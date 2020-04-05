@@ -8,5 +8,7 @@ function forward number argc done;
 function forward string argv number n done;
 function forward number factorial number n done;
 start
-  "cona" !
+	if argc > 2 then
+		" #"! cnt! "\n"!
+	fi
 end

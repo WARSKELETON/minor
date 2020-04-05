@@ -3,79 +3,74 @@
    1  file : program
    2       | module
 
-   3  program : PROGRAM START body END
-   4          | PROGRAM decls START body END
+   3  program : PROGRAM decls START body END
 
-   5  module : MODULE decls END
+   4  module : MODULE decls END
 
-   6  decls : decl
-   7        | decls decl
+   5  decls :
+   6        | decls ';' decl
 
-   8  decl : ';'
-   9       | func
-  10       | declpre var ATTR literal
-  11       | declpre var
-  12       | var ATTR literal
-  13       | var
+   7  decl : func
+   8       | qualifier CONST var ATTR literal
+   9       | qualifier CONST var
+  10       | qualifier var ATTR literal
+  11       | qualifier var
 
-  14  func : FUNCTION qualifier functype ID vars funcend
-  15       | FUNCTION functype ID funcend
-  16       | FUNCTION qualifier functype ID funcend
-  17       | FUNCTION functype ID vars funcend
+  12  func : FUNCTION qualifier functype ID vars funcend
 
-  18  funcend : DONE
-  19          | DO body
+  13  funcend : DONE
+  14          | DO body
 
-  20  functype : type
-  21           | VOID
+  15  functype : type
+  16           | VOID
 
-  22  declpre : qualifier CONST
-  23          | qualifier
-  24          | CONST
+  17  qualifier :
+  18            | PUBLIC
+  19            | FORWARD
 
-  25  qualifier : PUBLIC
-  26            | FORWARD
+  20  vars :
+  21       | vars ';' var
 
-  27  vars : var
-  28       | vars ';' var
+  22  var : type ID
 
-  29  var : type ID
+  23  type : NUMBER
+  24       | ARRAY
+  25       | STRING
 
-  30  type : NUMBER
-  31       | ARRAY
-  32       | STRING
+  26  body : instrs
 
-  33  body : instr
+  27  instr : IF expr THEN instrs FI
+  28        | IF expr THEN instrs ELIF expr THEN instrs ELSE instrs FI
+  29        | IF expr THEN instrs ELIF expr THEN instrs FI
+  30        | IF expr THEN instrs ELSE instrs FI
+  31        | FOR expr UNTIL expr STEP expr DO instrs DONE
+  32        | expr ';'
+  33        | expr '!'
+  34        | REPEAT
+  35        | STOP
+  36        | RETURN
 
-  34  instr : IF expr THEN instr FI
-  35        | IF expr THEN instr ELIF expr THEN instr ELSE instr FI
-  36        | IF expr THEN instr ELIF expr THEN instr FI
-  37        | IF expr THEN instr ELSE instr FI
-  38        | FOR expr UNTIL expr STEP expr DO instr DONE
-  39        | expr ';'
-  40        | expr '!'
-  41        | REPEAT
-  42        | STOP
-  43        | RETURN expr
-  44        | RETURN
+  37  instrs :
+  38         | instrs instr
 
-  45  expr : literal
-  46       | '-' expr
-  47       | '&' expr
-  48       | expr '+' expr
-  49       | expr '-' expr
-  50       | expr '*' expr
-  51       | expr '/' expr
-  52       | expr '%' expr
-  53       | expr '<' expr
-  54       | expr '>' expr
-  55       | expr GE expr
-  56       | expr LE expr
-  57       | expr NE expr
-  58       | expr '=' expr
+  39  expr : ID
+  40       | literal
+  41       | '-' expr
+  42       | '&' expr
+  43       | expr '+' expr
+  44       | expr '-' expr
+  45       | expr '*' expr
+  46       | expr '/' expr
+  47       | expr '%' expr
+  48       | expr '<' expr
+  49       | expr '>' expr
+  50       | expr GE expr
+  51       | expr LE expr
+  52       | expr NE expr
+  53       | expr '=' expr
 
-  59  literal : INTEGER
-  60          | STR
+  54  literal : INTEGER
+  55          | STR
 
 state 0
 	$accept : . file $end  (0)
@@ -90,49 +85,21 @@ state 0
 
 
 state 1
-	program : PROGRAM . START body END  (3)
-	program : PROGRAM . decls START body END  (4)
+	program : PROGRAM . decls START body END  (3)
+	decls : .  (5)
 
-	START  shift 6
-	FUNCTION  shift 7
-	PUBLIC  shift 8
-	FORWARD  shift 9
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	CONST  shift 13
-	';'  shift 14
-	.  error
+	.  reduce 5
 
-	decls  goto 15
-	decl  goto 16
-	func  goto 17
-	declpre  goto 18
-	var  goto 19
-	qualifier  goto 20
-	type  goto 21
+	decls  goto 6
 
 
 state 2
-	module : MODULE . decls END  (5)
+	module : MODULE . decls END  (4)
+	decls : .  (5)
 
-	FUNCTION  shift 7
-	PUBLIC  shift 8
-	FORWARD  shift 9
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	CONST  shift 13
-	';'  shift 14
-	.  error
+	.  reduce 5
 
-	decls  goto 22
-	decl  goto 16
-	func  goto 17
-	declpre  goto 18
-	var  goto 19
-	qualifier  goto 20
-	type  goto 21
+	decls  goto 7
 
 
 state 3
@@ -154,1063 +121,892 @@ state 5
 
 
 state 6
-	program : PROGRAM START . body END  (3)
+	program : PROGRAM decls . START body END  (3)
+	decls : decls . ';' decl  (6)
 
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
+	START  shift 8
+	';'  shift 9
 	.  error
-
-	body  goto 32
-	literal  goto 33
-	instr  goto 34
-	expr  goto 35
 
 
 state 7
-	func : FUNCTION . qualifier functype ID vars funcend  (14)
-	func : FUNCTION . functype ID funcend  (15)
-	func : FUNCTION . qualifier functype ID funcend  (16)
-	func : FUNCTION . functype ID vars funcend  (17)
+	module : MODULE decls . END  (4)
+	decls : decls . ';' decl  (6)
 
-	PUBLIC  shift 8
-	FORWARD  shift 9
-	NUMBER  shift 10
-	ARRAY  shift 11
-	VOID  shift 36
-	STRING  shift 12
+	END  shift 10
+	';'  shift 9
 	.  error
-
-	qualifier  goto 37
-	functype  goto 38
-	type  goto 39
 
 
 state 8
-	qualifier : PUBLIC .  (25)
+	program : PROGRAM decls START . body END  (3)
+	instrs : .  (37)
 
-	.  reduce 25
+	.  reduce 37
+
+	body  goto 11
+	instrs  goto 12
 
 
 state 9
-	qualifier : FORWARD .  (26)
+	decls : decls ';' . decl  (6)
+	qualifier : .  (17)
 
-	.  reduce 26
+	FUNCTION  shift 13
+	PUBLIC  shift 14
+	FORWARD  shift 15
+	NUMBER  reduce 17
+	ARRAY  reduce 17
+	STRING  reduce 17
+	CONST  reduce 17
+
+	decl  goto 16
+	func  goto 17
+	qualifier  goto 18
 
 
 state 10
-	type : NUMBER .  (30)
+	module : MODULE decls END .  (4)
 
-	.  reduce 30
+	.  reduce 4
 
 
 state 11
-	type : ARRAY .  (31)
+	program : PROGRAM decls START body . END  (3)
 
-	.  reduce 31
+	END  shift 19
+	.  error
 
 
 state 12
-	type : STRING .  (32)
+	body : instrs .  (26)
+	instrs : instrs . instr  (38)
 
-	.  reduce 32
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	IF  shift 23
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	START  reduce 26
+	END  reduce 26
+	';'  reduce 26
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
 
 
 state 13
-	declpre : CONST .  (24)
+	func : FUNCTION . qualifier functype ID vars funcend  (12)
+	qualifier : .  (17)
 
-	.  reduce 24
+	PUBLIC  shift 14
+	FORWARD  shift 15
+	NUMBER  reduce 17
+	ARRAY  reduce 17
+	VOID  reduce 17
+	STRING  reduce 17
+
+	qualifier  goto 33
 
 
 state 14
-	decl : ';' .  (8)
+	qualifier : PUBLIC .  (18)
 
-	.  reduce 8
+	.  reduce 18
 
 
 state 15
-	program : PROGRAM decls . START body END  (4)
-	decls : decls . decl  (7)
+	qualifier : FORWARD .  (19)
 
-	START  shift 40
-	FUNCTION  shift 7
-	PUBLIC  shift 8
-	FORWARD  shift 9
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	CONST  shift 13
-	';'  shift 14
-	.  error
-
-	decl  goto 41
-	func  goto 17
-	declpre  goto 18
-	var  goto 19
-	qualifier  goto 20
-	type  goto 21
+	.  reduce 19
 
 
 state 16
-	decls : decl .  (6)
+	decls : decls ';' decl .  (6)
 
 	.  reduce 6
 
 
 state 17
-	decl : func .  (9)
-
-	.  reduce 9
-
-
-state 18
-	decl : declpre . var ATTR literal  (10)
-	decl : declpre . var  (11)
-
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	.  error
-
-	var  goto 42
-	type  goto 21
-
-
-state 19
-	decl : var . ATTR literal  (12)
-	decl : var .  (13)
-
-	ATTR  shift 43
-	START  reduce 13
-	END  reduce 13
-	FUNCTION  reduce 13
-	PUBLIC  reduce 13
-	FORWARD  reduce 13
-	NUMBER  reduce 13
-	ARRAY  reduce 13
-	STRING  reduce 13
-	CONST  reduce 13
-	';'  reduce 13
-
-
-state 20
-	declpre : qualifier . CONST  (22)
-	declpre : qualifier .  (23)
-
-	CONST  shift 44
-	NUMBER  reduce 23
-	ARRAY  reduce 23
-	STRING  reduce 23
-
-
-state 21
-	var : type . ID  (29)
-
-	ID  shift 45
-	.  error
-
-
-state 22
-	module : MODULE decls . END  (5)
-	decls : decls . decl  (7)
-
-	END  shift 46
-	FUNCTION  shift 7
-	PUBLIC  shift 8
-	FORWARD  shift 9
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	CONST  shift 13
-	';'  shift 14
-	.  error
-
-	decl  goto 41
-	func  goto 17
-	declpre  goto 18
-	var  goto 19
-	qualifier  goto 20
-	type  goto 21
-
-
-state 23
-	literal : INTEGER .  (59)
-
-	.  reduce 59
-
-
-state 24
-	literal : STR .  (60)
-
-	.  reduce 60
-
-
-state 25
-	instr : IF . expr THEN instr FI  (34)
-	instr : IF . expr THEN instr ELIF expr THEN instr ELSE instr FI  (35)
-	instr : IF . expr THEN instr ELIF expr THEN instr FI  (36)
-	instr : IF . expr THEN instr ELSE instr FI  (37)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 47
-
-
-state 26
-	instr : FOR . expr UNTIL expr STEP expr DO instr DONE  (38)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 48
-
-
-state 27
-	instr : REPEAT .  (41)
-
-	.  reduce 41
-
-
-state 28
-	instr : STOP .  (42)
-
-	.  reduce 42
-
-
-state 29
-	instr : RETURN . expr  (43)
-	instr : RETURN .  (44)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	START  reduce 44
-	END  reduce 44
-	FUNCTION  reduce 44
-	PUBLIC  reduce 44
-	FORWARD  reduce 44
-	NUMBER  reduce 44
-	ARRAY  reduce 44
-	STRING  reduce 44
-	CONST  reduce 44
-	DONE  reduce 44
-	ELSE  reduce 44
-	ELIF  reduce 44
-	FI  reduce 44
-	';'  reduce 44
-
-	literal  goto 33
-	expr  goto 49
-
-
-state 30
-	expr : '-' . expr  (46)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 50
-
-
-state 31
-	expr : '&' . expr  (47)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 51
-
-
-state 32
-	program : PROGRAM START body . END  (3)
-
-	END  shift 52
-	.  error
-
-
-state 33
-	expr : literal .  (45)
-
-	.  reduce 45
-
-
-state 34
-	body : instr .  (33)
-
-	.  reduce 33
-
-
-state 35
-	instr : expr . ';'  (39)
-	instr : expr . '!'  (40)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	';'  shift 64
-	'!'  shift 65
-	.  error
-
-
-state 36
-	functype : VOID .  (21)
-
-	.  reduce 21
-
-
-state 37
-	func : FUNCTION qualifier . functype ID vars funcend  (14)
-	func : FUNCTION qualifier . functype ID funcend  (16)
-
-	NUMBER  shift 10
-	ARRAY  shift 11
-	VOID  shift 36
-	STRING  shift 12
-	.  error
-
-	functype  goto 66
-	type  goto 39
-
-
-state 38
-	func : FUNCTION functype . ID funcend  (15)
-	func : FUNCTION functype . ID vars funcend  (17)
-
-	ID  shift 67
-	.  error
-
-
-state 39
-	functype : type .  (20)
-
-	.  reduce 20
-
-
-state 40
-	program : PROGRAM decls START . body END  (4)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	body  goto 68
-	literal  goto 33
-	instr  goto 34
-	expr  goto 35
-
-
-state 41
-	decls : decls decl .  (7)
+	decl : func .  (7)
 
 	.  reduce 7
 
 
-state 42
-	decl : declpre var . ATTR literal  (10)
-	decl : declpre var .  (11)
+state 18
+	decl : qualifier . CONST var ATTR literal  (8)
+	decl : qualifier . CONST var  (9)
+	decl : qualifier . var ATTR literal  (10)
+	decl : qualifier . var  (11)
 
-	ATTR  shift 69
-	START  reduce 11
-	END  reduce 11
-	FUNCTION  reduce 11
-	PUBLIC  reduce 11
-	FORWARD  reduce 11
-	NUMBER  reduce 11
-	ARRAY  reduce 11
-	STRING  reduce 11
-	CONST  reduce 11
-	';'  reduce 11
-
-
-state 43
-	decl : var ATTR . literal  (12)
-
-	INTEGER  shift 23
-	STR  shift 24
+	NUMBER  shift 34
+	ARRAY  shift 35
+	STRING  shift 36
+	CONST  shift 37
 	.  error
 
-	literal  goto 70
+	var  goto 38
+	type  goto 39
 
 
-state 44
-	declpre : qualifier CONST .  (22)
-
-	.  reduce 22
-
-
-state 45
-	var : type ID .  (29)
-
-	.  reduce 29
-
-
-state 46
-	module : MODULE decls END .  (5)
-
-	.  reduce 5
-
-
-state 47
-	instr : IF expr . THEN instr FI  (34)
-	instr : IF expr . THEN instr ELIF expr THEN instr ELSE instr FI  (35)
-	instr : IF expr . THEN instr ELIF expr THEN instr FI  (36)
-	instr : IF expr . THEN instr ELSE instr FI  (37)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	THEN  shift 71
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	.  error
-
-
-state 48
-	instr : FOR expr . UNTIL expr STEP expr DO instr DONE  (38)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	UNTIL  shift 72
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	.  error
-
-
-state 49
-	instr : RETURN expr .  (43)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 43
-	END  reduce 43
-	FUNCTION  reduce 43
-	PUBLIC  reduce 43
-	FORWARD  reduce 43
-	NUMBER  reduce 43
-	ARRAY  reduce 43
-	STRING  reduce 43
-	CONST  reduce 43
-	DONE  reduce 43
-	ELSE  reduce 43
-	ELIF  reduce 43
-	FI  reduce 43
-	';'  reduce 43
-
-
-state 50
-	expr : '-' expr .  (46)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 46
-	END  reduce 46
-	FUNCTION  reduce 46
-	PUBLIC  reduce 46
-	FORWARD  reduce 46
-	NUMBER  reduce 46
-	ARRAY  reduce 46
-	STRING  reduce 46
-	CONST  reduce 46
-	DONE  reduce 46
-	DO  reduce 46
-	THEN  reduce 46
-	ELSE  reduce 46
-	ELIF  reduce 46
-	FI  reduce 46
-	UNTIL  reduce 46
-	STEP  reduce 46
-	';'  reduce 46
-	'!'  reduce 46
-
-
-state 51
-	expr : '&' expr .  (47)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 47
-	END  reduce 47
-	FUNCTION  reduce 47
-	PUBLIC  reduce 47
-	FORWARD  reduce 47
-	NUMBER  reduce 47
-	ARRAY  reduce 47
-	STRING  reduce 47
-	CONST  reduce 47
-	DONE  reduce 47
-	DO  reduce 47
-	THEN  reduce 47
-	ELSE  reduce 47
-	ELIF  reduce 47
-	FI  reduce 47
-	UNTIL  reduce 47
-	STEP  reduce 47
-	';'  reduce 47
-	'!'  reduce 47
-
-
-state 52
-	program : PROGRAM START body END .  (3)
+state 19
+	program : PROGRAM decls START body END .  (3)
 
 	.  reduce 3
 
 
-state 53
-	expr : expr '*' . expr  (50)
+state 20
+	literal : INTEGER .  (54)
 
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 73
+	.  reduce 54
 
 
-state 54
-	expr : expr '/' . expr  (51)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 74
-
-
-state 55
-	expr : expr '%' . expr  (52)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 75
-
-
-state 56
-	expr : expr '+' . expr  (48)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 76
-
-
-state 57
-	expr : expr '-' . expr  (49)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 77
-
-
-state 58
-	expr : expr '<' . expr  (53)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 78
-
-
-state 59
-	expr : expr '>' . expr  (54)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 79
-
-
-state 60
-	expr : expr LE . expr  (56)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 80
-
-
-state 61
-	expr : expr GE . expr  (55)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 81
-
-
-state 62
-	expr : expr NE . expr  (57)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 82
-
-
-state 63
-	expr : expr '=' . expr  (58)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 83
-
-
-state 64
-	instr : expr ';' .  (39)
+state 21
+	expr : ID .  (39)
 
 	.  reduce 39
 
 
-state 65
-	instr : expr '!' .  (40)
+state 22
+	literal : STR .  (55)
+
+	.  reduce 55
+
+
+state 23
+	instr : IF . expr THEN instrs FI  (27)
+	instr : IF . expr THEN instrs ELIF expr THEN instrs ELSE instrs FI  (28)
+	instr : IF . expr THEN instrs ELIF expr THEN instrs FI  (29)
+	instr : IF . expr THEN instrs ELSE instrs FI  (30)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 40
+
+
+state 24
+	instr : FOR . expr UNTIL expr STEP expr DO instrs DONE  (31)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 41
+
+
+state 25
+	instr : REPEAT .  (34)
+
+	.  reduce 34
+
+
+state 26
+	instr : STOP .  (35)
+
+	.  reduce 35
+
+
+state 27
+	instr : RETURN .  (36)
+
+	.  reduce 36
+
+
+state 28
+	expr : '-' . expr  (41)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 42
+
+
+state 29
+	expr : '&' . expr  (42)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 43
+
+
+state 30
+	expr : literal .  (40)
 
 	.  reduce 40
 
 
-state 66
-	func : FUNCTION qualifier functype . ID vars funcend  (14)
-	func : FUNCTION qualifier functype . ID funcend  (16)
+state 31
+	instrs : instrs instr .  (38)
 
-	ID  shift 84
+	.  reduce 38
+
+
+state 32
+	instr : expr . ';'  (32)
+	instr : expr . '!'  (33)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	';'  shift 55
+	'!'  shift 56
 	.  error
+
+
+state 33
+	func : FUNCTION qualifier . functype ID vars funcend  (12)
+
+	NUMBER  shift 34
+	ARRAY  shift 35
+	VOID  shift 57
+	STRING  shift 36
+	.  error
+
+	functype  goto 58
+	type  goto 59
+
+
+state 34
+	type : NUMBER .  (23)
+
+	.  reduce 23
+
+
+state 35
+	type : ARRAY .  (24)
+
+	.  reduce 24
+
+
+state 36
+	type : STRING .  (25)
+
+	.  reduce 25
+
+
+state 37
+	decl : qualifier CONST . var ATTR literal  (8)
+	decl : qualifier CONST . var  (9)
+
+	NUMBER  shift 34
+	ARRAY  shift 35
+	STRING  shift 36
+	.  error
+
+	var  goto 60
+	type  goto 39
+
+
+state 38
+	decl : qualifier var . ATTR literal  (10)
+	decl : qualifier var .  (11)
+
+	ATTR  shift 61
+	START  reduce 11
+	END  reduce 11
+	';'  reduce 11
+
+
+state 39
+	var : type . ID  (22)
+
+	ID  shift 62
+	.  error
+
+
+state 40
+	instr : IF expr . THEN instrs FI  (27)
+	instr : IF expr . THEN instrs ELIF expr THEN instrs ELSE instrs FI  (28)
+	instr : IF expr . THEN instrs ELIF expr THEN instrs FI  (29)
+	instr : IF expr . THEN instrs ELSE instrs FI  (30)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	THEN  shift 63
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	.  error
+
+
+state 41
+	instr : FOR expr . UNTIL expr STEP expr DO instrs DONE  (31)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	UNTIL  shift 64
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	.  error
+
+
+state 42
+	expr : '-' expr .  (41)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 41
+	THEN  reduce 41
+	UNTIL  reduce 41
+	STEP  reduce 41
+	';'  reduce 41
+	'!'  reduce 41
+
+
+state 43
+	expr : '&' expr .  (42)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 42
+	THEN  reduce 42
+	UNTIL  reduce 42
+	STEP  reduce 42
+	';'  reduce 42
+	'!'  reduce 42
+
+
+state 44
+	expr : expr '*' . expr  (45)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 65
+
+
+state 45
+	expr : expr '/' . expr  (46)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 66
+
+
+state 46
+	expr : expr '%' . expr  (47)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 67
+
+
+state 47
+	expr : expr '+' . expr  (43)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 68
+
+
+state 48
+	expr : expr '-' . expr  (44)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 69
+
+
+state 49
+	expr : expr '<' . expr  (48)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 70
+
+
+state 50
+	expr : expr '>' . expr  (49)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 71
+
+
+state 51
+	expr : expr LE . expr  (51)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 72
+
+
+state 52
+	expr : expr GE . expr  (50)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 73
+
+
+state 53
+	expr : expr NE . expr  (52)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 74
+
+
+state 54
+	expr : expr '=' . expr  (53)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 75
+
+
+state 55
+	instr : expr ';' .  (32)
+
+	.  reduce 32
+
+
+state 56
+	instr : expr '!' .  (33)
+
+	.  reduce 33
+
+
+state 57
+	functype : VOID .  (16)
+
+	.  reduce 16
+
+
+state 58
+	func : FUNCTION qualifier functype . ID vars funcend  (12)
+
+	ID  shift 76
+	.  error
+
+
+state 59
+	functype : type .  (15)
+
+	.  reduce 15
+
+
+state 60
+	decl : qualifier CONST var . ATTR literal  (8)
+	decl : qualifier CONST var .  (9)
+
+	ATTR  shift 77
+	START  reduce 9
+	END  reduce 9
+	';'  reduce 9
+
+
+state 61
+	decl : qualifier var ATTR . literal  (10)
+
+	INTEGER  shift 20
+	STR  shift 22
+	.  error
+
+	literal  goto 78
+
+
+state 62
+	var : type ID .  (22)
+
+	.  reduce 22
+
+
+state 63
+	instr : IF expr THEN . instrs FI  (27)
+	instr : IF expr THEN . instrs ELIF expr THEN instrs ELSE instrs FI  (28)
+	instr : IF expr THEN . instrs ELIF expr THEN instrs FI  (29)
+	instr : IF expr THEN . instrs ELSE instrs FI  (30)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	instrs  goto 79
+
+
+state 64
+	instr : FOR expr UNTIL . expr STEP expr DO instrs DONE  (31)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 80
+
+
+state 65
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr '*' expr .  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 45
+	THEN  reduce 45
+	UNTIL  reduce 45
+	STEP  reduce 45
+	'*'  reduce 45
+	'/'  reduce 45
+	'%'  reduce 45
+	';'  reduce 45
+	'!'  reduce 45
+
+
+state 66
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr '/' expr .  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 46
+	THEN  reduce 46
+	UNTIL  reduce 46
+	STEP  reduce 46
+	'*'  reduce 46
+	'/'  reduce 46
+	'%'  reduce 46
+	';'  reduce 46
+	'!'  reduce 46
 
 
 state 67
-	func : FUNCTION functype ID . funcend  (15)
-	func : FUNCTION functype ID . vars funcend  (17)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr '%' expr .  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	DONE  shift 85
-	DO  shift 86
-	.  error
-
-	var  goto 87
-	vars  goto 88
-	funcend  goto 89
-	type  goto 21
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 47
+	THEN  reduce 47
+	UNTIL  reduce 47
+	STEP  reduce 47
+	'*'  reduce 47
+	'/'  reduce 47
+	'%'  reduce 47
+	';'  reduce 47
+	'!'  reduce 47
 
 
 state 68
-	program : PROGRAM decls START body . END  (4)
+	expr : expr . '+' expr  (43)
+	expr : expr '+' expr .  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	END  shift 90
-	.  error
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 43
+	THEN  reduce 43
+	UNTIL  reduce 43
+	STEP  reduce 43
+	'*'  reduce 43
+	'/'  reduce 43
+	'%'  reduce 43
+	'+'  reduce 43
+	'-'  reduce 43
+	';'  reduce 43
+	'!'  reduce 43
 
 
 state 69
-	decl : declpre var ATTR . literal  (10)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr '-' expr .  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	INTEGER  shift 23
-	STR  shift 24
-	.  error
-
-	literal  goto 91
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 44
+	THEN  reduce 44
+	UNTIL  reduce 44
+	STEP  reduce 44
+	'*'  reduce 44
+	'/'  reduce 44
+	'%'  reduce 44
+	'+'  reduce 44
+	'-'  reduce 44
+	';'  reduce 44
+	'!'  reduce 44
 
 
 state 70
-	decl : var ATTR literal .  (12)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr '<' expr .  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	.  reduce 12
-
-
-state 71
-	instr : IF expr THEN . instr FI  (34)
-	instr : IF expr THEN . instr ELIF expr THEN instr ELSE instr FI  (35)
-	instr : IF expr THEN . instr ELIF expr THEN instr FI  (36)
-	instr : IF expr THEN . instr ELSE instr FI  (37)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	instr  goto 92
-	expr  goto 35
-
-
-state 72
-	instr : FOR expr UNTIL . expr STEP expr DO instr DONE  (38)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 93
-
-
-state 73
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr '*' expr .  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 50
-	END  reduce 50
-	FUNCTION  reduce 50
-	PUBLIC  reduce 50
-	FORWARD  reduce 50
-	NUMBER  reduce 50
-	ARRAY  reduce 50
-	STRING  reduce 50
-	CONST  reduce 50
-	DONE  reduce 50
-	DO  reduce 50
-	THEN  reduce 50
-	ELSE  reduce 50
-	ELIF  reduce 50
-	FI  reduce 50
-	UNTIL  reduce 50
-	STEP  reduce 50
-	'*'  reduce 50
-	'/'  reduce 50
-	'%'  reduce 50
-	';'  reduce 50
-	'!'  reduce 50
-
-
-state 74
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr '/' expr .  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 51
-	END  reduce 51
-	FUNCTION  reduce 51
-	PUBLIC  reduce 51
-	FORWARD  reduce 51
-	NUMBER  reduce 51
-	ARRAY  reduce 51
-	STRING  reduce 51
-	CONST  reduce 51
-	DONE  reduce 51
-	DO  reduce 51
-	THEN  reduce 51
-	ELSE  reduce 51
-	ELIF  reduce 51
-	FI  reduce 51
-	UNTIL  reduce 51
-	STEP  reduce 51
-	'*'  reduce 51
-	'/'  reduce 51
-	'%'  reduce 51
-	';'  reduce 51
-	'!'  reduce 51
-
-
-state 75
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr '%' expr .  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 52
-	END  reduce 52
-	FUNCTION  reduce 52
-	PUBLIC  reduce 52
-	FORWARD  reduce 52
-	NUMBER  reduce 52
-	ARRAY  reduce 52
-	STRING  reduce 52
-	CONST  reduce 52
-	DONE  reduce 52
-	DO  reduce 52
-	THEN  reduce 52
-	ELSE  reduce 52
-	ELIF  reduce 52
-	FI  reduce 52
-	UNTIL  reduce 52
-	STEP  reduce 52
-	'*'  reduce 52
-	'/'  reduce 52
-	'%'  reduce 52
-	';'  reduce 52
-	'!'  reduce 52
-
-
-state 76
-	expr : expr . '+' expr  (48)
-	expr : expr '+' expr .  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 48
-	END  reduce 48
-	FUNCTION  reduce 48
-	PUBLIC  reduce 48
-	FORWARD  reduce 48
-	NUMBER  reduce 48
-	ARRAY  reduce 48
-	STRING  reduce 48
-	CONST  reduce 48
-	DONE  reduce 48
+	NE  shift 53
+	'='  shift 54
 	DO  reduce 48
 	THEN  reduce 48
-	ELSE  reduce 48
-	ELIF  reduce 48
-	FI  reduce 48
 	UNTIL  reduce 48
 	STEP  reduce 48
 	'*'  reduce 48
@@ -1218,45 +1014,32 @@ state 76
 	'%'  reduce 48
 	'+'  reduce 48
 	'-'  reduce 48
+	'<'  reduce 48
+	'>'  reduce 48
+	LE  reduce 48
+	GE  reduce 48
 	';'  reduce 48
 	'!'  reduce 48
 
 
-state 77
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr '-' expr .  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
+state 71
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr '>' expr .  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	START  reduce 49
-	END  reduce 49
-	FUNCTION  reduce 49
-	PUBLIC  reduce 49
-	FORWARD  reduce 49
-	NUMBER  reduce 49
-	ARRAY  reduce 49
-	STRING  reduce 49
-	CONST  reduce 49
-	DONE  reduce 49
+	NE  shift 53
+	'='  shift 54
 	DO  reduce 49
 	THEN  reduce 49
-	ELSE  reduce 49
-	ELIF  reduce 49
-	FI  reduce 49
 	UNTIL  reduce 49
 	STEP  reduce 49
 	'*'  reduce 49
@@ -1264,624 +1047,503 @@ state 77
 	'%'  reduce 49
 	'+'  reduce 49
 	'-'  reduce 49
+	'<'  reduce 49
+	'>'  reduce 49
+	LE  reduce 49
+	GE  reduce 49
 	';'  reduce 49
 	'!'  reduce 49
 
 
+state 72
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr LE expr .  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 51
+	THEN  reduce 51
+	UNTIL  reduce 51
+	STEP  reduce 51
+	'*'  reduce 51
+	'/'  reduce 51
+	'%'  reduce 51
+	'+'  reduce 51
+	'-'  reduce 51
+	'<'  reduce 51
+	'>'  reduce 51
+	LE  reduce 51
+	GE  reduce 51
+	';'  reduce 51
+	'!'  reduce 51
+
+
+state 73
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr GE expr .  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	NE  shift 53
+	'='  shift 54
+	DO  reduce 50
+	THEN  reduce 50
+	UNTIL  reduce 50
+	STEP  reduce 50
+	'*'  reduce 50
+	'/'  reduce 50
+	'%'  reduce 50
+	'+'  reduce 50
+	'-'  reduce 50
+	'<'  reduce 50
+	'>'  reduce 50
+	LE  reduce 50
+	GE  reduce 50
+	';'  reduce 50
+	'!'  reduce 50
+
+
+state 74
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr NE expr .  (52)
+	expr : expr . '=' expr  (53)
+
+	.  reduce 52
+
+
+state 75
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+	expr : expr '=' expr .  (53)
+
+	.  reduce 53
+
+
+state 76
+	func : FUNCTION qualifier functype ID . vars funcend  (12)
+	vars : .  (20)
+
+	.  reduce 20
+
+	vars  goto 81
+
+
+state 77
+	decl : qualifier CONST var ATTR . literal  (8)
+
+	INTEGER  shift 20
+	STR  shift 22
+	.  error
+
+	literal  goto 82
+
+
 state 78
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr '<' expr .  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	NE  shift 62
-	'='  shift 63
-	START  reduce 53
-	END  reduce 53
-	FUNCTION  reduce 53
-	PUBLIC  reduce 53
-	FORWARD  reduce 53
-	NUMBER  reduce 53
-	ARRAY  reduce 53
-	STRING  reduce 53
-	CONST  reduce 53
-	DONE  reduce 53
-	DO  reduce 53
-	THEN  reduce 53
-	ELSE  reduce 53
-	ELIF  reduce 53
-	FI  reduce 53
-	UNTIL  reduce 53
-	STEP  reduce 53
-	'*'  reduce 53
-	'/'  reduce 53
-	'%'  reduce 53
-	'+'  reduce 53
-	'-'  reduce 53
-	'<'  reduce 53
-	'>'  reduce 53
-	LE  reduce 53
-	GE  reduce 53
-	';'  reduce 53
-	'!'  reduce 53
-
-
-state 79
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr '>' expr .  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	NE  shift 62
-	'='  shift 63
-	START  reduce 54
-	END  reduce 54
-	FUNCTION  reduce 54
-	PUBLIC  reduce 54
-	FORWARD  reduce 54
-	NUMBER  reduce 54
-	ARRAY  reduce 54
-	STRING  reduce 54
-	CONST  reduce 54
-	DONE  reduce 54
-	DO  reduce 54
-	THEN  reduce 54
-	ELSE  reduce 54
-	ELIF  reduce 54
-	FI  reduce 54
-	UNTIL  reduce 54
-	STEP  reduce 54
-	'*'  reduce 54
-	'/'  reduce 54
-	'%'  reduce 54
-	'+'  reduce 54
-	'-'  reduce 54
-	'<'  reduce 54
-	'>'  reduce 54
-	LE  reduce 54
-	GE  reduce 54
-	';'  reduce 54
-	'!'  reduce 54
-
-
-state 80
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr LE expr .  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	NE  shift 62
-	'='  shift 63
-	START  reduce 56
-	END  reduce 56
-	FUNCTION  reduce 56
-	PUBLIC  reduce 56
-	FORWARD  reduce 56
-	NUMBER  reduce 56
-	ARRAY  reduce 56
-	STRING  reduce 56
-	CONST  reduce 56
-	DONE  reduce 56
-	DO  reduce 56
-	THEN  reduce 56
-	ELSE  reduce 56
-	ELIF  reduce 56
-	FI  reduce 56
-	UNTIL  reduce 56
-	STEP  reduce 56
-	'*'  reduce 56
-	'/'  reduce 56
-	'%'  reduce 56
-	'+'  reduce 56
-	'-'  reduce 56
-	'<'  reduce 56
-	'>'  reduce 56
-	LE  reduce 56
-	GE  reduce 56
-	';'  reduce 56
-	'!'  reduce 56
-
-
-state 81
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr GE expr .  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	NE  shift 62
-	'='  shift 63
-	START  reduce 55
-	END  reduce 55
-	FUNCTION  reduce 55
-	PUBLIC  reduce 55
-	FORWARD  reduce 55
-	NUMBER  reduce 55
-	ARRAY  reduce 55
-	STRING  reduce 55
-	CONST  reduce 55
-	DONE  reduce 55
-	DO  reduce 55
-	THEN  reduce 55
-	ELSE  reduce 55
-	ELIF  reduce 55
-	FI  reduce 55
-	UNTIL  reduce 55
-	STEP  reduce 55
-	'*'  reduce 55
-	'/'  reduce 55
-	'%'  reduce 55
-	'+'  reduce 55
-	'-'  reduce 55
-	'<'  reduce 55
-	'>'  reduce 55
-	LE  reduce 55
-	GE  reduce 55
-	';'  reduce 55
-	'!'  reduce 55
-
-
-state 82
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr NE expr .  (57)
-	expr : expr . '=' expr  (58)
-
-	.  reduce 57
-
-
-state 83
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-	expr : expr '=' expr .  (58)
-
-	.  reduce 58
-
-
-state 84
-	func : FUNCTION qualifier functype ID . vars funcend  (14)
-	func : FUNCTION qualifier functype ID . funcend  (16)
-
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	DONE  shift 85
-	DO  shift 86
-	.  error
-
-	var  goto 87
-	vars  goto 94
-	funcend  goto 95
-	type  goto 21
-
-
-state 85
-	funcend : DONE .  (18)
-
-	.  reduce 18
-
-
-state 86
-	funcend : DO . body  (19)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	body  goto 96
-	literal  goto 33
-	instr  goto 34
-	expr  goto 35
-
-
-state 87
-	vars : var .  (27)
-
-	.  reduce 27
-
-
-state 88
-	func : FUNCTION functype ID vars . funcend  (17)
-	vars : vars . ';' var  (28)
-
-	DONE  shift 85
-	DO  shift 86
-	';'  shift 97
-	.  error
-
-	funcend  goto 98
-
-
-state 89
-	func : FUNCTION functype ID funcend .  (15)
-
-	.  reduce 15
-
-
-state 90
-	program : PROGRAM decls START body END .  (4)
-
-	.  reduce 4
-
-
-state 91
-	decl : declpre var ATTR literal .  (10)
+	decl : qualifier var ATTR literal .  (10)
 
 	.  reduce 10
 
 
-state 92
-	instr : IF expr THEN instr . FI  (34)
-	instr : IF expr THEN instr . ELIF expr THEN instr ELSE instr FI  (35)
-	instr : IF expr THEN instr . ELIF expr THEN instr FI  (36)
-	instr : IF expr THEN instr . ELSE instr FI  (37)
+state 79
+	instr : IF expr THEN instrs . FI  (27)
+	instr : IF expr THEN instrs . ELIF expr THEN instrs ELSE instrs FI  (28)
+	instr : IF expr THEN instrs . ELIF expr THEN instrs FI  (29)
+	instr : IF expr THEN instrs . ELSE instrs FI  (30)
+	instrs : instrs . instr  (38)
 
-	ELSE  shift 99
-	ELIF  shift 100
-	FI  shift 101
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	IF  shift 23
+	ELSE  shift 83
+	ELIF  shift 84
+	FI  shift 85
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
+
+
+state 80
+	instr : FOR expr UNTIL expr . STEP expr DO instrs DONE  (31)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	STEP  shift 86
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
+	.  error
+
+
+state 81
+	func : FUNCTION qualifier functype ID vars . funcend  (12)
+	vars : vars . ';' var  (21)
+
+	DONE  shift 87
+	DO  shift 88
+	';'  shift 89
+	.  error
+
+	funcend  goto 90
+
+
+state 82
+	decl : qualifier CONST var ATTR literal .  (8)
+
+	.  reduce 8
+
+
+state 83
+	instr : IF expr THEN instrs ELSE . instrs FI  (30)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	instrs  goto 91
+
+
+state 84
+	instr : IF expr THEN instrs ELIF . expr THEN instrs ELSE instrs FI  (28)
+	instr : IF expr THEN instrs ELIF . expr THEN instrs FI  (29)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 92
+
+
+state 85
+	instr : IF expr THEN instrs FI .  (27)
+
+	.  reduce 27
+
+
+state 86
+	instr : FOR expr UNTIL expr STEP . expr DO instrs DONE  (31)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	expr  goto 93
+
+
+state 87
+	funcend : DONE .  (13)
+
+	.  reduce 13
+
+
+state 88
+	funcend : DO . body  (14)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	body  goto 94
+	instrs  goto 12
+
+
+state 89
+	vars : vars ';' . var  (21)
+
+	NUMBER  shift 34
+	ARRAY  shift 35
+	STRING  shift 36
+	.  error
+
+	var  goto 95
+	type  goto 39
+
+
+state 90
+	func : FUNCTION qualifier functype ID vars funcend .  (12)
+
+	.  reduce 12
+
+
+state 91
+	instr : IF expr THEN instrs ELSE instrs . FI  (30)
+	instrs : instrs . instr  (38)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	IF  shift 23
+	FI  shift 96
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
+
+
+state 92
+	instr : IF expr THEN instrs ELIF expr . THEN instrs ELSE instrs FI  (28)
+	instr : IF expr THEN instrs ELIF expr . THEN instrs FI  (29)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
+
+	THEN  shift 97
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
 	.  error
 
 
 state 93
-	instr : FOR expr UNTIL expr . STEP expr DO instr DONE  (38)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
+	instr : FOR expr UNTIL expr STEP expr . DO instrs DONE  (31)
+	expr : expr . '+' expr  (43)
+	expr : expr . '-' expr  (44)
+	expr : expr . '*' expr  (45)
+	expr : expr . '/' expr  (46)
+	expr : expr . '%' expr  (47)
+	expr : expr . '<' expr  (48)
+	expr : expr . '>' expr  (49)
+	expr : expr . GE expr  (50)
+	expr : expr . LE expr  (51)
+	expr : expr . NE expr  (52)
+	expr : expr . '=' expr  (53)
 
-	STEP  shift 102
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
+	DO  shift 98
+	'*'  shift 44
+	'/'  shift 45
+	'%'  shift 46
+	'+'  shift 47
+	'-'  shift 48
+	'<'  shift 49
+	'>'  shift 50
+	LE  shift 51
+	GE  shift 52
+	NE  shift 53
+	'='  shift 54
 	.  error
 
 
 state 94
-	func : FUNCTION qualifier functype ID vars . funcend  (14)
-	vars : vars . ';' var  (28)
-
-	DONE  shift 85
-	DO  shift 86
-	';'  shift 97
-	.  error
-
-	funcend  goto 103
-
-
-state 95
-	func : FUNCTION qualifier functype ID funcend .  (16)
-
-	.  reduce 16
-
-
-state 96
-	funcend : DO body .  (19)
-
-	.  reduce 19
-
-
-state 97
-	vars : vars ';' . var  (28)
-
-	NUMBER  shift 10
-	ARRAY  shift 11
-	STRING  shift 12
-	.  error
-
-	var  goto 104
-	type  goto 21
-
-
-state 98
-	func : FUNCTION functype ID vars funcend .  (17)
-
-	.  reduce 17
-
-
-state 99
-	instr : IF expr THEN instr ELSE . instr FI  (37)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	instr  goto 105
-	expr  goto 35
-
-
-state 100
-	instr : IF expr THEN instr ELIF . expr THEN instr ELSE instr FI  (35)
-	instr : IF expr THEN instr ELIF . expr THEN instr FI  (36)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 106
-
-
-state 101
-	instr : IF expr THEN instr FI .  (34)
-
-	.  reduce 34
-
-
-state 102
-	instr : FOR expr UNTIL expr STEP . expr DO instr DONE  (38)
-
-	INTEGER  shift 23
-	STR  shift 24
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	expr  goto 107
-
-
-state 103
-	func : FUNCTION qualifier functype ID vars funcend .  (14)
+	funcend : DO body .  (14)
 
 	.  reduce 14
 
 
+state 95
+	vars : vars ';' var .  (21)
+
+	.  reduce 21
+
+
+state 96
+	instr : IF expr THEN instrs ELSE instrs FI .  (30)
+
+	.  reduce 30
+
+
+state 97
+	instr : IF expr THEN instrs ELIF expr THEN . instrs ELSE instrs FI  (28)
+	instr : IF expr THEN instrs ELIF expr THEN . instrs FI  (29)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	instrs  goto 99
+
+
+state 98
+	instr : FOR expr UNTIL expr STEP expr DO . instrs DONE  (31)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	instrs  goto 100
+
+
+state 99
+	instr : IF expr THEN instrs ELIF expr THEN instrs . ELSE instrs FI  (28)
+	instr : IF expr THEN instrs ELIF expr THEN instrs . FI  (29)
+	instrs : instrs . instr  (38)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	IF  shift 23
+	ELSE  shift 101
+	FI  shift 102
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
+
+
+state 100
+	instr : FOR expr UNTIL expr STEP expr DO instrs . DONE  (31)
+	instrs : instrs . instr  (38)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	DONE  shift 103
+	IF  shift 23
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
+
+
+state 101
+	instr : IF expr THEN instrs ELIF expr THEN instrs ELSE . instrs FI  (28)
+	instrs : .  (37)
+
+	.  reduce 37
+
+	instrs  goto 104
+
+
+state 102
+	instr : IF expr THEN instrs ELIF expr THEN instrs FI .  (29)
+
+	.  reduce 29
+
+
+state 103
+	instr : FOR expr UNTIL expr STEP expr DO instrs DONE .  (31)
+
+	.  reduce 31
+
+
 state 104
-	vars : vars ';' var .  (28)
+	instr : IF expr THEN instrs ELIF expr THEN instrs ELSE instrs . FI  (28)
+	instrs : instrs . instr  (38)
+
+	INTEGER  shift 20
+	ID  shift 21
+	STR  shift 22
+	IF  shift 23
+	FI  shift 105
+	FOR  shift 24
+	REPEAT  shift 25
+	STOP  shift 26
+	RETURN  shift 27
+	'-'  shift 28
+	'&'  shift 29
+	.  error
+
+	literal  goto 30
+	instr  goto 31
+	expr  goto 32
+
+
+state 105
+	instr : IF expr THEN instrs ELIF expr THEN instrs ELSE instrs FI .  (28)
 
 	.  reduce 28
 
 
-state 105
-	instr : IF expr THEN instr ELSE instr . FI  (37)
-
-	FI  shift 108
-	.  error
-
-
-state 106
-	instr : IF expr THEN instr ELIF expr . THEN instr ELSE instr FI  (35)
-	instr : IF expr THEN instr ELIF expr . THEN instr FI  (36)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	THEN  shift 109
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	.  error
-
-
-state 107
-	instr : FOR expr UNTIL expr STEP expr . DO instr DONE  (38)
-	expr : expr . '+' expr  (48)
-	expr : expr . '-' expr  (49)
-	expr : expr . '*' expr  (50)
-	expr : expr . '/' expr  (51)
-	expr : expr . '%' expr  (52)
-	expr : expr . '<' expr  (53)
-	expr : expr . '>' expr  (54)
-	expr : expr . GE expr  (55)
-	expr : expr . LE expr  (56)
-	expr : expr . NE expr  (57)
-	expr : expr . '=' expr  (58)
-
-	DO  shift 110
-	'*'  shift 53
-	'/'  shift 54
-	'%'  shift 55
-	'+'  shift 56
-	'-'  shift 57
-	'<'  shift 58
-	'>'  shift 59
-	LE  shift 60
-	GE  shift 61
-	NE  shift 62
-	'='  shift 63
-	.  error
-
-
-state 108
-	instr : IF expr THEN instr ELSE instr FI .  (37)
-
-	.  reduce 37
-
-
-state 109
-	instr : IF expr THEN instr ELIF expr THEN . instr ELSE instr FI  (35)
-	instr : IF expr THEN instr ELIF expr THEN . instr FI  (36)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	instr  goto 111
-	expr  goto 35
-
-
-state 110
-	instr : FOR expr UNTIL expr STEP expr DO . instr DONE  (38)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	instr  goto 112
-	expr  goto 35
-
-
-state 111
-	instr : IF expr THEN instr ELIF expr THEN instr . ELSE instr FI  (35)
-	instr : IF expr THEN instr ELIF expr THEN instr . FI  (36)
-
-	ELSE  shift 113
-	FI  shift 114
-	.  error
-
-
-state 112
-	instr : FOR expr UNTIL expr STEP expr DO instr . DONE  (38)
-
-	DONE  shift 115
-	.  error
-
-
-state 113
-	instr : IF expr THEN instr ELIF expr THEN instr ELSE . instr FI  (35)
-
-	INTEGER  shift 23
-	STR  shift 24
-	IF  shift 25
-	FOR  shift 26
-	REPEAT  shift 27
-	STOP  shift 28
-	RETURN  shift 29
-	'-'  shift 30
-	'&'  shift 31
-	.  error
-
-	literal  goto 33
-	instr  goto 116
-	expr  goto 35
-
-
-state 114
-	instr : IF expr THEN instr ELIF expr THEN instr FI .  (36)
-
-	.  reduce 36
-
-
-state 115
-	instr : FOR expr UNTIL expr STEP expr DO instr DONE .  (38)
-
-	.  reduce 38
-
-
-state 116
-	instr : IF expr THEN instr ELIF expr THEN instr ELSE instr . FI  (35)
-
-	FI  shift 117
-	.  error
-
-
-state 117
-	instr : IF expr THEN instr ELIF expr THEN instr ELSE instr FI .  (35)
-
-	.  reduce 35
-
-
 53 terminals, 18 nonterminals
-61 grammar rules, 118 states
+56 grammar rules, 106 states
