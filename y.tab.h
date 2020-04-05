@@ -15,7 +15,23 @@
 #define CONST 271
 #define DONE 272
 #define DO 273
-#define ATTR 274
+#define IF 274
+#define THEN 275
+#define ELSE 276
+#define ELIF 277
+#define FI 278
+#define FOR 279
+#define UNTIL 280
+#define STEP 281
+#define REPEAT 282
+#define STOP 283
+#define RETURN 284
+#define ADDR 285
+#define UMINUS 286
+#define LE 287
+#define GE 288
+#define NE 289
+#define ATTR 290
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

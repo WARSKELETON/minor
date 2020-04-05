@@ -21,7 +21,18 @@ void yyerror(char *s);
 %token <i> INTEGER
 %token <s> ID STR
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
+%token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
+%nonassoc '(' '['
+%nonassoc ADDR UMINUS '?'
+%right '^'
+%left '*' '/' '%'
+%left '+' '-'
+%left '<' '>' LE GE
+%left NE '='
+%nonassoc '~'
+%left '&'
+%left '|'
 %right ATTR
 
 %%
@@ -86,13 +97,37 @@ type    : NUMBER
 body    : instr
     ;
 
-instr   : expr '!'
+instr   : IF expr THEN instr FI
+    | IF expr THEN instr ELIF expr THEN instr ELSE instr FI
+    | IF expr THEN instr ELIF expr THEN instr FI
+    | IF expr THEN instr ELSE instr FI 
+    | FOR expr UNTIL expr STEP expr DO instr DONE
+    | expr ';'
+    | expr '!'
+    | REPEAT
+    | STOP
+    | RETURN expr
+    | RETURN
     ;
 
 expr    : literal
+    | '-' expr %prec UMINUS
+    | '&' expr %prec ADDR
+    | expr '+' expr
+	| expr '-' expr
+	| expr '*' expr
+	| expr '/' expr
+	| expr '%' expr
+	| expr '<' expr
+	| expr '>' expr
+	| expr GE expr
+	| expr LE expr
+	| expr NE expr
+	| expr '=' expr
     ;
 
-literal : STR
+literal : INTEGER 
+    | STR
     ;
 
 %%

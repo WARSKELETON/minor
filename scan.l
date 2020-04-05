@@ -23,6 +23,20 @@ extern void yyerror(const char *msg);
 "const"		return CONST;
 "do"		return DO;
 "done"		return DONE;
+"if"		return IF;
+"then"		return THEN;
+"else"		return ELSE;
+"elif"		return ELIF;
+"fi"		return FI;
+"for"		return FOR;
+"until"		return UNTIL;
+"step"		return STEP;
+"repeat"	return REPEAT;
+"stop"		return STOP;
+"return"	return RETURN;
+"<="		return LE;
+">="		return GE;
+"~="		return NE;
 ":="		return ATTR;
 
 [A-Za-z][A-Za-z0-9_]*	{ yylval.s = strdup(yytext); return ID; }
@@ -31,7 +45,7 @@ extern void yyerror(const char *msg);
 [0-9]+					{ yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* Ver melhor */
 "0x"[0-9a-fA-F]+		{ yylval.i = strtol(yytext, 0, 0); printf("%d\n", yylval.i); return INTEGER; }
 "0b"[0-1]+				{ yylval.i = strtol(yytext+2, 0, 2); printf("%d\n", yylval.i); return INTEGER; }
-[!;]					return *yytext;
+[-+*/%!;&|~^<>()?\[\]]					return *yytext; /* Falta # */
 
 [ \t\n\r]+		; /* ignore whitespace */
 
