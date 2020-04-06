@@ -118,6 +118,7 @@ instr   : IF rvalue THEN instrs FI
     | STOP
     | RETURN rvalue
     | RETURN
+    | lvalue '#' rvalue ';'
     ;
 
 elif    : ELIF rvalue THEN instrs
