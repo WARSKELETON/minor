@@ -23,10 +23,10 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
-%nonassoc RETURN INTEGER ID STR
+%nonassoc RETURN INTEGER STR ID
 %nonassoc '(' '['
-%nonassoc ADDR UMINUS '?'
-%right '^'
+%nonassoc ADDR UMINUS '?' /* falta */
+%right '^' /* falta isto e 	left-value # expressão ; */
 %left '*' '/' '%'
 %left '+' '-'
 %left '<' '>' LE GE
@@ -48,8 +48,11 @@ module  : MODULE decls END
     ;
 
 decls   : /* empty */
-    | decl
-    | decls ';' decl
+    | delclist
+    ;
+
+delclist   : decl
+    | delclist ';' decl
     ;
 
 decl    : func
@@ -76,8 +79,11 @@ qualifier   : /* empty */
     ;
 
 vars    : /* empty */
-    | var
-    | vars ';' var
+    | varlist
+    ;
+
+varlist : var
+    | varlist ';' var
     ;
 
 var    : type ID
@@ -88,22 +94,32 @@ type    : NUMBER
     | STRING
     ;
 
-body    : instrs
+body    : /* empty */
+    | bodyvars bodyinstrs
+    | bodyinstrs
+    | bodyvars
     ;
 
-instr   : IF expr THEN instrs FI
-    | IF expr THEN instrs elifs ELSE instrs FI
-    | IF expr THEN instrs elifs FI
-    | IF expr THEN instrs ELSE instrs FI
-    | FOR expr UNTIL expr STEP expr DO instrs DONE
-    | expr ';'
-    | expr '!'
+bodyinstrs : instrs instr
+
+bodyvars : var ';'
+    | bodyvars var ';'
+    ;
+
+instr   : IF rvalue THEN instrs FI
+    | IF rvalue THEN instrs elifs ELSE instrs FI
+    | IF rvalue THEN instrs elifs FI
+    | IF rvalue THEN instrs ELSE instrs FI
+    | FOR rvalue UNTIL rvalue STEP rvalue DO instrs DONE
+    | rvalue ';'
+    | rvalue '!'
     | REPEAT
     | STOP
+    | RETURN rvalue
     | RETURN
     ;
 
-elif    : ELIF expr THEN instrs
+elif    : ELIF rvalue THEN instrs
     ;
 
 elifs    : elif
@@ -114,28 +130,42 @@ instrs  : /* empty */
     | instrs instr
     ;
 
-expr    : '(' expr ')'
-    | ID
+lvalue	: ID
+	| lvalue '[' rvalue ']'
+	| '*' lvalue /* mal */
+	;
+
+rvalue    : lvalue
+    | '(' rvalue ')'
+	| rvalue '(' args ')'
+	| rvalue '(' ')'
     | literal
-    | '-' expr %prec UMINUS
-    | '&' expr %prec ADDR
-    | expr '+' expr
-	| expr '-' expr
-	| expr '*' expr
-	| expr '/' expr
-	| expr '%' expr
-	| expr '<' expr
-	| expr '>' expr
-	| expr GE expr
-	| expr LE expr
-	| expr NE expr
-	| expr '=' expr
+    | '-' rvalue %prec UMINUS
+    | '&' rvalue %prec ADDR
+    | rvalue '+' rvalue
+	| rvalue '-' rvalue
+	| rvalue '*' rvalue
+	| rvalue '/' rvalue
+	| rvalue '%' rvalue
+	| rvalue '<' rvalue
+	| rvalue '>' rvalue
+	| rvalue GE rvalue
+	| rvalue LE rvalue
+	| rvalue NE rvalue
+	| rvalue '=' rvalue
+    | lvalue ATTR rvalue
+    | rvalue '&' rvalue
+    | rvalue '|' rvalue
+    | '~' rvalue
     ;
 
 literal : INTEGER 
     | STR
     ;
 
+args	: rvalue	
+	| args ',' rvalue
+	;
 %%
 
 char **yynames =
