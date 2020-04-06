@@ -39,13 +39,14 @@ extern void yyerror(const char *msg);
 "~="		return NE;
 ":="		return ATTR;
 
-[A-Za-z][A-Za-z0-9_]*	{ yylval.s = strdup(yytext); return ID; }
-\"[^"]*\"				{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
-[0][0-7]*				{ yylval.i = strtol(yytext, 0, 8); return INTEGER; }
-[0-9]+					{ yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* Ver melhor */
-"0x"[0-9a-fA-F]+		{ yylval.i = strtol(yytext, 0, 0); printf("%d\n", yylval.i); return INTEGER; }
-"0b"[0-1]+				{ yylval.i = strtol(yytext+2, 0, 2); printf("%d\n", yylval.i); return INTEGER; }
-[-+*/%!;,#&|~^<>=()?\[\]]					return *yytext; /* Falta # */
+[A-Za-z][A-Za-z0-9_]*		{ yylval.s = strdup(yytext); return ID; }
+\'(([^']|\\*[nrt']){1})\'	{ yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
+\"[^"]*\"					{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
+[0][0-7]*					{ yylval.i = strtol(yytext, 0, 8); return INTEGER; }
+[0-9]+						{ yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* Ver melhor */
+"0x"[0-9a-fA-F]+			{ yylval.i = strtol(yytext, 0, 0); printf("%d\n", yylval.i); return INTEGER; }
+"0b"[0-1]+					{ yylval.i = strtol(yytext+2, 0, 2); printf("%d\n", yylval.i); return INTEGER; }
+[-+*/%!;,#&|~^<>=()?\[\]]	return *yytext;
 
 [ \t\n\r]+		; /* ignore whitespace */
 

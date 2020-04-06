@@ -16,7 +16,7 @@ start
 	if s[i] = 'X' then
 		soma := soma + 100;
 	else
-		soma := soma + 10 * (s[i] - '0');
+		soma := soma + 10 * (s[i] - 'a');
 	fi
 	if soma % 11 = 0 then
 		"ISBN ok!\n"!
