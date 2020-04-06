@@ -23,6 +23,7 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
+%nonassoc RETURN INTEGER ID STR
 %nonassoc '(' '['
 %nonassoc ADDR UMINUS '?'
 %right '^'
@@ -47,6 +48,7 @@ module  : MODULE decls END
     ;
 
 decls   : /* empty */
+    | decl
     | decls ';' decl
     ;
 
@@ -74,6 +76,7 @@ qualifier   : /* empty */
     ;
 
 vars    : /* empty */
+    | var
     | vars ';' var
     ;
 
@@ -89,9 +92,9 @@ body    : instrs
     ;
 
 instr   : IF expr THEN instrs FI
-    | IF expr THEN instrs ELIF expr THEN instrs ELSE instrs FI
-    | IF expr THEN instrs ELIF expr THEN instrs FI
-    | IF expr THEN instrs ELSE instrs FI 
+    | IF expr THEN instrs elifs ELSE instrs FI
+    | IF expr THEN instrs elifs FI
+    | IF expr THEN instrs ELSE instrs FI
     | FOR expr UNTIL expr STEP expr DO instrs DONE
     | expr ';'
     | expr '!'
@@ -100,11 +103,19 @@ instr   : IF expr THEN instrs FI
     | RETURN
     ;
 
+elif    : ELIF expr THEN instrs
+    ;
+
+elifs    : elif
+    | elifs elif
+    ;
+
 instrs  : /* empty */
     | instrs instr
     ;
 
-expr    : ID 
+expr    : '(' expr ')'
+    | ID
     | literal
     | '-' expr %prec UMINUS
     | '&' expr %prec ADDR

@@ -6,9 +6,13 @@ function forward string argv number n done;
 function forward number atoi string s done;
 function forward number argc done;
 function forward string argv number n done;
-function forward number factorial number n done;
+function forward number factorial number n done
 start
 	if argc > 2 then
 		" #"! cnt! "\n"!
+	elif argc > 2 then
+		"cona"!
+	else
+		"cona"!
 	fi
 end

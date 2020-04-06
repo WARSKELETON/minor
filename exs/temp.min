@@ -1,5 +1,5 @@
 program 
-	number cona := "cona"; number cona;
+	number cona := "cona"; number cona
 start 
-	"cona" ! 
+	"cona" !
 end
