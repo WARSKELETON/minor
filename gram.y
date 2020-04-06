@@ -23,18 +23,19 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
-%nonassoc RETURN INTEGER STR ID
-%nonassoc '(' '['
-%nonassoc ADDR UMINUS '?' /* falta */
-%right '^' /* falta isto e 	left-value # expressão ; */
-%left '*' '/' '%'
-%left '+' '-'
-%left '<' '>' LE GE
-%left NE '='
-%nonassoc '~'
-%left '&'
-%left '|'
+%nonassoc RETURN 
+%nonassoc INTEGER STR ID
 %right ATTR
+%left '|'
+%left '&'
+%nonassoc '~'
+%left NE '='
+%left '<' '>' LE GE
+%left '+' '-'
+%left '*' '/' '%'
+%right '^' /* falta isto e 	left-value # expressão ; */
+%nonassoc ADDR UMINUS '?' /* falta */
+%nonassoc '(' '['
 
 %%
 file    : program
