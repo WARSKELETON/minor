@@ -33,8 +33,8 @@ void yyerror(char *s);
 %left '<' '>' LE GE
 %left '+' '-'
 %left '*' '/' '%'
-%right '^' /* falta isto e 	left-value # expressão ; */
-%nonassoc ADDR UMINUS '?' /* falta */
+%right '^'
+%nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
 %%
@@ -144,6 +144,7 @@ rvalue    : lvalue
     | literal
     | '-' rvalue %prec UMINUS
     | '&' rvalue %prec ADDR
+    | rvalue '^' rvalue
     | rvalue '+' rvalue
 	| rvalue '-' rvalue
 	| rvalue '*' rvalue
@@ -159,6 +160,7 @@ rvalue    : lvalue
     | rvalue '&' rvalue
     | rvalue '|' rvalue
     | '~' rvalue
+    | '?'
     ;
 
 literal : INTEGER 
