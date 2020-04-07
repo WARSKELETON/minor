@@ -1,3 +1,4 @@
+%option stack
 %{
 #include <stdlib.h> 
 #include <string.h> 
@@ -7,56 +8,58 @@ char *dupstr(const char *s);
 extern void yyerror(const char *msg);
 %}
 
-%x X_COMMENT
+%x X_FILE X_COMMENT
 %%
-"$$".*\n                      	; /* ignore comments */
+<X_FILE>"$$".*\n                      	; /* ignore comments */
 
-"$"                          	BEGIN X_COMMENT;
-<X_COMMENT>"$"					BEGIN 0;
+<X_FILE>"$"                          	yy_push_state(X_COMMENT);
+<X_COMMENT>"$"					yy_pop_state();
 <X_COMMENT>.|\n               	; /* ignore content */
 
-"program"	return PROGRAM;
-"module"	return MODULE;
-"start"		return START;
-"end"		return END;
-"function"	return FUNCTION;
-"public"	return PUBLIC;
-"forward"	return FORWARD;
-"number"	return NUMBER;
-"array"		return ARRAY;
-"void"		return VOID;
-"string"	return STRING;
-"const"		return CONST;
-"do"		return DO;
-"done"		return DONE;
-"if"		return IF;
-"then"		return THEN;
-"else"		return ELSE;
-"elif"		return ELIF;
-"fi"		return FI;
-"for"		return FOR;
-"until"		return UNTIL;
-"step"		return STEP;
-"repeat"	return REPEAT;
-"stop"		return STOP;
-"return"	return RETURN;
-"<="		return LE;
-">="		return GE;
-"~="		return NE;
-":="		return ATTR;
+^"program"	yy_push_state(X_FILE); return PROGRAM;
+^"module"	yy_push_state(X_FILE); return MODULE;
+<X_FILE>"start"		return START;
+<X_FILE>"end"		yy_pop_state(); return END;
+<X_FILE>"function"	return FUNCTION;
+<X_FILE>"public"	return PUBLIC;
+<X_FILE>"forward"	return FORWARD;
+<X_FILE>"number"	return NUMBER;
+<X_FILE>"array"		return ARRAY;
+<X_FILE>"void"		return VOID;
+<X_FILE>"string"	return STRING;
+<X_FILE>"const"		return CONST;
+<X_FILE>"do"		return DO;
+<X_FILE>"done"		return DONE;
+<X_FILE>"if"		return IF;
+<X_FILE>"then"		return THEN;
+<X_FILE>"else"		return ELSE;
+<X_FILE>"elif"		return ELIF;
+<X_FILE>"fi"		return FI;
+<X_FILE>"for"		return FOR;
+<X_FILE>"until"		return UNTIL;
+<X_FILE>"step"		return STEP;
+<X_FILE>"repeat"	return REPEAT;
+<X_FILE>"stop"		return STOP;
+<X_FILE>"return"	return RETURN;
+<X_FILE>"<="		return LE;
+<X_FILE>">="		return GE;
+<X_FILE>"~="		return NE;
+<X_FILE>":="		return ATTR;
 
-[A-Za-z][A-Za-z0-9_]*		{ yylval.s = strdup(yytext); return ID; }
-\'(([^']|\\[nrt']){1})\'	{ yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
-\"(([^"]|\\[nrt"])*)\"		{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
-[0][0-7]*					{ yylval.i = strtol(yytext, 0, 8); return INTEGER; }
-[0-9]+						{ yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* Ver melhor */
-"0x"[0-9a-fA-F]+			{ yylval.i = strtol(yytext, 0, 0); printf("%d\n", yylval.i); return INTEGER; }
-"0b"[0-1]+					{ yylval.i = strtol(yytext+2, 0, 2); printf("%d\n", yylval.i); return INTEGER; }
-[-+*/%!;,#&|~^<>=()?\[\]]	return *yytext;
+<X_FILE>[A-Za-z][A-Za-z0-9_]*		{ yylval.s = strdup(yytext); return ID; }
+<X_FILE>\'(([^']|\\[nrt']){1})\'	{ yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
+<X_FILE>\"(([^"]|\\[nrt"])*)\"		{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
+<X_FILE>[0][0-7]*					{ yylval.i = strtol(yytext, 0, 8); if (errno == ERANGE) yyerror("octal overflow"); return INTEGER; }
+<X_FILE>[0-9]+						{ yylval.i = strtol(yytext, 0, 10); if (errno == ERANGE) yyerror("decimal overflow"); return INTEGER; } /* Ver melhor */
+<X_FILE>"0x"[0-9a-fA-F]+			{ yylval.i = strtol(yytext, 0, 0); if (errno == ERANGE) yyerror("hexadecimal overflow"); return INTEGER; }
+<X_FILE>"0b"[0-1]+					{ yylval.i = strtol(yytext+2, 0, 2); if (errno == ERANGE) yyerror("binary overflow"); printf("%d\n", yylval.i); return INTEGER; }
+<X_FILE>[-+*/%!;,#&|~^<>=()?\[\]]	return *yytext;
 
-[ \t\n\r]+		; /* ignore whitespace */
+<X_FILE>[ \t\n\r]+		; /* ignore whitespace */
 
-.			yyerror("Unknown character");
+<X_FILE>.				yyerror("Unknown character"); /* yyerror("Unknown character") */
+
+.						;
 
 %% 
 int yywrap() { return 1; } 

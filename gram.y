@@ -23,6 +23,8 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
+%nonassoc INTEGERX
+%nonassoc INTEGERLIST
 %right ATTR
 %left '|'
 %left '&'
@@ -55,11 +57,14 @@ delclist   : decl
     ;
 
 decl    : func
-    | qualifier CONST var ATTR literal 
-    | qualifier CONST var
-    | qualifier var ATTR literal
-    | qualifier var
+    | qualifier CONST var declattr
+    | qualifier var declattr
     ;
+
+declattr   : /* empty */
+    | ATTR literal
+    | '[' INTEGER ']'
+    | '[' INTEGER ']' ATTR literal
 
 func    : FUNCTION qualifier functype ID vars funcend
     ;
@@ -167,8 +172,8 @@ rvalue    : lvalue
     | '?'
     ;
 
-literal : INTEGER 
-    | STR
+literal : STR
+    | INTEGER
     ;
 
 args	: rvalue	
