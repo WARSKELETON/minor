@@ -23,8 +23,6 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
-%nonassoc INTEGERX
-%nonassoc INTEGERLIST
 %right ATTR
 %left '|'
 %left '&'
@@ -150,7 +148,8 @@ rvalue    : lvalue
     | '(' rvalue ')'
 	| rvalue '(' args ')'
 	| rvalue '(' ')'
-    | literal
+    | STR
+    | INTEGER
     | '-' rvalue %prec UMINUS
     | '&' rvalue %prec ADDR
     | rvalue '^' rvalue
@@ -173,7 +172,11 @@ rvalue    : lvalue
     ;
 
 literal : STR
-    | INTEGER
+    | integerlist
+    ;
+
+integerlist : INTEGER
+    | integerlist ',' INTEGER
     ;
 
 args	: rvalue	

@@ -26,14 +26,12 @@
 #define REPEAT 282
 #define STOP 283
 #define RETURN 284
-#define INTEGERX 285
-#define INTEGERLIST 286
-#define ATTR 287
-#define NE 288
-#define LE 289
-#define GE 290
-#define ADDR 291
-#define UMINUS 292
+#define ATTR 285
+#define NE 286
+#define LE 287
+#define GE 288
+#define ADDR 289
+#define UMINUS 290
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
