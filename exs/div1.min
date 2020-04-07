@@ -1,4 +1,4 @@
-program
+program $$ div
 number i;
 number n;
 number d := 0

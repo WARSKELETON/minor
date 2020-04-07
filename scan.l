@@ -7,8 +7,14 @@ char *dupstr(const char *s);
 extern void yyerror(const char *msg);
 %}
 
+%x X_COMMENT
 %%
-"$$".*			; /* comment */
+"$$".*\n                      	; /* ignore comments */
+
+"$"                          	BEGIN X_COMMENT;
+<X_COMMENT>"$"					BEGIN 0;
+<X_COMMENT>.|\n               	; /* ignore content */
+
 "program"	return PROGRAM;
 "module"	return MODULE;
 "start"		return START;

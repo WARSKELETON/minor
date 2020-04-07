@@ -119,7 +119,7 @@ instrterm   : REPEAT
     | RETURN
     ;
 
-elif    : ELIF rvalue THEN instrs
+elif    : ELIF rvalue THEN block
     ;
 
 elifs    : elif

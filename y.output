@@ -65,7 +65,7 @@
   45            | RETURN rvalue
   46            | RETURN
 
-  47  elif : ELIF rvalue THEN instrs
+  47  elif : ELIF rvalue THEN block
 
   48  elifs : elif
   49        | elifs elif
@@ -2809,7 +2809,7 @@ state 135
 
 
 state 136
-	elif : ELIF . rvalue THEN instrs  (47)
+	elif : ELIF . rvalue THEN block  (47)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -2917,7 +2917,7 @@ state 142
 
 
 state 143
-	elif : ELIF rvalue . THEN instrs  (47)
+	elif : ELIF rvalue . THEN block  (47)
 	rvalue : rvalue . '(' args ')'  (61)
 	rvalue : rvalue . '(' ')'  (62)
 	rvalue : rvalue . '^' rvalue  (66)
@@ -3040,26 +3040,34 @@ state 148
 
 
 state 149
-	elif : ELIF rvalue THEN . instrs  (47)
+	elif : ELIF rvalue THEN . block  (47)
+	block : .  (50)
 
 	INTEGER  shift 28
 	ID  shift 29
 	STR  shift 30
 	IF  shift 31
 	FOR  shift 32
+	REPEAT  shift 33
+	STOP  shift 34
+	RETURN  shift 35
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
 	'*'  shift 39
 	'?'  shift 40
 	'('  shift 41
-	.  error
+	ELSE  reduce 50
+	ELIF  reduce 50
+	FI  reduce 50
 
 	literal  goto 44
+	block  goto 152
 	instr  goto 48
 	rvalue  goto 49
 	lvalue  goto 50
-	instrs  goto 152
+	instrterm  goto 51
+	instrs  goto 52
 
 
 state 150
@@ -3099,28 +3107,9 @@ state 151
 
 
 state 152
-	elif : ELIF rvalue THEN instrs .  (47)
-	instrs : instrs . instr  (55)
+	elif : ELIF rvalue THEN block .  (47)
 
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	IF  shift 31
-	FOR  shift 32
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	ELSE  reduce 47
-	ELIF  reduce 47
-	FI  reduce 47
-
-	literal  goto 44
-	instr  goto 91
-	rvalue  goto 49
-	lvalue  goto 50
+	.  reduce 47
 
 
 state 153

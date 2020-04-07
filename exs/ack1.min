@@ -1,4 +1,4 @@
-program
+program $ ackermann $
 number cnt := 0;
 function forward number atoi string s done;
 function forward number argc done;
