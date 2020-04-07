@@ -23,8 +23,6 @@ void yyerror(char *s);
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
 
-%nonassoc RETURN 
-%nonassoc INTEGER STR ID
 %right ATTR
 %left '|'
 %left '&'
@@ -95,30 +93,30 @@ type    : NUMBER
     | STRING
     ;
 
-body    : /* empty */
-    | bodyvars bodyinstrs
+body    : bodyvars bodyinstrs
     | bodyinstrs
-    | bodyvars
     ;
 
-bodyinstrs : instrs instr
+bodyinstrs : block
 
 bodyvars : var ';'
     | bodyvars var ';'
     ;
 
-instr   : IF rvalue THEN instrs FI
-    | IF rvalue THEN instrs elifs ELSE instrs FI
-    | IF rvalue THEN instrs elifs FI
-    | IF rvalue THEN instrs ELSE instrs FI
-    | FOR rvalue UNTIL rvalue STEP rvalue DO instrs DONE
+instr   : IF rvalue THEN block FI
+    | IF rvalue THEN block elifs ELSE block FI
+    | IF rvalue THEN block elifs FI
+    | IF rvalue THEN block ELSE block FI
+    | FOR rvalue UNTIL rvalue STEP rvalue DO block DONE
     | rvalue ';'
     | rvalue '!'
-    | REPEAT
+    | lvalue '#' rvalue ';'
+    ;
+
+instrterm   : REPEAT
     | STOP
     | RETURN rvalue
     | RETURN
-    | lvalue '#' rvalue ';'
     ;
 
 elif    : ELIF rvalue THEN instrs
@@ -128,7 +126,13 @@ elifs    : elif
     | elifs elif
     ;
 
-instrs  : /* empty */
+block   : /* empty */
+    | instrterm
+    | instrs
+    | instrs instrterm
+    ;
+
+instrs  : instr
     | instrs instr
     ;
 
