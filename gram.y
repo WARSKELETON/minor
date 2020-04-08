@@ -35,7 +35,7 @@ void yyerror(char *s);
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls delclist decl body bodyinstrs bodyvars func declattr funcend functype qualifier vars varlist var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
+%type <n> program module decls delclist decl body bodyprincipal bodyinstrs bodyvars func declattr funcend functype qualifier vars varlist var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
 
 %token NIL DECLS DECL FUNCTYPE QUALIFIER DECLATTR VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
 
@@ -44,7 +44,7 @@ file    : program                       { printNode($1,0,yynames); }
     | module                            { printNode($1,0,yynames); }
     ;
 
-program : PROGRAM decls START body END  { $$ = binNode(PROGRAM, $2, $4); }
+program : PROGRAM decls START bodyprincipal END  { $$ = binNode(PROGRAM, $2, $4); }
     ;
 
 module  : MODULE decls END              { $$ = uniNode(MODULE, $2); }
@@ -100,11 +100,17 @@ type    : NUMBER            { $$ = nilNode(NUMBER); }
     | STRING                { $$ = nilNode(STRING); }
     ;
 
-body    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
-    | bodyinstrs                { $$ = $1; }
+bodyprincipal    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
+    | bodyinstrs                         { $$ = $1; }
     ;
 
-bodyinstrs : block              { $$ = $1; }
+body    : bodyvars block   { $$ = binNode(BODY, $1, $2); }
+    | block                { $$ = $1; }
+    ;
+
+bodyinstrs : /* empty */        { $$ = nilNode(NIL); }
+    | instrs                    { $$ = $1; }
+    ;
 
 bodyvars : var ';'              { $$ = $1; }
     | bodyvars var ';'          { $$ = binNode(BODYVARS, $1, $2); }
