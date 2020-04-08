@@ -40,8 +40,8 @@ void yyerror(char *s);
 %token END DECLS DECL DECLATTR VARS VAR BODY BODYVARS IF_ELIF_ELSE RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
 
 %%
-file    : program                       { evaluate($1); freeNode($1); }
-    | module                            { evaluate($1); freeNode($1); }
+file    : program                       { printNode($1,0,yynames); }
+    | module                            { printNode($1,0,yynames); }
     ;
 
 program : PROGRAM decls START body END  { $$ = binNode(PROGRAM, $2, $4); }

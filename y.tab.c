@@ -910,11 +910,11 @@ yyreduce:
     {
 case 1:
 #line 43 "gram.y"
-	{ evaluate(yystack.l_mark[0].n); freeNode(yystack.l_mark[0].n); }
+	{ printNode(yystack.l_mark[0].n,0,yynames); }
 break;
 case 2:
 #line 44 "gram.y"
-	{ evaluate(yystack.l_mark[0].n); freeNode(yystack.l_mark[0].n); }
+	{ printNode(yystack.l_mark[0].n,0,yynames); }
 break;
 case 3:
 #line 47 "gram.y"
