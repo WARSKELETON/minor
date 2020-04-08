@@ -40,64 +40,62 @@ static int ncicl;
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls delclist decl body bodyprincipal bodyinstrs bodyvars func declattr funcend functype qualifier vars varlist var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
+%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier vars var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
 
-%token NIL DECLS DECL FUNCTYPE QUALIFIER DECLATTR VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
+%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
 
 %%
-file    : program                       { ; }
-    | module                            { ; }
+file    : program                       { printNode($1,0,yynames); }
+    | module                            { printNode($1,0,yynames); }
     ;
 
 program : PROGRAM decls START bodyprincipal END  { $$ = binNode(PROGRAM, $2, $4); }
+    | PROGRAM START bodyprincipal END            { $$ = uniNode(PROGRAM, $3); }
     ;
 
 module  : MODULE decls END              { $$ = uniNode(MODULE, $2); }
+    | MODULE END                        { $$ = nilNode(MODULE); }
     ;
 
-decls   : /* empty */                   { $$ = nilNode(NIL); }
-    | delclist                          { $$ = $1; }
-    ;
-
-delclist   : decl                       { $$ = $1; }
-    | delclist ';' decl                 { $$ = binNode(DECLS, $1, $3); }
+decls   : decl                          { $$ = $1; }
+    | decls ';' decl                    { $$ = binNode(DECLS, $1, $3); }
     ;
 
 decl    : func                          { $$ = $1; }
-    | qualifier CONST var declattr      { $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, uniNode(DECLATTR, $4))); }
-    | qualifier var declattr            { $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, uniNode(DECLATTR, $3))); }
+    | qualifier CONST var ATTR literal  { $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, $5)); }
+    | qualifier var ATTR literal        { $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, $4)); }
+    | qualifier var                     { $$ = binNode(DECL, $1, $2); }
+    | qualifier CONST var               { $$ = binNode(DECL, $1, $3); }
+    | CONST var                         { $$ = $2; }
+    | CONST var ATTR literal            { $$ = binNode(DECL, $2, $4); }
+    | var                               { $$ = $1; }
+    | var ATTR literal                  { $$ = binNode(DECL, $1, $3); }
     ;
-
-declattr   : /* empty */                { $$ = nilNode(NIL); }
-    | ATTR literal                      { $$ = uniNode(DECLATTR, $2); } /* TODO */
-    | '[' INTEGER ']'                   { $$ = nilNode(NIL); }
-    | '[' INTEGER ']' ATTR literal      { $$ = uniNode(DECLATTR, $5); }
 
 func    : FUNCTION qualifier functype ID vars funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); }
+    | FUNCTION functype ID vars funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $4, uniNode(END, $5)))); }
+    | FUNCTION qualifier functype ID funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $5)))); }
+    | FUNCTION functype ID funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $4))); }
     ;
 
-funcend : DONE  { $$ = nilNode(DONE); }
-    | DO body   { $$ = uniNode(DO, $2); }
+funcend : DONE          { $$ = nilNode(DONE); }
+    | DO body           { $$ = uniNode(DO, $2); }
     ;
 
-functype    : type  { $$ = $1; }
-    | VOID  { $$ = nilNode(VOID); }
+functype    : type      { $$ = $1; }
+    | VOID              { $$ = nilNode(VOID); }
     ;
 
-qualifier   : /* empty */   { $$ = nilNode(NIL); }
-    | PUBLIC                { $$ = nilNode(PUBLIC); }
-    | FORWARD               { $$ = nilNode(FORWARD); }
+qualifier   : PUBLIC    { $$ = nilNode(PUBLIC); }
+    | FORWARD           { $$ = nilNode(FORWARD); }
     ;
 
-vars    : /* empty */       { $$ = nilNode(NIL); }
-    | varlist               { $$ = $1; }
+vars    : var               { $$ = $1; }
+    | vars ';' var          { $$ = binNode(VARS, $1, $3); }
     ;
 
-varlist : var               { $$ = $1; }
-    | varlist ';' var       { $$ = binNode(VARS, $1, $3); }
-    ;
-
-var    : type ID            { $$ = binNode(VAR, $1, strNode(ID, $2)); }
+var    : type ID                { $$ = binNode(VAR, $1, strNode(ID, $2)); }
+    | type ID '[' integer ']'   { $$ = binNode(VAR, $1, binNode(ID, strNode(ID, $2), $4)); }
     ;
 
 type    : NUMBER            { $$ = nilNode(NUMBER); }

@@ -37,18 +37,17 @@
 #define DECL 293
 #define FUNCTYPE 294
 #define QUALIFIER 295
-#define DECLATTR 296
-#define VARS 297
-#define VAR 298
-#define BODY 299
-#define BODYVARS 300
-#define RETURN_EXPR 301
-#define ELIFS 302
-#define INSTRS_INSTRTERM 303
-#define INSTRS 304
-#define TWO_INTEGERS 305
-#define MORE_INTEGERS 306
-#define ARGS 307
+#define VARS 296
+#define VAR 297
+#define BODY 298
+#define BODYVARS 299
+#define RETURN_EXPR 300
+#define ELIFS 301
+#define INSTRS_INSTRTERM 302
+#define INSTRS 303
+#define TWO_INTEGERS 304
+#define MORE_INTEGERS 305
+#define ARGS 306
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
