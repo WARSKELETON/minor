@@ -35,9 +35,9 @@ void yyerror(char *s);
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls delclist decl body bodyinstrs bodyvars func declattr funcend functype qualifier vars varlist var type instr instrterm elif elifs block instrs lvalue rvalue literal integer integerlist string stringintegerlist args
+%type <n> program module decls delclist decl body bodyinstrs bodyvars func declattr funcend functype qualifier vars varlist var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
 
-%token END DECLS DECL DECLATTR VARS VAR BODY BODYVARS IF_ELIF_ELSE RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
+%token NIL DECLS DECL FUNCTYPE QUALIFIER DECLATTR VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
 
 %%
 file    : program                       { printNode($1,0,yynames); }
@@ -50,7 +50,7 @@ program : PROGRAM decls START body END  { $$ = binNode(PROGRAM, $2, $4); }
 module  : MODULE decls END              { $$ = uniNode(MODULE, $2); }
     ;
 
-decls   : /* empty */                   { $$ = nilNode(END); }
+decls   : /* empty */                   { $$ = nilNode(NIL); }
     | delclist                          { $$ = $1; }
     ;
 
@@ -59,32 +59,32 @@ delclist   : decl                       { $$ = $1; }
     ;
 
 decl    : func                          { $$ = $1; }
-    | qualifier CONST var declattr      { $$ = triNode(DECL, $1, $3, $4); }
-    | qualifier var declattr            { $$ = triNode(DECL, $1, $2, $3); }
+    | qualifier CONST var declattr      { $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, uniNode(DECLATTR, $4))); }
+    | qualifier var declattr            { $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, uniNode(DECLATTR, $3))); }
     ;
 
-declattr   : /* empty */                { $$ = nilNode(END); }
-    | ATTR literal                      { $$ = uniNode(DECLATTR, $2); }
-    | '[' INTEGER ']'                   { $$ = nilNode(END); }
+declattr   : /* empty */                { $$ = nilNode(NIL); }
+    | ATTR literal                      { $$ = uniNode(DECLATTR, $2); } /* TODO */
+    | '[' INTEGER ']'                   { $$ = nilNode(NIL); }
     | '[' INTEGER ']' ATTR literal      { $$ = uniNode(DECLATTR, $5); }
 
-func    : FUNCTION qualifier functype ID vars funcend   { $$ = pentNode(FUNCTION, $2, $3, strNode(ID, $4), $5, $6); }
+func    : FUNCTION qualifier functype ID vars funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); }
     ;
 
-funcend : DONE  { $$ = nilNode(END); }
+funcend : DONE  { $$ = nilNode(DONE); }
     | DO body   { $$ = uniNode(DO, $2); }
     ;
 
 functype    : type  { $$ = $1; }
-    | VOID  { $$ = uniNode(VOID, nilNode(END)); }
+    | VOID  { $$ = nilNode(VOID); }
     ;
 
-qualifier   : /* empty */   { $$ = nilNode(END); }
-    | PUBLIC                { $$ = uniNode(PUBLIC, nilNode(END)); }
-    | FORWARD               { $$ = uniNode(FORWARD, nilNode(END)); }
+qualifier   : /* empty */   { $$ = nilNode(NIL); }
+    | PUBLIC                { $$ = nilNode(PUBLIC); }
+    | FORWARD               { $$ = nilNode(FORWARD); }
     ;
 
-vars    : /* empty */       { $$ = nilNode(END); }
+vars    : /* empty */       { $$ = nilNode(NIL); }
     | varlist               { $$ = $1; }
     ;
 
@@ -95,9 +95,9 @@ varlist : var               { $$ = $1; }
 var    : type ID            { $$ = binNode(VAR, $1, strNode(ID, $2)); }
     ;
 
-type    : NUMBER            { $$ = uniNode(NUMBER, nilNode(END)); }
-    | ARRAY                 { $$ = uniNode(ARRAY, nilNode(END)); }
-    | STRING                { $$ = uniNode(STRING, nilNode(END)); }
+type    : NUMBER            { $$ = nilNode(NUMBER); }
+    | ARRAY                 { $$ = nilNode(ARRAY); }
+    | STRING                { $$ = nilNode(STRING); }
     ;
 
 body    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
@@ -110,30 +110,30 @@ bodyvars : var ';'              { $$ = $1; }
     | bodyvars var ';'          { $$ = binNode(BODYVARS, $1, $2); }
     ;
 
-instr   : IF rvalue THEN block FI                           { $$ = binNode(IF, $2, $4); }
-    | IF rvalue THEN block elifs ELSE block FI              { $$ = quadNode(IF_ELIF_ELSE, $2, $4, $5, $7); }
-    | IF rvalue THEN block elifs FI                         { $$ = triNode(ELIF, $2, $4, $5); }
-    | IF rvalue THEN block ELSE block FI                    { $$ = triNode(ELSE, $2, $4, $6); }
-    | FOR rvalue UNTIL rvalue STEP rvalue DO block DONE     { $$ = quadNode(FOR, $2, $4, $6, $8); }
-    | rvalue ';'                                            { $$ = $1; }
-    | rvalue '!'                                            { $$ = $1; }
-    | lvalue '#' rvalue ';'                                 { $$ = binNode('#', $1, $3); }
+instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2, $4); }
+    | IF expr THEN block elifs ELSE block FI              { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, uniNode(ELSE, $7)))); }
+    | IF expr THEN block elifs FI                         { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELIF, $5))); }
+    | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); }
+    | FOR expr UNTIL expr STEP expr DO block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $8)))); }
+    | expr ';'                                            { $$ = $1; }
+    | expr '!'                                            { $$ = $1; }
+    | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); }
     ;
 
-instrterm   : REPEAT    { $$ = uniNode(REPEAT, nilNode(END)); }
-    | STOP              { $$ = uniNode(STOP, nilNode(END)); }
-    | RETURN rvalue     { $$ = uniNode(RETURN_EXPR, nilNode(END)); }
-    | RETURN            { $$ = uniNode(RETURN, nilNode(END)); }
+instrterm   : REPEAT    { $$ = nilNode(REPEAT); }
+    | STOP              { $$ = nilNode(STOP); }
+    | RETURN expr       { $$ = uniNode(RETURN_EXPR, $2); }
+    | RETURN            { $$ = nilNode(RETURN); }
     ;
 
-elif    : ELIF rvalue THEN block    { $$ = binNode(ELIF, $2, $4); }
+elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); }
     ;
 
 elifs    : elif                     { $$ = $1; }
     | elifs elif                    { $$ = binNode(ELIFS, $1, $2); }
     ;
 
-block   : /* empty */               { $$ = nilNode(END); }
+block   : /* empty */               { $$ = nilNode(NIL); }
     | instrterm                     { $$ = $1; }
     | instrs                        { $$ = $1; }
     | instrs instrterm              { $$ = binNode(INSTRS_INSTRTERM, $1, $2); }
@@ -144,34 +144,34 @@ instrs  : instr                     { $$ = $1; }
     ;
 
 lvalue	: ID                        { $$ = strNode(ID, $1); }
-	| lvalue '[' rvalue ']'         { $$ = binNode('[', $1, $3); }
+	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); }
 	;
 
-rvalue    : lvalue              { $$ = $1; }
-    | '(' rvalue ')'            { $$ = $2; }
-	| rvalue '(' args ')'       { $$ = binNode('(', $1, $3); }
-	| rvalue '(' ')'            { $$ = $1; }
-    | STR                       { $$ = strNode(STR, $1); }
-    | INTEGER                   { $$ = intNode(INTEGER, $1); }
-    | '-' rvalue %prec UMINUS   { $$ = uniNode(UMINUS, $2); }
-    | '&' rvalue %prec ADDR     { $$ = uniNode(ADDR, $2); }
-    | rvalue '^' rvalue         { $$ = binNode('^', $1, $3); }
-    | rvalue '+' rvalue         { $$ = binNode('+', $1, $3); }
-	| rvalue '-' rvalue         { $$ = binNode('-', $1, $3); }
-	| rvalue '*' rvalue         { $$ = binNode('*', $1, $3); }
-	| rvalue '/' rvalue         { $$ = binNode('/', $1, $3); }
-	| rvalue '%' rvalue         { $$ = binNode('%', $1, $3); }
-	| rvalue '<' rvalue         { $$ = binNode('<', $1, $3); }
-	| rvalue '>' rvalue         { $$ = binNode('>', $1, $3); }
-	| rvalue GE rvalue          { $$ = binNode(GE, $1, $3); }
-	| rvalue LE rvalue          { $$ = binNode(LE, $1, $3); }
-	| rvalue NE rvalue          { $$ = binNode(NE, $1, $3); }
-	| rvalue '=' rvalue         { $$ = binNode('=', $1, $3); }
-    | lvalue ATTR rvalue        { $$ = binNode(ATTR, $1, $3); }
-    | rvalue '&' rvalue         { $$ = binNode('&', $1, $3); }
-    | rvalue '|' rvalue         { $$ = binNode('|', $1, $3); }
-    | '~' rvalue                { $$ = uniNode('~', $2); }
-    | '?'                       { $$ = uniNode('?', nilNode(END)); }
+expr    : lvalue              { $$ = $1; }
+    | '(' expr ')'            { $$ = $2; }
+	| expr '(' args ')'       { $$ = binNode('(', $1, $3); }
+	| expr '(' ')'            { $$ = $1; }
+    | STR                     { $$ = strNode(STR, $1); }
+    | INTEGER                 { $$ = intNode(INTEGER, $1); }
+    | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); }
+    | '&' expr %prec ADDR     { $$ = uniNode(ADDR, $2); }
+    | expr '^' expr           { $$ = binNode('^', $1, $3); }
+    | expr '+' expr           { $$ = binNode('+', $1, $3); }
+	| expr '-' expr           { $$ = binNode('-', $1, $3); }
+	| expr '*' expr           { $$ = binNode('*', $1, $3); }
+	| expr '/' expr           { $$ = binNode('/', $1, $3); }
+	| expr '%' expr           { $$ = binNode('%', $1, $3); }
+	| expr '<' expr           { $$ = binNode('<', $1, $3); }
+	| expr '>' expr           { $$ = binNode('>', $1, $3); }
+	| expr GE expr            { $$ = binNode(GE, $1, $3); }
+	| expr LE expr            { $$ = binNode(LE, $1, $3); }
+	| expr NE expr            { $$ = binNode(NE, $1, $3); }
+	| expr '=' expr           { $$ = binNode('=', $1, $3); }
+    | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); }
+    | expr '&' expr           { $$ = binNode('&', $1, $3); }
+    | expr '|' expr           { $$ = binNode('|', $1, $3); }
+    | '~' expr                { $$ = uniNode('~', $2); }
+    | '?'                     { $$ = nilNode('?'); }
     ;
 
 literal : string                { $$ = $1; }
@@ -192,8 +192,8 @@ integerlist : integer                   { $$ = $1; }
     | integerlist ',' integer           { $$ = binNode(',', $1, $3); }
     ;
 
-args	: rvalue	                    { $$ = $1; }
-	| args ',' rvalue                   { $$ = binNode(ARGS, $1, $3); }
+args	: expr	                      { $$ = $1; }
+	| args ',' expr                   { $$ = binNode(ARGS, $1, $3); }
 	;
 %%
 

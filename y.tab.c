@@ -109,21 +109,23 @@ extern int YYPARSE_DECL();
 #define GE 288
 #define ADDR 289
 #define UMINUS 290
-#define DECLS 291
-#define DECL 292
-#define DECLATTR 293
-#define VARS 294
-#define VAR 295
-#define BODY 296
-#define BODYVARS 297
-#define IF_ELIF_ELSE 298
-#define RETURN_EXPR 299
-#define ELIFS 300
-#define INSTRS_INSTRTERM 301
-#define INSTRS 302
-#define TWO_INTEGERS 303
-#define MORE_INTEGERS 304
-#define ARGS 305
+#define NIL 291
+#define DECLS 292
+#define DECL 293
+#define FUNCTYPE 294
+#define QUALIFIER 295
+#define DECLATTR 296
+#define VARS 297
+#define VAR 298
+#define BODY 299
+#define BODYVARS 300
+#define RETURN_EXPR 301
+#define ELIFS 302
+#define INSTRS_INSTRTERM 303
+#define INSTRS 304
+#define TWO_INTEGERS 305
+#define MORE_INTEGERS 306
+#define ARGS 307
 #define YYERRCODE 256
 typedef short YYINT;
 static const YYINT yylhs[] = {                           -1,
@@ -542,8 +544,8 @@ static const YYINT yycheck[] = {                         33,
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 305
-#define YYUNDFTOKEN 339
+#define YYMAXTOKEN 307
+#define YYUNDFTOKEN 341
 #define YYTRANSLATE(a) ((a) > YYMAXTOKEN ? YYUNDFTOKEN : (a))
 #if YYDEBUG
 static const char *const yyname[] = {
@@ -559,8 +561,8 @@ static const char *const yyname[] = {
 "PROGRAM","MODULE","START","END","FUNCTION","PUBLIC","FORWARD","NUMBER","ARRAY",
 "VOID","STRING","CONST","DONE","DO","IF","THEN","ELSE","ELIF","FI","FOR",
 "UNTIL","STEP","REPEAT","STOP","RETURN","ATTR","NE","LE","GE","ADDR","UMINUS",
-"DECLS","DECL","DECLATTR","VARS","VAR","BODY","BODYVARS","IF_ELIF_ELSE",
-"RETURN_EXPR","ELIFS","INSTRS_INSTRTERM","INSTRS","TWO_INTEGERS",
+"NIL","DECLS","DECL","FUNCTYPE","QUALIFIER","DECLATTR","VARS","VAR","BODY",
+"BODYVARS","RETURN_EXPR","ELIFS","INSTRS_INSTRTERM","INSTRS","TWO_INTEGERS",
 "MORE_INTEGERS","ARGS",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,"illegal-symbol",
 };
@@ -602,19 +604,19 @@ static const char *const yyrule[] = {
 "bodyinstrs : block",
 "bodyvars : var ';'",
 "bodyvars : bodyvars var ';'",
-"instr : IF rvalue THEN block FI",
-"instr : IF rvalue THEN block elifs ELSE block FI",
-"instr : IF rvalue THEN block elifs FI",
-"instr : IF rvalue THEN block ELSE block FI",
-"instr : FOR rvalue UNTIL rvalue STEP rvalue DO block DONE",
-"instr : rvalue ';'",
-"instr : rvalue '!'",
-"instr : lvalue '#' rvalue ';'",
+"instr : IF expr THEN block FI",
+"instr : IF expr THEN block elifs ELSE block FI",
+"instr : IF expr THEN block elifs FI",
+"instr : IF expr THEN block ELSE block FI",
+"instr : FOR expr UNTIL expr STEP expr DO block DONE",
+"instr : expr ';'",
+"instr : expr '!'",
+"instr : lvalue '#' expr ';'",
 "instrterm : REPEAT",
 "instrterm : STOP",
-"instrterm : RETURN rvalue",
+"instrterm : RETURN expr",
 "instrterm : RETURN",
-"elif : ELIF rvalue THEN block",
+"elif : ELIF expr THEN block",
 "elifs : elif",
 "elifs : elifs elif",
 "block :",
@@ -624,32 +626,32 @@ static const char *const yyrule[] = {
 "instrs : instr",
 "instrs : instrs instr",
 "lvalue : ID",
-"lvalue : lvalue '[' rvalue ']'",
-"rvalue : lvalue",
-"rvalue : '(' rvalue ')'",
-"rvalue : rvalue '(' args ')'",
-"rvalue : rvalue '(' ')'",
-"rvalue : STR",
-"rvalue : INTEGER",
-"rvalue : '-' rvalue",
-"rvalue : '&' rvalue",
-"rvalue : rvalue '^' rvalue",
-"rvalue : rvalue '+' rvalue",
-"rvalue : rvalue '-' rvalue",
-"rvalue : rvalue '*' rvalue",
-"rvalue : rvalue '/' rvalue",
-"rvalue : rvalue '%' rvalue",
-"rvalue : rvalue '<' rvalue",
-"rvalue : rvalue '>' rvalue",
-"rvalue : rvalue GE rvalue",
-"rvalue : rvalue LE rvalue",
-"rvalue : rvalue NE rvalue",
-"rvalue : rvalue '=' rvalue",
-"rvalue : lvalue ATTR rvalue",
-"rvalue : rvalue '&' rvalue",
-"rvalue : rvalue '|' rvalue",
-"rvalue : '~' rvalue",
-"rvalue : '?'",
+"lvalue : lvalue '[' expr ']'",
+"expr : lvalue",
+"expr : '(' expr ')'",
+"expr : expr '(' args ')'",
+"expr : expr '(' ')'",
+"expr : STR",
+"expr : INTEGER",
+"expr : '-' expr",
+"expr : '&' expr",
+"expr : expr '^' expr",
+"expr : expr '+' expr",
+"expr : expr '-' expr",
+"expr : expr '*' expr",
+"expr : expr '/' expr",
+"expr : expr '%' expr",
+"expr : expr '<' expr",
+"expr : expr '>' expr",
+"expr : expr GE expr",
+"expr : expr LE expr",
+"expr : expr NE expr",
+"expr : expr '=' expr",
+"expr : lvalue ATTR expr",
+"expr : expr '&' expr",
+"expr : expr '|' expr",
+"expr : '~' expr",
+"expr : '?'",
 "literal : string",
 "literal : integerlist",
 "integer : INTEGER",
@@ -659,8 +661,8 @@ static const char *const yyrule[] = {
 "stringintegerlist : stringintegerlist integer",
 "integerlist : integer",
 "integerlist : integerlist ',' integer",
-"args : rvalue",
-"args : args ',' rvalue",
+"args : expr",
+"args : args ',' expr",
 
 };
 #endif
@@ -706,7 +708,7 @@ char **yynames =
 #else
 		 0;
 #endif
-#line 710 "y.tab.c"
+#line 712 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -926,7 +928,7 @@ case 4:
 break;
 case 5:
 #line 53 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 6:
 #line 54 "gram.y"
@@ -946,15 +948,15 @@ case 9:
 break;
 case 10:
 #line 62 "gram.y"
-	{ yyval.n = triNode(DECL, yystack.l_mark[-3].n, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-3].n, binNode(VAR, yystack.l_mark[-1].n, uniNode(DECLATTR, yystack.l_mark[0].n))); }
 break;
 case 11:
 #line 63 "gram.y"
-	{ yyval.n = triNode(DECL, yystack.l_mark[-2].n, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-2].n, binNode(VAR, yystack.l_mark[-1].n, uniNode(DECLATTR, yystack.l_mark[0].n))); }
 break;
 case 12:
 #line 66 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 13:
 #line 67 "gram.y"
@@ -962,7 +964,7 @@ case 13:
 break;
 case 14:
 #line 68 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 15:
 #line 69 "gram.y"
@@ -970,11 +972,11 @@ case 15:
 break;
 case 16:
 #line 71 "gram.y"
-	{ yyval.n = pentNode(FUNCTION, yystack.l_mark[-4].n, yystack.l_mark[-3].n, strNode(ID, yystack.l_mark[-2].s), yystack.l_mark[-1].n, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-4].n, binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n))))); }
 break;
 case 17:
 #line 74 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(DONE); }
 break;
 case 18:
 #line 75 "gram.y"
@@ -986,23 +988,23 @@ case 19:
 break;
 case 20:
 #line 79 "gram.y"
-	{ yyval.n = uniNode(VOID, nilNode(END)); }
+	{ yyval.n = nilNode(VOID); }
 break;
 case 21:
 #line 82 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 22:
 #line 83 "gram.y"
-	{ yyval.n = uniNode(PUBLIC, nilNode(END)); }
+	{ yyval.n = nilNode(PUBLIC); }
 break;
 case 23:
 #line 84 "gram.y"
-	{ yyval.n = uniNode(FORWARD, nilNode(END)); }
+	{ yyval.n = nilNode(FORWARD); }
 break;
 case 24:
 #line 87 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 25:
 #line 88 "gram.y"
@@ -1022,15 +1024,15 @@ case 28:
 break;
 case 29:
 #line 98 "gram.y"
-	{ yyval.n = uniNode(NUMBER, nilNode(END)); }
+	{ yyval.n = nilNode(NUMBER); }
 break;
 case 30:
 #line 99 "gram.y"
-	{ yyval.n = uniNode(ARRAY, nilNode(END)); }
+	{ yyval.n = nilNode(ARRAY); }
 break;
 case 31:
 #line 100 "gram.y"
-	{ yyval.n = uniNode(STRING, nilNode(END)); }
+	{ yyval.n = nilNode(STRING); }
 break;
 case 32:
 #line 103 "gram.y"
@@ -1058,19 +1060,19 @@ case 37:
 break;
 case 38:
 #line 114 "gram.y"
-	{ yyval.n = quadNode(IF_ELIF_ELSE, yystack.l_mark[-6].n, yystack.l_mark[-4].n, yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-6].n, binNode(THEN, yystack.l_mark[-4].n, binNode(ELIF, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n)))); }
 break;
 case 39:
 #line 115 "gram.y"
-	{ yyval.n = triNode(ELIF, yystack.l_mark[-4].n, yystack.l_mark[-2].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-4].n, binNode(THEN, yystack.l_mark[-2].n, uniNode(ELIF, yystack.l_mark[-1].n))); }
 break;
 case 40:
 #line 116 "gram.y"
-	{ yyval.n = triNode(ELSE, yystack.l_mark[-5].n, yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-5].n, binNode(THEN, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n))); }
 break;
 case 41:
 #line 117 "gram.y"
-	{ yyval.n = quadNode(FOR, yystack.l_mark[-7].n, yystack.l_mark[-5].n, yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode(FOR, yystack.l_mark[-7].n, binNode(UNTIL, yystack.l_mark[-5].n, binNode(STEP, yystack.l_mark[-3].n, uniNode(DO, yystack.l_mark[-1].n)))); }
 break;
 case 42:
 #line 118 "gram.y"
@@ -1086,19 +1088,19 @@ case 44:
 break;
 case 45:
 #line 123 "gram.y"
-	{ yyval.n = uniNode(REPEAT, nilNode(END)); }
+	{ yyval.n = nilNode(REPEAT); }
 break;
 case 46:
 #line 124 "gram.y"
-	{ yyval.n = uniNode(STOP, nilNode(END)); }
+	{ yyval.n = nilNode(STOP); }
 break;
 case 47:
 #line 125 "gram.y"
-	{ yyval.n = uniNode(RETURN_EXPR, nilNode(END)); }
+	{ yyval.n = uniNode(RETURN_EXPR, yystack.l_mark[0].n); }
 break;
 case 48:
 #line 126 "gram.y"
-	{ yyval.n = uniNode(RETURN, nilNode(END)); }
+	{ yyval.n = nilNode(RETURN); }
 break;
 case 49:
 #line 129 "gram.y"
@@ -1114,7 +1116,7 @@ case 51:
 break;
 case 52:
 #line 136 "gram.y"
-	{ yyval.n = nilNode(END); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 53:
 #line 137 "gram.y"
@@ -1242,7 +1244,7 @@ case 83:
 break;
 case 84:
 #line 174 "gram.y"
-	{ yyval.n = uniNode('?', nilNode(END)); }
+	{ yyval.n = nilNode('?'); }
 break;
 case 85:
 #line 177 "gram.y"
@@ -1288,7 +1290,7 @@ case 95:
 #line 196 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1292 "y.tab.c"
+#line 1294 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
