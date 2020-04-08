@@ -9,6 +9,11 @@
 int yylex();
 void evaluate(Node *p);
 void yyerror(char *s);
+
+int nostring(Node *arg1, Node *arg2);
+int intonly(Node *arg, int);
+int noassign(Node *arg1, Node *arg2);
+static int ncicl;
 %}
 
 %union {
@@ -40,8 +45,8 @@ void yyerror(char *s);
 %token NIL DECLS DECL FUNCTYPE QUALIFIER DECLATTR VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
 
 %%
-file    : program                       { printNode($1,0,yynames); }
-    | module                            { printNode($1,0,yynames); }
+file    : program                       { ; }
+    | module                            { ; }
     ;
 
 program : PROGRAM decls START bodyprincipal END  { $$ = binNode(PROGRAM, $2, $4); }
@@ -120,14 +125,14 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | IF expr THEN block elifs ELSE block FI              { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, uniNode(ELSE, $7)))); }
     | IF expr THEN block elifs FI                         { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELIF, $5))); }
     | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); }
-    | FOR expr UNTIL expr STEP expr DO block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $8)))); }
+    | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $8)))); ncicl--; }
     | expr ';'                                            { $$ = $1; }
     | expr '!'                                            { $$ = $1; }
     | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); }
     ;
 
-instrterm   : REPEAT    { $$ = nilNode(REPEAT); }
-    | STOP              { $$ = nilNode(STOP); }
+instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
+    | STOP              { $$ = nilNode(STOP); if (ncicl <= 0) yyerror("invalid stop argument"); }
     | RETURN expr       { $$ = uniNode(RETURN_EXPR, $2); }
     | RETURN            { $$ = nilNode(RETURN); }
     ;
@@ -157,8 +162,8 @@ expr    : lvalue              { $$ = $1; }
     | '(' expr ')'            { $$ = $2; }
 	| expr '(' args ')'       { $$ = binNode('(', $1, $3); }
 	| expr '(' ')'            { $$ = $1; }
-    | STR                     { $$ = strNode(STR, $1); }
-    | INTEGER                 { $$ = intNode(INTEGER, $1); }
+    | string                  { $$ = $1; }
+    | integer                 { $$ = $1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); }
     | '&' expr %prec ADDR     { $$ = uniNode(ADDR, $2); }
     | expr '^' expr           { $$ = binNode('^', $1, $3); }
@@ -180,22 +185,22 @@ expr    : lvalue              { $$ = $1; }
     | '?'                     { $$ = nilNode('?'); }
     ;
 
-literal : string                { $$ = $1; }
-    | integerlist               { $$ = $1; }
+literal : string                { $$ = $1; $$->info = $1->info; }
+    | integerlist               { $$ = $1; $$->info = $1->info; }
     ;
 
-integer : INTEGER               { $$ = intNode(INTEGER, $1); }
+integer : INTEGER               { $$ = intNode(INTEGER, $1); $$->info = 1; }
     ;
 
-string  : stringintegerlist     { $$ = $1; }
-    | STR                       { $$ = strNode(STR, $1); }
+string  : stringintegerlist     { $$ = $1; $$->info = $1->info; }
+    | STR                       { $$ = strNode(STR, $1); $$->info = 2; }
     ;
 
-stringintegerlist   : integer integer   { $$ = binNode(TWO_INTEGERS, $1, $2); }
-    | stringintegerlist integer         { $$ = binNode(MORE_INTEGERS, $1, $2); }
+stringintegerlist   : integer integer   { $$ = binNode(TWO_INTEGERS, $1, $2); $$->info = 2; }
+    | stringintegerlist integer         { $$ = binNode(MORE_INTEGERS, $1, $2); $$->info = 2; }
 
-integerlist : integer                   { $$ = $1; }
-    | integerlist ',' integer           { $$ = binNode(',', $1, $3); }
+integerlist : integer                   { $$ = $1; $$->info = $1->info; }
+    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 2; } /* dunno */
     ;
 
 args	: expr	                      { $$ = $1; }
@@ -209,3 +214,28 @@ char **yynames =
 #else
 		 0;
 #endif
+
+int nostring(Node *arg1, Node *arg2) {
+	if (arg1->info % 5 == 2 || arg2->info % 5 == 2)
+		yyerror("can not use strings");
+	return arg1->info % 5 == 3 || arg2->info % 5 == 3 ? 3 : 1;
+}
+
+int intonly(Node *arg, int novar) {
+	if (arg->info % 5 != 1)
+		yyerror("only integers can be used");
+	if (arg->info % 10 > 5)
+		yyerror("argument is constant");
+	return 1;
+}
+
+int noassign(Node *arg1, Node *arg2) {
+	int t1 = arg1->info, t2 = arg2->info;
+	if (t1 == t2) return 0;
+	if (t1 == 2 && t2 == 11) return 0; /* string := int* */
+	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
+		return 0; /* string := 0 */
+	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
+		return 0; /* pointer := 0 */
+	return 1;
+}
