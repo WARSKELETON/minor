@@ -32,6 +32,21 @@
 #define GE 288
 #define ADDR 289
 #define UMINUS 290
+#define DECLS 291
+#define DECL 292
+#define DECLATTR 293
+#define VARS 294
+#define VAR 295
+#define BODY 296
+#define BODYVARS 297
+#define IF_ELIF_ELSE 298
+#define RETURN_EXPR 299
+#define ELIFS 300
+#define INSTRS_INSTRTERM 301
+#define INSTRS 302
+#define TWO_INTEGERS 303
+#define MORE_INTEGERS 304
+#define ARGS 305
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

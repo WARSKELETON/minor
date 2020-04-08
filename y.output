@@ -83,42 +83,49 @@
 
   58  lvalue : ID
   59         | lvalue '[' rvalue ']'
-  60         | '*' lvalue
 
-  61  rvalue : lvalue
-  62         | '(' rvalue ')'
-  63         | rvalue '(' args ')'
-  64         | rvalue '(' ')'
-  65         | STR
-  66         | INTEGER
-  67         | '-' rvalue
-  68         | '&' rvalue
-  69         | rvalue '^' rvalue
-  70         | rvalue '+' rvalue
-  71         | rvalue '-' rvalue
-  72         | rvalue '*' rvalue
-  73         | rvalue '/' rvalue
-  74         | rvalue '%' rvalue
-  75         | rvalue '<' rvalue
-  76         | rvalue '>' rvalue
-  77         | rvalue GE rvalue
-  78         | rvalue LE rvalue
-  79         | rvalue NE rvalue
-  80         | rvalue '=' rvalue
-  81         | lvalue ATTR rvalue
-  82         | rvalue '&' rvalue
-  83         | rvalue '|' rvalue
-  84         | '~' rvalue
-  85         | '?'
+  60  rvalue : lvalue
+  61         | '(' rvalue ')'
+  62         | rvalue '(' args ')'
+  63         | rvalue '(' ')'
+  64         | STR
+  65         | INTEGER
+  66         | '-' rvalue
+  67         | '&' rvalue
+  68         | rvalue '^' rvalue
+  69         | rvalue '+' rvalue
+  70         | rvalue '-' rvalue
+  71         | rvalue '*' rvalue
+  72         | rvalue '/' rvalue
+  73         | rvalue '%' rvalue
+  74         | rvalue '<' rvalue
+  75         | rvalue '>' rvalue
+  76         | rvalue GE rvalue
+  77         | rvalue LE rvalue
+  78         | rvalue NE rvalue
+  79         | rvalue '=' rvalue
+  80         | lvalue ATTR rvalue
+  81         | rvalue '&' rvalue
+  82         | rvalue '|' rvalue
+  83         | '~' rvalue
+  84         | '?'
 
-  86  literal : STR
-  87          | integerlist
+  85  literal : string
+  86          | integerlist
 
-  88  integerlist : INTEGER
-  89              | integerlist ',' INTEGER
+  87  integer : INTEGER
 
-  90  args : rvalue
-  91       | args ',' rvalue
+  88  string : stringintegerlist
+  89         | STR
+
+  90  stringintegerlist : integer integer
+  91                    | stringintegerlist integer
+
+  92  integerlist : integer
+  93              | integerlist ',' integer
+
+  94  args : rvalue
+  95       | args ',' rvalue
 
 state 0
 	$accept : . file $end  (0)
@@ -298,22 +305,21 @@ state 16
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	END  reduce 52
 
-	body  goto 42
-	var  goto 43
+	body  goto 41
+	bodyinstrs  goto 42
+	bodyvars  goto 43
+	var  goto 44
 	type  goto 23
-	bodyvars  goto 44
-	bodyinstrs  goto 45
-	block  goto 46
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 47
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
 state 17
@@ -328,7 +334,7 @@ state 17
 	STRING  reduce 21
 	CONST  reduce 21
 
-	decl  goto 52
+	decl  goto 51
 	func  goto 12
 	qualifier  goto 13
 
@@ -359,7 +365,7 @@ state 21
 	STRING  shift 20
 	.  error
 
-	var  goto 53
+	var  goto 52
 	type  goto 23
 
 
@@ -367,19 +373,19 @@ state 22
 	decl : qualifier var . declattr  (11)
 	declattr : .  (12)
 
-	ATTR  shift 54
-	'['  shift 55
+	ATTR  shift 53
+	'['  shift 54
 	START  reduce 12
 	END  reduce 12
 	';'  reduce 12
 
-	declattr  goto 56
+	declattr  goto 55
 
 
 state 23
 	var : type . ID  (28)
 
-	ID  shift 57
+	ID  shift 56
 	.  error
 
 
@@ -398,7 +404,7 @@ state 25
 state 26
 	func : FUNCTION qualifier functype . ID vars funcend  (16)
 
-	ID  shift 58
+	ID  shift 57
 	.  error
 
 
@@ -409,9 +415,9 @@ state 27
 
 
 state 28
-	rvalue : INTEGER .  (66)
+	rvalue : INTEGER .  (65)
 
-	.  reduce 66
+	.  reduce 65
 
 
 state 29
@@ -421,9 +427,9 @@ state 29
 
 
 state 30
-	rvalue : STR .  (65)
+	rvalue : STR .  (64)
 
-	.  reduce 65
+	.  reduce 64
 
 
 state 31
@@ -438,13 +444,12 @@ state 31
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
+	lvalue  goto 58
 	rvalue  goto 59
-	lvalue  goto 60
 
 
 state 32
@@ -456,13 +461,12 @@ state 32
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 61
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 60
 
 
 state 33
@@ -487,9 +491,8 @@ state 35
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	START  reduce 48
 	END  reduce 48
 	DONE  reduce 48
@@ -498,12 +501,12 @@ state 35
 	FI  reduce 48
 	';'  reduce 48
 
-	rvalue  goto 62
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 61
 
 
 state 36
-	rvalue : '&' . rvalue  (68)
+	rvalue : '&' . rvalue  (67)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -511,17 +514,16 @@ state 36
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 63
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 62
 
 
 state 37
-	rvalue : '~' . rvalue  (84)
+	rvalue : '~' . rvalue  (83)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -529,17 +531,16 @@ state 37
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 64
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 63
 
 
 state 38
-	rvalue : '-' . rvalue  (67)
+	rvalue : '-' . rvalue  (66)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -547,33 +548,22 @@ state 38
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 65
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 64
 
 
 state 39
-	lvalue : '*' . lvalue  (60)
+	rvalue : '?' .  (84)
 
-	ID  shift 29
-	'*'  shift 39
-	.  error
-
-	lvalue  goto 66
+	.  reduce 84
 
 
 state 40
-	rvalue : '?' .  (85)
-
-	.  reduce 85
-
-
-state 41
-	rvalue : '(' . rvalue ')'  (62)
+	rvalue : '(' . rvalue ')'  (61)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -581,30 +571,28 @@ state 41
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 67
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 65
+
+
+state 41
+	program : PROGRAM decls START body . END  (3)
+
+	END  shift 66
+	.  error
 
 
 state 42
-	program : PROGRAM decls START body . END  (3)
+	body : bodyinstrs .  (33)
 
-	END  shift 68
-	.  error
+	.  reduce 33
 
 
 state 43
-	bodyvars : var . ';'  (35)
-
-	';'  shift 69
-	.  error
-
-
-state 44
 	body : bodyvars . bodyinstrs  (32)
 	bodyvars : bodyvars . var ';'  (36)
 	block : .  (52)
@@ -623,117 +611,49 @@ state 44
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	START  reduce 52
 	END  reduce 52
 	';'  reduce 52
 
-	var  goto 70
+	bodyinstrs  goto 67
+	var  goto 68
 	type  goto 23
-	bodyinstrs  goto 71
-	block  goto 46
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 47
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
+
+
+state 44
+	bodyvars : var . ';'  (35)
+
+	';'  shift 69
+	.  error
 
 
 state 45
-	body : bodyinstrs .  (33)
-
-	.  reduce 33
-
-
-state 46
-	bodyinstrs : block .  (34)
-
-	.  reduce 34
-
-
-state 47
 	instrs : instr .  (56)
 
 	.  reduce 56
 
 
-state 48
-	instr : rvalue . ';'  (42)
-	instr : rvalue . '!'  (43)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	';'  shift 87
-	'!'  shift 88
-	.  error
-
-
-state 49
-	instr : lvalue . '#' rvalue ';'  (44)
-	lvalue : lvalue . '[' rvalue ']'  (59)
-	rvalue : lvalue .  (61)
-	rvalue : lvalue . ATTR rvalue  (81)
-
-	ATTR  shift 89
-	'['  shift 90
-	'#'  shift 91
-	'|'  reduce 61
-	'&'  reduce 61
-	NE  reduce 61
-	'='  reduce 61
-	'<'  reduce 61
-	'>'  reduce 61
-	LE  reduce 61
-	GE  reduce 61
-	'+'  reduce 61
-	'-'  reduce 61
-	'*'  reduce 61
-	'/'  reduce 61
-	'%'  reduce 61
-	'^'  reduce 61
-	'('  reduce 61
-	';'  reduce 61
-	'!'  reduce 61
-
-
-state 50
+state 46
 	block : instrterm .  (53)
 
 	.  reduce 53
 
 
-state 51
+state 47
+	bodyinstrs : block .  (34)
+
+	.  reduce 34
+
+
+state 48
 	block : instrs .  (54)
 	block : instrs . instrterm  (55)
 	instrs : instrs . instr  (57)
@@ -749,9 +669,8 @@ state 51
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	START  reduce 54
 	END  reduce 54
 	DONE  reduce 54
@@ -760,63 +679,134 @@ state 51
 	FI  reduce 54
 	';'  reduce 54
 
-	instr  goto 92
-	rvalue  goto 48
+	instr  goto 70
+	instrterm  goto 71
 	lvalue  goto 49
-	instrterm  goto 93
+	rvalue  goto 50
 
 
-state 52
+state 49
+	instr : lvalue . '#' rvalue ';'  (44)
+	lvalue : lvalue . '[' rvalue ']'  (59)
+	rvalue : lvalue .  (60)
+	rvalue : lvalue . ATTR rvalue  (80)
+
+	ATTR  shift 72
+	'['  shift 73
+	'#'  shift 74
+	'|'  reduce 60
+	'&'  reduce 60
+	NE  reduce 60
+	'='  reduce 60
+	'<'  reduce 60
+	'>'  reduce 60
+	LE  reduce 60
+	GE  reduce 60
+	'+'  reduce 60
+	'-'  reduce 60
+	'*'  reduce 60
+	'/'  reduce 60
+	'%'  reduce 60
+	'^'  reduce 60
+	'('  reduce 60
+	';'  reduce 60
+	'!'  reduce 60
+
+
+state 50
+	instr : rvalue . ';'  (42)
+	instr : rvalue . '!'  (43)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	';'  shift 90
+	'!'  shift 91
+	.  error
+
+
+state 51
 	delclist : delclist ';' decl .  (8)
 
 	.  reduce 8
 
 
-state 53
+state 52
 	decl : qualifier CONST var . declattr  (10)
 	declattr : .  (12)
 
-	ATTR  shift 54
-	'['  shift 55
+	ATTR  shift 53
+	'['  shift 54
 	START  reduce 12
 	END  reduce 12
 	';'  reduce 12
 
-	declattr  goto 94
+	declattr  goto 92
+
+
+state 53
+	declattr : ATTR . literal  (13)
+
+	INTEGER  shift 93
+	STR  shift 94
+	.  error
+
+	literal  goto 95
+	integer  goto 96
+	integerlist  goto 97
+	string  goto 98
+	stringintegerlist  goto 99
 
 
 state 54
-	declattr : ATTR . literal  (13)
-
-	INTEGER  shift 95
-	STR  shift 96
-	.  error
-
-	literal  goto 97
-	integerlist  goto 98
-
-
-state 55
 	declattr : '[' . INTEGER ']'  (14)
 	declattr : '[' . INTEGER ']' ATTR literal  (15)
 
-	INTEGER  shift 99
+	INTEGER  shift 100
 	.  error
 
 
-state 56
+state 55
 	decl : qualifier var declattr .  (11)
 
 	.  reduce 11
 
 
-state 57
+state 56
 	var : type ID .  (28)
 
 	.  reduce 28
 
 
-state 58
+state 57
 	func : FUNCTION qualifier functype ID . vars funcend  (16)
 	vars : .  (24)
 
@@ -826,10 +816,49 @@ state 58
 	DONE  reduce 24
 	DO  reduce 24
 
-	var  goto 100
 	vars  goto 101
-	type  goto 23
 	varlist  goto 102
+	var  goto 103
+	type  goto 23
+
+
+state 58
+	lvalue : lvalue . '[' rvalue ']'  (59)
+	rvalue : lvalue .  (60)
+	rvalue : lvalue . ATTR rvalue  (80)
+
+	ATTR  shift 72
+	'['  shift 73
+	START  reduce 60
+	END  reduce 60
+	DONE  reduce 60
+	DO  reduce 60
+	THEN  reduce 60
+	ELSE  reduce 60
+	ELIF  reduce 60
+	FI  reduce 60
+	UNTIL  reduce 60
+	STEP  reduce 60
+	'|'  reduce 60
+	'&'  reduce 60
+	NE  reduce 60
+	'='  reduce 60
+	'<'  reduce 60
+	'>'  reduce 60
+	LE  reduce 60
+	GE  reduce 60
+	'+'  reduce 60
+	'-'  reduce 60
+	'*'  reduce 60
+	'/'  reduce 60
+	'%'  reduce 60
+	'^'  reduce 60
+	'('  reduce 60
+	';'  reduce 60
+	']'  reduce 60
+	'!'  reduce 60
+	')'  reduce 60
+	','  reduce 60
 
 
 state 59
@@ -837,153 +866,114 @@ state 59
 	instr : IF rvalue . THEN block elifs ELSE block FI  (38)
 	instr : IF rvalue . THEN block elifs FI  (39)
 	instr : IF rvalue . THEN block ELSE block FI  (40)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	THEN  shift 103
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	THEN  shift 104
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	.  error
 
 
 state 60
-	lvalue : lvalue . '[' rvalue ']'  (59)
-	rvalue : lvalue .  (61)
-	rvalue : lvalue . ATTR rvalue  (81)
-
-	ATTR  shift 89
-	'['  shift 90
-	START  reduce 61
-	END  reduce 61
-	DONE  reduce 61
-	DO  reduce 61
-	THEN  reduce 61
-	ELSE  reduce 61
-	ELIF  reduce 61
-	FI  reduce 61
-	UNTIL  reduce 61
-	STEP  reduce 61
-	'|'  reduce 61
-	'&'  reduce 61
-	NE  reduce 61
-	'='  reduce 61
-	'<'  reduce 61
-	'>'  reduce 61
-	LE  reduce 61
-	GE  reduce 61
-	'+'  reduce 61
-	'-'  reduce 61
-	'*'  reduce 61
-	'/'  reduce 61
-	'%'  reduce 61
-	'^'  reduce 61
-	'('  reduce 61
-	';'  reduce 61
-	']'  reduce 61
-	'!'  reduce 61
-	')'  reduce 61
-	','  reduce 61
-
-
-state 61
 	instr : FOR rvalue . UNTIL rvalue STEP rvalue DO block DONE  (41)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	UNTIL  shift 104
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	UNTIL  shift 105
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	.  error
 
 
-state 62
+state 61
 	instrterm : RETURN rvalue .  (47)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 47
 	END  reduce 47
 	DONE  reduce 47
@@ -993,128 +983,26 @@ state 62
 	';'  reduce 47
 
 
-state 63
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : '&' rvalue .  (68)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 62
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : '&' rvalue .  (67)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'('  shift 86
-	START  reduce 68
-	END  reduce 68
-	DONE  reduce 68
-	DO  reduce 68
-	THEN  reduce 68
-	ELSE  reduce 68
-	ELIF  reduce 68
-	FI  reduce 68
-	UNTIL  reduce 68
-	STEP  reduce 68
-	'|'  reduce 68
-	'&'  reduce 68
-	NE  reduce 68
-	'='  reduce 68
-	'<'  reduce 68
-	'>'  reduce 68
-	LE  reduce 68
-	GE  reduce 68
-	'+'  reduce 68
-	'-'  reduce 68
-	'*'  reduce 68
-	'/'  reduce 68
-	'%'  reduce 68
-	'^'  reduce 68
-	';'  reduce 68
-	']'  reduce 68
-	'!'  reduce 68
-	')'  reduce 68
-	','  reduce 68
-
-
-state 64
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-	rvalue : '~' rvalue .  (84)
-
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 84
-	END  reduce 84
-	DONE  reduce 84
-	DO  reduce 84
-	THEN  reduce 84
-	ELSE  reduce 84
-	ELIF  reduce 84
-	FI  reduce 84
-	UNTIL  reduce 84
-	STEP  reduce 84
-	'|'  reduce 84
-	'&'  reduce 84
-	';'  reduce 84
-	']'  reduce 84
-	'!'  reduce 84
-	')'  reduce 84
-	','  reduce 84
-
-
-state 65
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : '-' rvalue .  (67)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'('  shift 86
+	'('  shift 89
 	START  reduce 67
 	END  reduce 67
 	DONE  reduce 67
@@ -1146,87 +1034,163 @@ state 65
 	','  reduce 67
 
 
-state 66
-	lvalue : lvalue . '[' rvalue ']'  (59)
-	lvalue : '*' lvalue .  (60)
+state 63
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+	rvalue : '~' rvalue .  (83)
 
-	'['  shift 90
-	START  reduce 60
-	END  reduce 60
-	DONE  reduce 60
-	DO  reduce 60
-	THEN  reduce 60
-	ELSE  reduce 60
-	ELIF  reduce 60
-	FI  reduce 60
-	UNTIL  reduce 60
-	STEP  reduce 60
-	ATTR  reduce 60
-	'|'  reduce 60
-	'&'  reduce 60
-	NE  reduce 60
-	'='  reduce 60
-	'<'  reduce 60
-	'>'  reduce 60
-	LE  reduce 60
-	GE  reduce 60
-	'+'  reduce 60
-	'-'  reduce 60
-	'*'  reduce 60
-	'/'  reduce 60
-	'%'  reduce 60
-	'^'  reduce 60
-	'('  reduce 60
-	';'  reduce 60
-	']'  reduce 60
-	'!'  reduce 60
-	'#'  reduce 60
-	')'  reduce 60
-	','  reduce 60
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 83
+	END  reduce 83
+	DONE  reduce 83
+	DO  reduce 83
+	THEN  reduce 83
+	ELSE  reduce 83
+	ELIF  reduce 83
+	FI  reduce 83
+	UNTIL  reduce 83
+	STEP  reduce 83
+	'|'  reduce 83
+	'&'  reduce 83
+	';'  reduce 83
+	']'  reduce 83
+	'!'  reduce 83
+	')'  reduce 83
+	','  reduce 83
 
 
-state 67
-	rvalue : '(' rvalue . ')'  (62)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 64
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : '-' rvalue .  (66)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	')'  shift 105
+	'('  shift 89
+	START  reduce 66
+	END  reduce 66
+	DONE  reduce 66
+	DO  reduce 66
+	THEN  reduce 66
+	ELSE  reduce 66
+	ELIF  reduce 66
+	FI  reduce 66
+	UNTIL  reduce 66
+	STEP  reduce 66
+	'|'  reduce 66
+	'&'  reduce 66
+	NE  reduce 66
+	'='  reduce 66
+	'<'  reduce 66
+	'>'  reduce 66
+	LE  reduce 66
+	GE  reduce 66
+	'+'  reduce 66
+	'-'  reduce 66
+	'*'  reduce 66
+	'/'  reduce 66
+	'%'  reduce 66
+	'^'  reduce 66
+	';'  reduce 66
+	']'  reduce 66
+	'!'  reduce 66
+	')'  reduce 66
+	','  reduce 66
+
+
+state 65
+	rvalue : '(' rvalue . ')'  (61)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	')'  shift 106
 	.  error
 
 
-state 68
+state 66
 	program : PROGRAM decls START body END .  (3)
 
 	.  reduce 3
+
+
+state 67
+	body : bodyvars bodyinstrs .  (32)
+
+	.  reduce 32
+
+
+state 68
+	bodyvars : bodyvars var . ';'  (36)
+
+	';'  shift 107
+	.  error
 
 
 state 69
@@ -1236,20 +1200,19 @@ state 69
 
 
 state 70
-	bodyvars : bodyvars var . ';'  (36)
+	instrs : instrs instr .  (57)
 
-	';'  shift 106
-	.  error
+	.  reduce 57
 
 
 state 71
-	body : bodyvars bodyinstrs .  (32)
+	block : instrs instrterm .  (55)
 
-	.  reduce 32
+	.  reduce 55
 
 
 state 72
-	rvalue : rvalue '|' . rvalue  (83)
+	rvalue : lvalue ATTR . rvalue  (80)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -1257,301 +1220,15 @@ state 72
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 107
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 108
 
 
 state 73
-	rvalue : rvalue '&' . rvalue  (82)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 108
-	lvalue  goto 60
-
-
-state 74
-	rvalue : rvalue NE . rvalue  (79)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 109
-	lvalue  goto 60
-
-
-state 75
-	rvalue : rvalue '=' . rvalue  (80)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 110
-	lvalue  goto 60
-
-
-state 76
-	rvalue : rvalue '<' . rvalue  (75)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 111
-	lvalue  goto 60
-
-
-state 77
-	rvalue : rvalue '>' . rvalue  (76)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 112
-	lvalue  goto 60
-
-
-state 78
-	rvalue : rvalue LE . rvalue  (78)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 113
-	lvalue  goto 60
-
-
-state 79
-	rvalue : rvalue GE . rvalue  (77)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 114
-	lvalue  goto 60
-
-
-state 80
-	rvalue : rvalue '+' . rvalue  (70)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 115
-	lvalue  goto 60
-
-
-state 81
-	rvalue : rvalue '-' . rvalue  (71)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 116
-	lvalue  goto 60
-
-
-state 82
-	rvalue : rvalue '*' . rvalue  (72)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 117
-	lvalue  goto 60
-
-
-state 83
-	rvalue : rvalue '/' . rvalue  (73)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 118
-	lvalue  goto 60
-
-
-state 84
-	rvalue : rvalue '%' . rvalue  (74)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 119
-	lvalue  goto 60
-
-
-state 85
-	rvalue : rvalue '^' . rvalue  (69)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 120
-	lvalue  goto 60
-
-
-state 86
-	rvalue : rvalue '(' . args ')'  (63)
-	rvalue : rvalue '(' . ')'  (64)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	')'  shift 121
-	.  error
-
-	rvalue  goto 122
-	lvalue  goto 60
-	args  goto 123
-
-
-state 87
-	instr : rvalue ';' .  (42)
-
-	.  reduce 42
-
-
-state 88
-	instr : rvalue '!' .  (43)
-
-	.  reduce 43
-
-
-state 89
-	rvalue : lvalue ATTR . rvalue  (81)
-
-	INTEGER  shift 28
-	ID  shift 29
-	STR  shift 30
-	'&'  shift 36
-	'~'  shift 37
-	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
-	.  error
-
-	rvalue  goto 124
-	lvalue  goto 60
-
-
-state 90
 	lvalue : lvalue '[' . rvalue ']'  (59)
 
 	INTEGER  shift 28
@@ -1560,16 +1237,15 @@ state 90
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 125
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 109
 
 
-state 91
+state 74
 	instr : lvalue '#' . rvalue ';'  (44)
 
 	INTEGER  shift 28
@@ -1578,95 +1254,383 @@ state 91
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
+	lvalue  goto 58
+	rvalue  goto 110
+
+
+state 75
+	rvalue : rvalue '|' . rvalue  (82)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 111
+
+
+state 76
+	rvalue : rvalue '&' . rvalue  (81)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 112
+
+
+state 77
+	rvalue : rvalue NE . rvalue  (78)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 113
+
+
+state 78
+	rvalue : rvalue '=' . rvalue  (79)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 114
+
+
+state 79
+	rvalue : rvalue '<' . rvalue  (74)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 115
+
+
+state 80
+	rvalue : rvalue '>' . rvalue  (75)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 116
+
+
+state 81
+	rvalue : rvalue LE . rvalue  (77)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 117
+
+
+state 82
+	rvalue : rvalue GE . rvalue  (76)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 118
+
+
+state 83
+	rvalue : rvalue '+' . rvalue  (69)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 119
+
+
+state 84
+	rvalue : rvalue '-' . rvalue  (70)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 120
+
+
+state 85
+	rvalue : rvalue '*' . rvalue  (71)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 121
+
+
+state 86
+	rvalue : rvalue '/' . rvalue  (72)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 122
+
+
+state 87
+	rvalue : rvalue '%' . rvalue  (73)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 123
+
+
+state 88
+	rvalue : rvalue '^' . rvalue  (68)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	.  error
+
+	lvalue  goto 58
+	rvalue  goto 124
+
+
+state 89
+	rvalue : rvalue '(' . args ')'  (62)
+	rvalue : rvalue '(' . ')'  (63)
+
+	INTEGER  shift 28
+	ID  shift 29
+	STR  shift 30
+	'&'  shift 36
+	'~'  shift 37
+	'-'  shift 38
+	'?'  shift 39
+	'('  shift 40
+	')'  shift 125
+	.  error
+
+	lvalue  goto 58
 	rvalue  goto 126
-	lvalue  goto 60
+	args  goto 127
+
+
+state 90
+	instr : rvalue ';' .  (42)
+
+	.  reduce 42
+
+
+state 91
+	instr : rvalue '!' .  (43)
+
+	.  reduce 43
 
 
 state 92
-	instrs : instrs instr .  (57)
-
-	.  reduce 57
-
-
-state 93
-	block : instrs instrterm .  (55)
-
-	.  reduce 55
-
-
-state 94
 	decl : qualifier CONST var declattr .  (10)
 
 	.  reduce 10
 
 
+state 93
+	integer : INTEGER .  (87)
+
+	.  reduce 87
+
+
+state 94
+	string : STR .  (89)
+
+	.  reduce 89
+
+
 state 95
-	integerlist : INTEGER .  (88)
-
-	.  reduce 88
-
-
-state 96
-	literal : STR .  (86)
-
-	.  reduce 86
-
-
-state 97
 	declattr : ATTR literal .  (13)
 
 	.  reduce 13
 
 
-state 98
-	literal : integerlist .  (87)
-	integerlist : integerlist . ',' INTEGER  (89)
+state 96
+	stringintegerlist : integer . integer  (90)
+	integerlist : integer .  (92)
 
-	','  shift 127
-	START  reduce 87
-	END  reduce 87
-	';'  reduce 87
+	INTEGER  shift 93
+	START  reduce 92
+	END  reduce 92
+	';'  reduce 92
+	','  reduce 92
+
+	integer  goto 128
+
+
+state 97
+	literal : integerlist .  (86)
+	integerlist : integerlist . ',' integer  (93)
+
+	','  shift 129
+	START  reduce 86
+	END  reduce 86
+	';'  reduce 86
+
+
+state 98
+	literal : string .  (85)
+
+	.  reduce 85
 
 
 state 99
-	declattr : '[' INTEGER . ']'  (14)
-	declattr : '[' INTEGER . ']' ATTR literal  (15)
+	string : stringintegerlist .  (88)
+	stringintegerlist : stringintegerlist . integer  (91)
 
-	']'  shift 128
-	.  error
+	INTEGER  shift 93
+	START  reduce 88
+	END  reduce 88
+	';'  reduce 88
+
+	integer  goto 130
 
 
 state 100
-	varlist : var .  (26)
+	declattr : '[' INTEGER . ']'  (14)
+	declattr : '[' INTEGER . ']' ATTR literal  (15)
 
-	.  reduce 26
+	']'  shift 131
+	.  error
 
 
 state 101
 	func : FUNCTION qualifier functype ID vars . funcend  (16)
 
-	DONE  shift 129
-	DO  shift 130
+	DONE  shift 132
+	DO  shift 133
 	.  error
 
-	funcend  goto 131
+	funcend  goto 134
 
 
 state 102
 	vars : varlist .  (25)
 	varlist : varlist . ';' var  (27)
 
-	';'  shift 132
+	';'  shift 135
 	DONE  reduce 25
 	DO  reduce 25
 
 
 state 103
+	varlist : var .  (26)
+
+	.  reduce 26
+
+
+state 104
 	instr : IF rvalue THEN . block FI  (37)
 	instr : IF rvalue THEN . block elifs ELSE block FI  (38)
 	instr : IF rvalue THEN . block elifs FI  (39)
@@ -1684,22 +1648,21 @@ state 103
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	ELSE  reduce 52
 	ELIF  reduce 52
 	FI  reduce 52
 
-	block  goto 133
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 136
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 104
+state 105
 	instr : FOR rvalue UNTIL . rvalue STEP rvalue DO block DONE  (41)
 
 	INTEGER  shift 28
@@ -1708,110 +1671,186 @@ state 104
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 134
-	lvalue  goto 60
-
-
-state 105
-	rvalue : '(' rvalue ')' .  (62)
-
-	.  reduce 62
+	lvalue  goto 58
+	rvalue  goto 137
 
 
 state 106
+	rvalue : '(' rvalue ')' .  (61)
+
+	.  reduce 61
+
+
+state 107
 	bodyvars : bodyvars var ';' .  (36)
 
 	.  reduce 36
 
 
-state 107
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-	rvalue : rvalue '|' rvalue .  (83)
-
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 83
-	END  reduce 83
-	DONE  reduce 83
-	DO  reduce 83
-	THEN  reduce 83
-	ELSE  reduce 83
-	ELIF  reduce 83
-	FI  reduce 83
-	UNTIL  reduce 83
-	STEP  reduce 83
-	'|'  reduce 83
-	';'  reduce 83
-	']'  reduce 83
-	'!'  reduce 83
-	')'  reduce 83
-	','  reduce 83
-
-
 state 108
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue '&' rvalue .  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : lvalue ATTR rvalue .  (80)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 80
+	END  reduce 80
+	DONE  reduce 80
+	DO  reduce 80
+	THEN  reduce 80
+	ELSE  reduce 80
+	ELIF  reduce 80
+	FI  reduce 80
+	UNTIL  reduce 80
+	STEP  reduce 80
+	';'  reduce 80
+	']'  reduce 80
+	'!'  reduce 80
+	')'  reduce 80
+	','  reduce 80
+
+
+state 109
+	lvalue : lvalue '[' rvalue . ']'  (59)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	']'  shift 138
+	.  error
+
+
+state 110
+	instr : lvalue '#' rvalue . ';'  (44)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	';'  shift 139
+	.  error
+
+
+state 111
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+	rvalue : rvalue '|' rvalue .  (82)
+
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 82
 	END  reduce 82
 	DONE  reduce 82
@@ -1823,7 +1862,6 @@ state 108
 	UNTIL  reduce 82
 	STEP  reduce 82
 	'|'  reduce 82
-	'&'  reduce 82
 	';'  reduce 82
 	']'  reduce 82
 	'!'  reduce 82
@@ -1831,36 +1869,138 @@ state 108
 	','  reduce 82
 
 
-state 109
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue NE rvalue .  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 112
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue '&' rvalue .  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 81
+	END  reduce 81
+	DONE  reduce 81
+	DO  reduce 81
+	THEN  reduce 81
+	ELSE  reduce 81
+	ELIF  reduce 81
+	FI  reduce 81
+	UNTIL  reduce 81
+	STEP  reduce 81
+	'|'  reduce 81
+	'&'  reduce 81
+	';'  reduce 81
+	']'  reduce 81
+	'!'  reduce 81
+	')'  reduce 81
+	','  reduce 81
+
+
+state 113
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue NE rvalue .  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 78
+	END  reduce 78
+	DONE  reduce 78
+	DO  reduce 78
+	THEN  reduce 78
+	ELSE  reduce 78
+	ELIF  reduce 78
+	FI  reduce 78
+	UNTIL  reduce 78
+	STEP  reduce 78
+	'|'  reduce 78
+	'&'  reduce 78
+	NE  reduce 78
+	'='  reduce 78
+	';'  reduce 78
+	']'  reduce 78
+	'!'  reduce 78
+	')'  reduce 78
+	','  reduce 78
+
+
+state 114
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue '=' rvalue .  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 79
 	END  reduce 79
 	DONE  reduce 79
@@ -1882,83 +2022,83 @@ state 109
 	','  reduce 79
 
 
-state 110
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue '=' rvalue .  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 115
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue '<' rvalue .  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 80
-	END  reduce 80
-	DONE  reduce 80
-	DO  reduce 80
-	THEN  reduce 80
-	ELSE  reduce 80
-	ELIF  reduce 80
-	FI  reduce 80
-	UNTIL  reduce 80
-	STEP  reduce 80
-	'|'  reduce 80
-	'&'  reduce 80
-	NE  reduce 80
-	'='  reduce 80
-	';'  reduce 80
-	']'  reduce 80
-	'!'  reduce 80
-	')'  reduce 80
-	','  reduce 80
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 74
+	END  reduce 74
+	DONE  reduce 74
+	DO  reduce 74
+	THEN  reduce 74
+	ELSE  reduce 74
+	ELIF  reduce 74
+	FI  reduce 74
+	UNTIL  reduce 74
+	STEP  reduce 74
+	'|'  reduce 74
+	'&'  reduce 74
+	NE  reduce 74
+	'='  reduce 74
+	'<'  reduce 74
+	'>'  reduce 74
+	LE  reduce 74
+	GE  reduce 74
+	';'  reduce 74
+	']'  reduce 74
+	'!'  reduce 74
+	')'  reduce 74
+	','  reduce 74
 
 
-state 111
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue '<' rvalue .  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 116
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue '>' rvalue .  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 75
 	END  reduce 75
 	DONE  reduce 75
@@ -1984,134 +2124,32 @@ state 111
 	','  reduce 75
 
 
-state 112
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue '>' rvalue .  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 117
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue LE rvalue .  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 76
-	END  reduce 76
-	DONE  reduce 76
-	DO  reduce 76
-	THEN  reduce 76
-	ELSE  reduce 76
-	ELIF  reduce 76
-	FI  reduce 76
-	UNTIL  reduce 76
-	STEP  reduce 76
-	'|'  reduce 76
-	'&'  reduce 76
-	NE  reduce 76
-	'='  reduce 76
-	'<'  reduce 76
-	'>'  reduce 76
-	LE  reduce 76
-	GE  reduce 76
-	';'  reduce 76
-	']'  reduce 76
-	'!'  reduce 76
-	')'  reduce 76
-	','  reduce 76
-
-
-state 113
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue LE rvalue .  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 78
-	END  reduce 78
-	DONE  reduce 78
-	DO  reduce 78
-	THEN  reduce 78
-	ELSE  reduce 78
-	ELIF  reduce 78
-	FI  reduce 78
-	UNTIL  reduce 78
-	STEP  reduce 78
-	'|'  reduce 78
-	'&'  reduce 78
-	NE  reduce 78
-	'='  reduce 78
-	'<'  reduce 78
-	'>'  reduce 78
-	LE  reduce 78
-	GE  reduce 78
-	';'  reduce 78
-	']'  reduce 78
-	'!'  reduce 78
-	')'  reduce 78
-	','  reduce 78
-
-
-state 114
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue GE rvalue .  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 77
 	END  reduce 77
 	DONE  reduce 77
@@ -2137,30 +2175,132 @@ state 114
 	','  reduce 77
 
 
-state 115
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue '+' rvalue .  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 118
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue GE rvalue .  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 76
+	END  reduce 76
+	DONE  reduce 76
+	DO  reduce 76
+	THEN  reduce 76
+	ELSE  reduce 76
+	ELIF  reduce 76
+	FI  reduce 76
+	UNTIL  reduce 76
+	STEP  reduce 76
+	'|'  reduce 76
+	'&'  reduce 76
+	NE  reduce 76
+	'='  reduce 76
+	'<'  reduce 76
+	'>'  reduce 76
+	LE  reduce 76
+	GE  reduce 76
+	';'  reduce 76
+	']'  reduce 76
+	'!'  reduce 76
+	')'  reduce 76
+	','  reduce 76
+
+
+state 119
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue '+' rvalue .  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 69
+	END  reduce 69
+	DONE  reduce 69
+	DO  reduce 69
+	THEN  reduce 69
+	ELSE  reduce 69
+	ELIF  reduce 69
+	FI  reduce 69
+	UNTIL  reduce 69
+	STEP  reduce 69
+	'|'  reduce 69
+	'&'  reduce 69
+	NE  reduce 69
+	'='  reduce 69
+	'<'  reduce 69
+	'>'  reduce 69
+	LE  reduce 69
+	GE  reduce 69
+	'+'  reduce 69
+	'-'  reduce 69
+	';'  reduce 69
+	']'  reduce 69
+	'!'  reduce 69
+	')'  reduce 69
+	','  reduce 69
+
+
+state 120
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue '-' rvalue .  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 70
 	END  reduce 70
 	DONE  reduce 70
@@ -2188,30 +2328,27 @@ state 115
 	','  reduce 70
 
 
-state 116
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue '-' rvalue .  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 121
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue '*' rvalue .  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 71
 	END  reduce 71
 	DONE  reduce 71
@@ -2232,6 +2369,9 @@ state 116
 	GE  reduce 71
 	'+'  reduce 71
 	'-'  reduce 71
+	'*'  reduce 71
+	'/'  reduce 71
+	'%'  reduce 71
 	';'  reduce 71
 	']'  reduce 71
 	'!'  reduce 71
@@ -2239,27 +2379,27 @@ state 116
 	','  reduce 71
 
 
-state 117
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue '*' rvalue .  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 122
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue '/' rvalue .  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'^'  shift 85
-	'('  shift 86
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 72
 	END  reduce 72
 	DONE  reduce 72
@@ -2290,27 +2430,27 @@ state 117
 	','  reduce 72
 
 
-state 118
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue '/' rvalue .  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+state 123
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue '%' rvalue .  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'^'  shift 85
-	'('  shift 86
+	'^'  shift 88
+	'('  shift 89
 	START  reduce 73
 	END  reduce 73
 	DONE  reduce 73
@@ -2341,312 +2481,148 @@ state 118
 	','  reduce 73
 
 
-state 119
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue '%' rvalue .  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 74
-	END  reduce 74
-	DONE  reduce 74
-	DO  reduce 74
-	THEN  reduce 74
-	ELSE  reduce 74
-	ELIF  reduce 74
-	FI  reduce 74
-	UNTIL  reduce 74
-	STEP  reduce 74
-	'|'  reduce 74
-	'&'  reduce 74
-	NE  reduce 74
-	'='  reduce 74
-	'<'  reduce 74
-	'>'  reduce 74
-	LE  reduce 74
-	GE  reduce 74
-	'+'  reduce 74
-	'-'  reduce 74
-	'*'  reduce 74
-	'/'  reduce 74
-	'%'  reduce 74
-	';'  reduce 74
-	']'  reduce 74
-	'!'  reduce 74
-	')'  reduce 74
-	','  reduce 74
-
-
-state 120
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue '^' rvalue .  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 69
-	END  reduce 69
-	DONE  reduce 69
-	DO  reduce 69
-	THEN  reduce 69
-	ELSE  reduce 69
-	ELIF  reduce 69
-	FI  reduce 69
-	UNTIL  reduce 69
-	STEP  reduce 69
-	'|'  reduce 69
-	'&'  reduce 69
-	NE  reduce 69
-	'='  reduce 69
-	'<'  reduce 69
-	'>'  reduce 69
-	LE  reduce 69
-	GE  reduce 69
-	'+'  reduce 69
-	'-'  reduce 69
-	'*'  reduce 69
-	'/'  reduce 69
-	'%'  reduce 69
-	';'  reduce 69
-	']'  reduce 69
-	'!'  reduce 69
-	')'  reduce 69
-	','  reduce 69
-
-
-state 121
-	rvalue : rvalue '(' ')' .  (64)
-
-	.  reduce 64
-
-
-state 122
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-	args : rvalue .  (90)
-
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	')'  reduce 90
-	','  reduce 90
-
-
-state 123
-	rvalue : rvalue '(' args . ')'  (63)
-	args : args . ',' rvalue  (91)
-
-	')'  shift 135
-	','  shift 136
-	.  error
-
-
 state 124
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : lvalue ATTR rvalue .  (81)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue '^' rvalue .  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	START  reduce 81
-	END  reduce 81
-	DONE  reduce 81
-	DO  reduce 81
-	THEN  reduce 81
-	ELSE  reduce 81
-	ELIF  reduce 81
-	FI  reduce 81
-	UNTIL  reduce 81
-	STEP  reduce 81
-	';'  reduce 81
-	']'  reduce 81
-	'!'  reduce 81
-	')'  reduce 81
-	','  reduce 81
+	'^'  shift 88
+	'('  shift 89
+	START  reduce 68
+	END  reduce 68
+	DONE  reduce 68
+	DO  reduce 68
+	THEN  reduce 68
+	ELSE  reduce 68
+	ELIF  reduce 68
+	FI  reduce 68
+	UNTIL  reduce 68
+	STEP  reduce 68
+	'|'  reduce 68
+	'&'  reduce 68
+	NE  reduce 68
+	'='  reduce 68
+	'<'  reduce 68
+	'>'  reduce 68
+	LE  reduce 68
+	GE  reduce 68
+	'+'  reduce 68
+	'-'  reduce 68
+	'*'  reduce 68
+	'/'  reduce 68
+	'%'  reduce 68
+	';'  reduce 68
+	']'  reduce 68
+	'!'  reduce 68
+	')'  reduce 68
+	','  reduce 68
 
 
 state 125
-	lvalue : lvalue '[' rvalue . ']'  (59)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue '(' ')' .  (63)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	']'  shift 137
-	.  error
+	.  reduce 63
 
 
 state 126
-	instr : lvalue '#' rvalue . ';'  (44)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+	args : rvalue .  (94)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	';'  shift 138
-	.  error
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	')'  reduce 94
+	','  reduce 94
 
 
 state 127
-	integerlist : integerlist ',' . INTEGER  (89)
+	rvalue : rvalue '(' args . ')'  (62)
+	args : args . ',' rvalue  (95)
 
-	INTEGER  shift 139
+	')'  shift 140
+	','  shift 141
 	.  error
 
 
 state 128
+	stringintegerlist : integer integer .  (90)
+
+	.  reduce 90
+
+
+state 129
+	integerlist : integerlist ',' . integer  (93)
+
+	INTEGER  shift 93
+	.  error
+
+	integer  goto 142
+
+
+state 130
+	stringintegerlist : stringintegerlist integer .  (91)
+
+	.  reduce 91
+
+
+state 131
 	declattr : '[' INTEGER ']' .  (14)
 	declattr : '[' INTEGER ']' . ATTR literal  (15)
 
-	ATTR  shift 140
+	ATTR  shift 143
 	START  reduce 14
 	END  reduce 14
 	';'  reduce 14
 
 
-state 129
+state 132
 	funcend : DONE .  (17)
 
 	.  reduce 17
 
 
-state 130
+state 133
 	funcend : DO . body  (18)
 	block : .  (52)
 
@@ -2664,33 +2640,32 @@ state 130
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	START  reduce 52
 	END  reduce 52
 	';'  reduce 52
 
-	body  goto 141
-	var  goto 43
+	body  goto 144
+	bodyinstrs  goto 42
+	bodyvars  goto 43
+	var  goto 44
 	type  goto 23
-	bodyvars  goto 44
-	bodyinstrs  goto 45
-	block  goto 46
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 47
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 131
+state 134
 	func : FUNCTION qualifier functype ID vars funcend .  (16)
 
 	.  reduce 16
 
 
-state 132
+state 135
 	varlist : varlist ';' . var  (27)
 
 	NUMBER  shift 18
@@ -2698,71 +2673,83 @@ state 132
 	STRING  shift 20
 	.  error
 
-	var  goto 142
+	var  goto 145
 	type  goto 23
 
 
-state 133
+state 136
 	instr : IF rvalue THEN block . FI  (37)
 	instr : IF rvalue THEN block . elifs ELSE block FI  (38)
 	instr : IF rvalue THEN block . elifs FI  (39)
 	instr : IF rvalue THEN block . ELSE block FI  (40)
 
-	ELSE  shift 143
-	ELIF  shift 144
-	FI  shift 145
+	ELSE  shift 146
+	ELIF  shift 147
+	FI  shift 148
 	.  error
 
-	elifs  goto 146
-	elif  goto 147
+	elif  goto 149
+	elifs  goto 150
 
 
-state 134
+state 137
 	instr : FOR rvalue UNTIL rvalue . STEP rvalue DO block DONE  (41)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	STEP  shift 148
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	STEP  shift 151
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	.  error
 
 
-state 135
-	rvalue : rvalue '(' args ')' .  (63)
+state 138
+	lvalue : lvalue '[' rvalue ']' .  (59)
 
-	.  reduce 63
+	.  reduce 59
 
 
-state 136
-	args : args ',' . rvalue  (91)
+state 139
+	instr : lvalue '#' rvalue ';' .  (44)
+
+	.  reduce 44
+
+
+state 140
+	rvalue : rvalue '(' args ')' .  (62)
+
+	.  reduce 62
+
+
+state 141
+	args : args ',' . rvalue  (95)
 
 	INTEGER  shift 28
 	ID  shift 29
@@ -2770,57 +2757,47 @@ state 136
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 149
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 152
 
 
-state 137
-	lvalue : lvalue '[' rvalue ']' .  (59)
+state 142
+	integerlist : integerlist ',' integer .  (93)
 
-	.  reduce 59
-
-
-state 138
-	instr : lvalue '#' rvalue ';' .  (44)
-
-	.  reduce 44
+	.  reduce 93
 
 
-state 139
-	integerlist : integerlist ',' INTEGER .  (89)
-
-	.  reduce 89
-
-
-state 140
+state 143
 	declattr : '[' INTEGER ']' ATTR . literal  (15)
 
-	INTEGER  shift 95
-	STR  shift 96
+	INTEGER  shift 93
+	STR  shift 94
 	.  error
 
-	literal  goto 150
-	integerlist  goto 98
+	literal  goto 153
+	integer  goto 96
+	integerlist  goto 97
+	string  goto 98
+	stringintegerlist  goto 99
 
 
-state 141
+state 144
 	funcend : DO body .  (18)
 
 	.  reduce 18
 
 
-state 142
+state 145
 	varlist : varlist ';' var .  (27)
 
 	.  reduce 27
 
 
-state 143
+state 146
 	instr : IF rvalue THEN block ELSE . block FI  (40)
 	block : .  (52)
 
@@ -2835,20 +2812,19 @@ state 143
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	FI  reduce 52
 
-	block  goto 151
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 154
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 144
+state 147
 	elif : ELIF . rvalue THEN block  (49)
 
 	INTEGER  shift 28
@@ -2857,41 +2833,40 @@ state 144
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 152
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 155
 
 
-state 145
+state 148
 	instr : IF rvalue THEN block FI .  (37)
 
 	.  reduce 37
 
 
-state 146
-	instr : IF rvalue THEN block elifs . ELSE block FI  (38)
-	instr : IF rvalue THEN block elifs . FI  (39)
-	elifs : elifs . elif  (51)
-
-	ELSE  shift 153
-	ELIF  shift 144
-	FI  shift 154
-	.  error
-
-	elif  goto 155
-
-
-state 147
+state 149
 	elifs : elif .  (50)
 
 	.  reduce 50
 
 
-state 148
+state 150
+	instr : IF rvalue THEN block elifs . ELSE block FI  (38)
+	instr : IF rvalue THEN block elifs . FI  (39)
+	elifs : elifs . elif  (51)
+
+	ELSE  shift 156
+	ELIF  shift 147
+	FI  shift 157
+	.  error
+
+	elif  goto 158
+
+
+state 151
 	instr : FOR rvalue UNTIL rvalue STEP . rvalue DO block DONE  (41)
 
 	INTEGER  shift 28
@@ -2900,105 +2875,104 @@ state 148
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	.  error
 
-	rvalue  goto 156
-	lvalue  goto 60
+	lvalue  goto 58
+	rvalue  goto 159
 
 
-state 149
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
-	args : args ',' rvalue .  (91)
+state 152
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
+	args : args ',' rvalue .  (95)
 
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
-	')'  reduce 91
-	','  reduce 91
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
+	')'  reduce 95
+	','  reduce 95
 
 
-state 150
+state 153
 	declattr : '[' INTEGER ']' ATTR literal .  (15)
 
 	.  reduce 15
 
 
-state 151
+state 154
 	instr : IF rvalue THEN block ELSE block . FI  (40)
 
-	FI  shift 157
+	FI  shift 160
 	.  error
 
 
-state 152
+state 155
 	elif : ELIF rvalue . THEN block  (49)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	THEN  shift 158
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	THEN  shift 161
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	.  error
 
 
-state 153
+state 156
 	instr : IF rvalue THEN block elifs ELSE . block FI  (38)
 	block : .  (52)
 
@@ -3013,76 +2987,75 @@ state 153
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	FI  reduce 52
 
-	block  goto 159
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 162
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 154
+state 157
 	instr : IF rvalue THEN block elifs FI .  (39)
 
 	.  reduce 39
 
 
-state 155
+state 158
 	elifs : elifs elif .  (51)
 
 	.  reduce 51
 
 
-state 156
+state 159
 	instr : FOR rvalue UNTIL rvalue STEP rvalue . DO block DONE  (41)
-	rvalue : rvalue . '(' args ')'  (63)
-	rvalue : rvalue . '(' ')'  (64)
-	rvalue : rvalue . '^' rvalue  (69)
-	rvalue : rvalue . '+' rvalue  (70)
-	rvalue : rvalue . '-' rvalue  (71)
-	rvalue : rvalue . '*' rvalue  (72)
-	rvalue : rvalue . '/' rvalue  (73)
-	rvalue : rvalue . '%' rvalue  (74)
-	rvalue : rvalue . '<' rvalue  (75)
-	rvalue : rvalue . '>' rvalue  (76)
-	rvalue : rvalue . GE rvalue  (77)
-	rvalue : rvalue . LE rvalue  (78)
-	rvalue : rvalue . NE rvalue  (79)
-	rvalue : rvalue . '=' rvalue  (80)
-	rvalue : rvalue . '&' rvalue  (82)
-	rvalue : rvalue . '|' rvalue  (83)
+	rvalue : rvalue . '(' args ')'  (62)
+	rvalue : rvalue . '(' ')'  (63)
+	rvalue : rvalue . '^' rvalue  (68)
+	rvalue : rvalue . '+' rvalue  (69)
+	rvalue : rvalue . '-' rvalue  (70)
+	rvalue : rvalue . '*' rvalue  (71)
+	rvalue : rvalue . '/' rvalue  (72)
+	rvalue : rvalue . '%' rvalue  (73)
+	rvalue : rvalue . '<' rvalue  (74)
+	rvalue : rvalue . '>' rvalue  (75)
+	rvalue : rvalue . GE rvalue  (76)
+	rvalue : rvalue . LE rvalue  (77)
+	rvalue : rvalue . NE rvalue  (78)
+	rvalue : rvalue . '=' rvalue  (79)
+	rvalue : rvalue . '&' rvalue  (81)
+	rvalue : rvalue . '|' rvalue  (82)
 
-	DO  shift 160
-	'|'  shift 72
-	'&'  shift 73
-	NE  shift 74
-	'='  shift 75
-	'<'  shift 76
-	'>'  shift 77
-	LE  shift 78
-	GE  shift 79
-	'+'  shift 80
-	'-'  shift 81
-	'*'  shift 82
-	'/'  shift 83
-	'%'  shift 84
-	'^'  shift 85
-	'('  shift 86
+	DO  shift 163
+	'|'  shift 75
+	'&'  shift 76
+	NE  shift 77
+	'='  shift 78
+	'<'  shift 79
+	'>'  shift 80
+	LE  shift 81
+	GE  shift 82
+	'+'  shift 83
+	'-'  shift 84
+	'*'  shift 85
+	'/'  shift 86
+	'%'  shift 87
+	'^'  shift 88
+	'('  shift 89
 	.  error
 
 
-state 157
+state 160
 	instr : IF rvalue THEN block ELSE block FI .  (40)
 
 	.  reduce 40
 
 
-state 158
+state 161
 	elif : ELIF rvalue THEN . block  (49)
 	block : .  (52)
 
@@ -3097,29 +3070,28 @@ state 158
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	ELSE  reduce 52
 	ELIF  reduce 52
 	FI  reduce 52
 
-	block  goto 161
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 164
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 159
+state 162
 	instr : IF rvalue THEN block elifs ELSE block . FI  (38)
 
-	FI  shift 162
+	FI  shift 165
 	.  error
 
 
-state 160
+state 163
 	instr : FOR rvalue UNTIL rvalue STEP rvalue DO . block DONE  (41)
 	block : .  (52)
 
@@ -3134,43 +3106,42 @@ state 160
 	'&'  shift 36
 	'~'  shift 37
 	'-'  shift 38
-	'*'  shift 39
-	'?'  shift 40
-	'('  shift 41
+	'?'  shift 39
+	'('  shift 40
 	DONE  reduce 52
 
-	block  goto 163
-	instr  goto 47
-	rvalue  goto 48
+	instr  goto 45
+	instrterm  goto 46
+	block  goto 166
+	instrs  goto 48
 	lvalue  goto 49
-	instrterm  goto 50
-	instrs  goto 51
+	rvalue  goto 50
 
 
-state 161
+state 164
 	elif : ELIF rvalue THEN block .  (49)
 
 	.  reduce 49
 
 
-state 162
+state 165
 	instr : IF rvalue THEN block elifs ELSE block FI .  (38)
 
 	.  reduce 38
 
 
-state 163
+state 166
 	instr : FOR rvalue UNTIL rvalue STEP rvalue DO block . DONE  (41)
 
-	DONE  shift 164
+	DONE  shift 167
 	.  error
 
 
-state 164
+state 167
 	instr : FOR rvalue UNTIL rvalue STEP rvalue DO block DONE .  (41)
 
 	.  reduce 41
 
 
-57 terminals, 30 nonterminals
-92 grammar rules, 165 states
+72 terminals, 33 nonterminals
+96 grammar rules, 168 states
