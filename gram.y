@@ -48,7 +48,7 @@ static char *fpar;
 
 %type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
 
-%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS LOCAL
+%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY RETURN_EXPR ELIFS BLOCK INSTRS TWO_INTEGERS MORE_INTEGERS ARGS LOCAL CALL
 
 %%
 file    : program                       { printNode($1,0,yynames); }
@@ -96,7 +96,7 @@ qualifier   : PUBLIC    { $$ = nilNode(PUBLIC); $$->info = 1; }
     | FORWARD           { $$ = nilNode(FORWARD); $$->info = 2; }
     ;
 
-params  : param         { $$ = $1; }
+params  : param         { $$ = binNode(VARS, $1, 0); }
     | params ';' param  { $$ = binNode(VARS, $1, $3); }
     ;
 
@@ -108,6 +108,7 @@ param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
     | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
+    | ARRAY ID                      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
     ;
 
 type    : NUMBER            { $$ = nilNode(NUMBER); $$->info = 1; }
@@ -116,19 +117,19 @@ type    : NUMBER            { $$ = nilNode(NUMBER); $$->info = 1; }
     ;
 
 bodyprincipal    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
-    | bodyinstrs                         { $$ = $1; }
+    | bodyinstrs                         { $$ = binNode(BODY, $1, 0); }
     ;
 
 body    : bodyvars block   { $$ = binNode(BODY, $1, $2); }
-    | block                { $$ = $1; }
+    | block                { $$ = binNode(BODY, $1, 0); }
     ;
 
 bodyinstrs : /* empty */        { $$ = nilNode(NIL); }
-    | instrs                    { $$ = $1; }
+    | instrs                    { $$ = binNode(BODY, $1, 0); }
     ;
 
-bodyvars : var ';'              { $$ = $1; }
-    | bodyvars var ';'          { $$ = binNode(BODYVARS, $1, $2); }
+bodyvars : var ';'              { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); $$ = binNode(VARS, $1, 0); }
+    | bodyvars var ';'          { IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(VARS, $1, $2); }
     ;
 
 instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2, $4); }
@@ -150,28 +151,28 @@ instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid
 elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); }
     ;
 
-elifs    : elif                     { $$ = $1; }
+elifs    : elif                     { $$ = binNode(ELIFS, $1, 0); }
     | elifs elif                    { $$ = binNode(ELIFS, $1, $2); }
     ;
 
 block   : /* empty */               { $$ = nilNode(NIL); }
-    | instrterm                     { $$ = $1; }
-    | instrs                        { $$ = $1; }
-    | instrs instrterm              { $$ = binNode(INSTRS_INSTRTERM, $1, $2); }
+    | instrterm                     { $$ = binNode(BLOCK, $1, 0); }
+    | instrs                        { $$ = binNode(BLOCK, $1, 0); }
+    | instrs instrterm              { $$ = binNode(BLOCK, $1, $2); }
     ;
 
-instrs  : instr                     { $$ = $1; }
+instrs  : instr                     { $$ = binNode(INSTRS, $1, 0); }
     | instrs instr                  { $$ = binNode(INSTRS, $1, $2); }
     ;
 
 lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
-	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); }
+	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); $$->info = 1; } /* expr tem que ser int mais merdas */
 	;
 
 expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | '(' expr ')'            { $$ = $2; }
-	| expr '(' args ')'       { $$ = binNode('(', $1, $3); }
-	| expr '(' ')'            { $$ = $1; }
+	| ID '(' args ')'         { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
+	| ID '(' ')'              { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
     | string                  { $$ = $1; $$->info = 2; }
     | integer                 { $$ = $1; $$->info = 1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}

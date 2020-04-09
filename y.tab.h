@@ -40,15 +40,15 @@
 #define VARS 296
 #define VAR 297
 #define BODY 298
-#define BODYVARS 299
-#define RETURN_EXPR 300
-#define ELIFS 301
-#define INSTRS_INSTRTERM 302
-#define INSTRS 303
-#define TWO_INTEGERS 304
-#define MORE_INTEGERS 305
-#define ARGS 306
-#define LOCAL 307
+#define RETURN_EXPR 299
+#define ELIFS 300
+#define BLOCK 301
+#define INSTRS 302
+#define TWO_INTEGERS 303
+#define MORE_INTEGERS 304
+#define ARGS 305
+#define LOCAL 306
+#define CALL 307
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
