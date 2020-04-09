@@ -48,6 +48,7 @@
 #define TWO_INTEGERS 304
 #define MORE_INTEGERS 305
 #define ARGS 306
+#define LOCAL 307
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

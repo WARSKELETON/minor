@@ -11,10 +11,15 @@ void evaluate(Node *p);
 void yyerror(char *s);
 
 void declare(Node *pub, int cnst, Node *type, char *name, Node *value);
+void enter(int pub, int typ, char *name);
+void function(int pub, Node *type, char *name, Node *body,int enter);
 int nostring(Node *arg1, Node *arg2);
-int intonly(Node *arg, int);
+void noarray(Node *arg1, Node *arg2);
+void sametype(Node *arg1, Node *arg2);
+int intonly(Node *arg);
 int noassign(Node *arg1, Node *arg2);
 static int ncicl;
+static char *fpar;
 %}
 
 %union {
@@ -41,9 +46,9 @@ static int ncicl;
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier vars var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
+%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
 
-%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS
+%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY BODYVARS RETURN_EXPR ELIFS INSTRS_INSTRTERM INSTRS TWO_INTEGERS MORE_INTEGERS ARGS LOCAL
 
 %%
 file    : program                       { printNode($1,0,yynames); }
@@ -63,36 +68,41 @@ decls   : decl                          { $$ = $1; }
     ;
 
 decl    : func                          { $$ = $1; }
-    | qualifier CONST var ATTR literal  { IDnew($3->value.i+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, $5); $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, $5)); }
-    | qualifier var ATTR literal        { IDnew($2->value.i, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, $4)); }
-    | qualifier var                     { IDnew($2->value.i, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(DECL, $1, $2); }
-    | qualifier CONST var               { IDnew($3->value.i+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, 0); $$ = binNode(DECL, $1, $3); }
-    | CONST var                         { IDnew($2->value.i+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, 0); $$ = $2; }
-    | CONST var ATTR literal            { IDnew($2->value.i+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(DECL, $2, $4); }
-    | var                               { IDnew($1->value.i, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, 0); $$ = $1; }
-    | var ATTR literal                  { IDnew($1->value.i, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
+    | qualifier CONST var ATTR literal  { IDnew($3->info+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, $5); $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, $5)); }
+    | qualifier var ATTR literal        { IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, $4)); }
+    | qualifier var                     { IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(DECL, $1, $2); }
+    | qualifier CONST var               { IDnew($3->info+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, 0); $$ = binNode(DECL, $1, $3); }
+    | CONST var                         { IDnew($2->info+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, 0); $$ = $2; }
+    | CONST var ATTR literal            { IDnew($2->info+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(DECL, $2, $4); }
+    | var                               { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, 0); $$ = $1; }
+    | var ATTR literal                  { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
     ;
 
-func    : FUNCTION qualifier functype ID vars funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); }
-    | FUNCTION functype ID vars funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $4, uniNode(END, $5)))); }
-    | FUNCTION qualifier functype ID funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $5)))); }
-    | FUNCTION functype ID funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $4))); }
+func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); IDpop(); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); } params funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $4, uniNode(END, $5)))); IDpop(); }
+    | FUNCTION qualifier functype ID { enter($2, $3->info, $4); } funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $5)))); IDpop(); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); } funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $4))); IDpop(); }
     ;
 
 funcend : DONE          { $$ = nilNode(DONE); }
     | DO body           { $$ = uniNode(DO, $2); }
     ;
 
-functype    : type      { $$ = $1; }
-    | VOID              { $$ = nilNode(VOID); }
+functype    : type      { $$ = $1; $$->info = $1->info; }
+    | VOID              { $$ = nilNode(VOID); $$->info = 4; }
     ;
 
 qualifier   : PUBLIC    { $$ = nilNode(PUBLIC); $$->info = 1; }
     | FORWARD           { $$ = nilNode(FORWARD); $$->info = 2; }
     ;
 
-vars    : var               { $$ = $1; }
-    | vars ';' var          { $$ = binNode(VARS, $1, $3); }
+params  : param         { $$ = $1; }
+    | params ';' param  { $$ = binNode(VARS, $1, $3); }
+    ;
+
+param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); IDnew(2, $2, 0); $$->info = 2; }
+    | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); IDnew(1, $2, 0); $$->info = 1; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); $$->info = 3; }
     ;
 
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
@@ -100,9 +110,9 @@ var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(
     | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
     ;
 
-type    : NUMBER            { $$ = nilNode(NUMBER); }
-    | ARRAY                 { $$ = nilNode(ARRAY); }
-    | STRING                { $$ = nilNode(STRING); }
+type    : NUMBER            { $$ = nilNode(NUMBER); $$->info = 1; }
+    | ARRAY                 { $$ = nilNode(ARRAY); $$->info = 3; }
+    | STRING                { $$ = nilNode(STRING); $$->info = 2; }
     ;
 
 bodyprincipal    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
@@ -154,34 +164,34 @@ instrs  : instr                     { $$ = $1; }
     | instrs instr                  { $$ = binNode(INSTRS, $1, $2); }
     ;
 
-lvalue	: ID                        { $$ = strNode(ID, $1); }
+lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
 	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); }
 	;
 
-expr    : lvalue              { $$ = $1; }
+expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | '(' expr ')'            { $$ = $2; }
 	| expr '(' args ')'       { $$ = binNode('(', $1, $3); }
 	| expr '(' ')'            { $$ = $1; }
-    | string                  { $$ = $1; }
-    | integer                 { $$ = $1; }
-    | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); }
-    | '&' expr %prec ADDR     { $$ = uniNode(ADDR, $2); }
-    | expr '^' expr           { $$ = binNode('^', $1, $3); }
-    | expr '+' expr           { $$ = binNode('+', $1, $3); }
-	| expr '-' expr           { $$ = binNode('-', $1, $3); }
-	| expr '*' expr           { $$ = binNode('*', $1, $3); }
-	| expr '/' expr           { $$ = binNode('/', $1, $3); }
-	| expr '%' expr           { $$ = binNode('%', $1, $3); }
-	| expr '<' expr           { $$ = binNode('<', $1, $3); }
-	| expr '>' expr           { $$ = binNode('>', $1, $3); }
-	| expr GE expr            { $$ = binNode(GE, $1, $3); }
-	| expr LE expr            { $$ = binNode(LE, $1, $3); }
-	| expr NE expr            { $$ = binNode(NE, $1, $3); }
-	| expr '=' expr           { $$ = binNode('=', $1, $3); }
+    | string                  { $$ = $1; $$->info = 2; }
+    | integer                 { $$ = $1; $$->info = 1; }
+    | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
+    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); }
+    | expr '^' expr           { $$ = binNode('^', $1, $3); $$->info = intonly($1); intonly($3); }
+    | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = intonly($1); intonly($3); }
+	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = intonly($1); intonly($3); }
+	| expr '*' expr           { $$ = binNode('*', $1, $3); $$->info = intonly($1); intonly($3); }
+	| expr '/' expr           { $$ = binNode('/', $1, $3); $$->info = intonly($1); intonly($3); }
+	| expr '%' expr           { $$ = binNode('%', $1, $3); $$->info = intonly($1); intonly($3); }
+	| expr '<' expr           { $$ = binNode('<', $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
+	| expr '>' expr           { $$ = binNode('>', $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
+	| expr GE expr            { $$ = binNode(GE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
+	| expr LE expr            { $$ = binNode(LE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
+	| expr NE expr            { $$ = binNode(NE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
+	| expr '=' expr           { $$ = binNode('=', $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
     | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); }
-    | expr '&' expr           { $$ = binNode('&', $1, $3); }
-    | expr '|' expr           { $$ = binNode('|', $1, $3); }
-    | '~' expr                { $$ = uniNode('~', $2); }
+    | expr '&' expr           { $$ = binNode('&', $1, $3); $$->info = intonly($1); intonly($3); }
+    | expr '|' expr           { $$ = binNode('|', $1, $3); $$->info = intonly($1); intonly($3); }
+    | '~' expr                { $$ = uniNode('~', $2); $$->info = intonly($2); }
     | '?'                     { $$ = nilNode('?'); }
     ;
 
@@ -221,7 +231,17 @@ int nostring(Node *arg1, Node *arg2) {
 	return arg1->info % 5 == 3 || arg2->info % 5 == 3 ? 3 : 1;
 }
 
-int intonly(Node *arg, int novar) {
+void noarray(Node *arg1, Node *arg2) {
+	if (arg1->info % 5 == 3 || arg2->info % 5 == 3)
+		yyerror("can not use arrays");
+}
+
+void sametype(Node *arg1, Node *arg2) {
+	if (arg1->info % 5 != arg2->info % 5)
+		yyerror("different types not allowed");
+}
+
+int intonly(Node *arg) {
 	if (arg->info % 5 != 1)
 		yyerror("only integers can be used");
 	if (arg->info % 10 > 5)
@@ -259,4 +279,26 @@ void declare(Node *pub, int cnst, Node *type, char *name, Node *value)
   if (type->info != typ)
     yyerror("wrong types in initialization");
 
+}
+
+void enter(int pub, int typ, char *name) {
+	fpar = malloc(32); /* 31 arguments, at most */
+	fpar[0] = 0; /* argument count */
+	if (IDfind(name, (long*)IDtest) < 20)
+		IDnew(typ+20, name, (long)fpar);
+	IDpush();
+	if (typ != 4) IDnew(typ, name, 0);
+}
+
+void function(int pub, Node *type, char *name, Node *body, int enter)
+{
+
+	Node *bloco = LEFT_CHILD(body);
+	IDpop();
+	if (bloco != 0) { /* not a forward declaration */
+		long par;
+		int fwd = IDfind(name, &par);
+		if (fwd > 40) yyerror("duplicate function");
+		else IDreplace(fwd+40, name, par);
+	}
 }
