@@ -20,6 +20,7 @@ int intonly(Node *arg);
 int noassign(Node *arg1, Node *arg2);
 static int ncicl;
 static char *fpar;
+int typereturn;
 %}
 
 %union {
@@ -78,10 +79,10 @@ decl    : func                          { $$ = $1; }
     | var ATTR literal                  { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
     ;
 
-func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); IDpop(); }
-    | FUNCTION functype ID { enter(0, $2->info, $3); } params funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $4, uniNode(END, $5)))); IDpop(); }
-    | FUNCTION qualifier functype ID { enter($2, $3->info, $4); } funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $5)))); IDpop(); }
-    | FUNCTION functype ID { enter(0, $2->info, $3); } funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $4))); IDpop(); }
+func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); IDpop(); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } params funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $4, uniNode(END, $5)))); IDpop(); }
+    | FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $5)))); IDpop(); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $4))); IDpop(); }
     ;
 
 funcend : DONE          { $$ = nilNode(DONE); }
@@ -144,8 +145,8 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
 
 instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
     | STOP              { $$ = nilNode(STOP); if (ncicl <= 0) yyerror("invalid stop argument"); }
-    | RETURN expr       { $$ = uniNode(RETURN_EXPR, $2); }
-    | RETURN            { $$ = nilNode(RETURN); }
+    | RETURN expr       { if (IDlevel() == 0 && $2->info != 1) yyerror("return non integer out of function"); if (IDlevel() > 0 && typereturn != $2->info) yyerror("return type differs from function type"); $$ = uniNode(RETURN_EXPR, $2); }
+    | RETURN            { if (IDlevel() == 0) yyerror("return void out of function"); if (typereturn != 4) yyerror("return type differs from function type"); $$ = nilNode(RETURN); }
     ;
 
 elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); }
@@ -166,7 +167,7 @@ instrs  : instr                     { $$ = binNode(INSTRS, $1, 0); }
     ;
 
 lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
-	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); $$->info = 1; } /* expr tem que ser int mais merdas */
+	| lvalue '[' expr ']'           { $$ = binNode('[', $1, $3); $$->info = 1; } /* expr tem que ser int mais merdas, pode se indexar strings */
 	;
 
 expr    : lvalue              { $$ = $1; $$->info = $1->info; }

@@ -1,5 +1,0 @@
-program 
-	number cona := "cona"; number cona
-start 
-	"cona" !
-end
