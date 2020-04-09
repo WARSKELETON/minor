@@ -10,6 +10,7 @@ int yylex();
 void evaluate(Node *p);
 void yyerror(char *s);
 
+void declare(Node *pub, int cnst, Node *type, char *name, Node *value);
 int nostring(Node *arg1, Node *arg2);
 int intonly(Node *arg, int);
 int noassign(Node *arg1, Node *arg2);
@@ -62,14 +63,14 @@ decls   : decl                          { $$ = $1; }
     ;
 
 decl    : func                          { $$ = $1; }
-    | qualifier CONST var ATTR literal  { $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, $5)); }
-    | qualifier var ATTR literal        { $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, $4)); }
-    | qualifier var                     { $$ = binNode(DECL, $1, $2); }
-    | qualifier CONST var               { $$ = binNode(DECL, $1, $3); }
-    | CONST var                         { $$ = $2; }
-    | CONST var ATTR literal            { $$ = binNode(DECL, $2, $4); }
-    | var                               { $$ = $1; }
-    | var ATTR literal                  { $$ = binNode(DECL, $1, $3); }
+    | qualifier CONST var ATTR literal  { IDnew($3->value.i+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, $5); $$ = binNode(QUALIFIER, $1, binNode(VAR, $3, $5)); }
+    | qualifier var ATTR literal        { IDnew($2->value.i, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(QUALIFIER, $1, binNode(VAR, $2, $4)); }
+    | qualifier var                     { IDnew($2->value.i, RIGHT_CHILD($2)->value.s, 0); declare($1, 0, $2, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(DECL, $1, $2); }
+    | qualifier CONST var               { IDnew($3->value.i+5, RIGHT_CHILD($3)->value.s, 0); declare($1, 1, $3, RIGHT_CHILD($3)->value.s, 0); $$ = binNode(DECL, $1, $3); }
+    | CONST var                         { IDnew($2->value.i+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, 0); $$ = $2; }
+    | CONST var ATTR literal            { IDnew($2->value.i+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(DECL, $2, $4); }
+    | var                               { IDnew($1->value.i, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, 0); $$ = $1; }
+    | var ATTR literal                  { IDnew($1->value.i, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
     ;
 
 func    : FUNCTION qualifier functype ID vars funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $5, uniNode(END, $6))))); }
@@ -86,16 +87,17 @@ functype    : type      { $$ = $1; }
     | VOID              { $$ = nilNode(VOID); }
     ;
 
-qualifier   : PUBLIC    { $$ = nilNode(PUBLIC); }
-    | FORWARD           { $$ = nilNode(FORWARD); }
+qualifier   : PUBLIC    { $$ = nilNode(PUBLIC); $$->info = 1; }
+    | FORWARD           { $$ = nilNode(FORWARD); $$->info = 2; }
     ;
 
 vars    : var               { $$ = $1; }
     | vars ';' var          { $$ = binNode(VARS, $1, $3); }
     ;
 
-var    : type ID                { $$ = binNode(VAR, $1, strNode(ID, $2)); }
-    | type ID '[' integer ']'   { $$ = binNode(VAR, $1, binNode(ID, strNode(ID, $2), $4)); }
+var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
+    | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
     ;
 
 type    : NUMBER            { $$ = nilNode(NUMBER); }
@@ -198,7 +200,7 @@ stringintegerlist   : integer integer   { $$ = binNode(TWO_INTEGERS, $1, $2); $$
     | stringintegerlist integer         { $$ = binNode(MORE_INTEGERS, $1, $2); $$->info = 2; }
 
 integerlist : integer                   { $$ = $1; $$->info = $1->info; }
-    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 2; } /* dunno */
+    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 3; }
     ;
 
 args	: expr	                      { $$ = $1; }
@@ -230,10 +232,31 @@ int intonly(Node *arg, int novar) {
 int noassign(Node *arg1, Node *arg2) {
 	int t1 = arg1->info, t2 = arg2->info;
 	if (t1 == t2) return 0;
+	if (t1 == 3 && t2 == 1) return 0; /* array := int */
+	if (t1 == 1 && t2 == 3) return 0; /* int := array */
 	if (t1 == 2 && t2 == 11) return 0; /* string := int* */
 	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* string := 0 */
 	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* pointer := 0 */
 	return 1;
+}
+
+void declare(Node *pub, int cnst, Node *type, char *name, Node *value)
+{
+  int typ;
+  if (!value) {
+    if (pub) {
+        if (pub->info == 1 && cnst) {
+            yyerror("local constants must be initialised");
+        }
+    }
+    return;
+  }
+  if (value->attrib = INTEGER && value->value.i == 0 && type->value.i > 10)
+  	return; /* NULL pointer */
+  if ((typ = value->info) % 10 > 5) typ -= 5;
+  if (type->info != typ)
+    yyerror("wrong types in initialization");
+
 }
