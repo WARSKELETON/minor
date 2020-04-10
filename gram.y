@@ -174,11 +174,13 @@ instrs  : instr                     { $$ = binNode(INSTRS, $1, 0); }
     | instrs instr                  { $$ = binNode(INSTRS, $1, $2); }
     ;
 
-lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
-	| ID '[' expr ']'               { long pos; int typ = IDfind($1, &pos); 
-                                        if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); 
-                                        $$ = binNode('[', $1, $3); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly($3); $$->info = 1; } /* pode ser array de funcao TODO */
-    | string '[' expr ']'           { $$ = binNode('[', $1, $3); intonly($3); $$->info = 1; }
+lvalue	: ID                              { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
+	| ID '[' expr ']'                     { long pos; int typ = IDfind($1, &pos); 
+                                            if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); 
+                                            $$ = binNode('[', $1, $3); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly($3); $$->info = 1; } /* pode ser array de funcao TODO */
+    | string '[' expr ']'                 { $$ = binNode('[', $1, $3); intonly($3); $$->info = 1; }
+    | ID '(' args ')' '[' expr ']'        { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, $3); }
+	| ID '(' ')' '[' expr ']'             { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, 0); }
 	;
 
 expr    : lvalue              { $$ = $1; $$->info = $1->info; }
@@ -188,7 +190,7 @@ expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | string                  { $$ = $1; $$->info = 2; }
     | integer                 { $$ = $1; $$->info = 1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
-    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); $$->info = 1; }
+    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); $$->info = 3; }
     | expr '^' expr           { $$ = binNode('^', $1, $3); $$->info = intonly($1); intonly($3); }
     | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = intonly($1); intonly($3); }
 	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = intonly($1); intonly($3); }
