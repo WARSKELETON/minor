@@ -41,14 +41,13 @@
 #define VAR 297
 #define BODY 298
 #define RETURN_EXPR 299
-#define ELIFS 300
-#define BLOCK 301
-#define INSTRS 302
-#define TWO_INTEGERS 303
-#define MORE_INTEGERS 304
-#define ARGS 305
-#define LOCAL 306
-#define CALL 307
+#define BLOCK 300
+#define INSTRS 301
+#define TWO_INTEGERS 302
+#define MORE_INTEGERS 303
+#define ARGS 304
+#define LOCAL 305
+#define CALL 306
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
