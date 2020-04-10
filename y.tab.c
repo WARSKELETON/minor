@@ -29,7 +29,7 @@ int yylex();
 void evaluate(Node *p);
 void yyerror(char *s);
 
-void declare(Node *pub, int cnst, Node *type, char *name, Node *value);
+void declare(Node *qualifier, int cnst, Node *type, char *name, Node *value);
 void enter(Node *qualifier, int typ, char *name);
 void function(Node *qualifier, Node *type, char *name, Node *body);
 int nostring(Node *arg1, Node *arg2);
@@ -862,16 +862,21 @@ int noassign(Node *arg1, Node *arg2) {
 	return 1;
 }
 
-void declare(Node *pub, int cnst, Node *type, char *name, Node *value)
+void declare(Node *qualifier, int cnst, Node *type, char *name, Node *value)
 {
   int typ;
   if (!value) {
-    if (pub) {
-        if (pub->info == 1 && cnst) {
+    if (qualifier) {
+        if (qualifier->info == 1 && cnst) {
             yyerror("local constants must be initialised");
         }
     }
     return;
+  }
+  if (qualifier) {
+      if (qualifier->info == 2) {
+          yyerror("forward with declaration");
+      }
   }
   if (value->attrib = INTEGER && value->value.i == 0 && type->value.i > 10)
   	return; /* NULL pointer */
@@ -952,7 +957,7 @@ int checkargs(char *name, Node *args) {
 	}
 	return typ % 20;
 }
-#line 956 "y.tab.c"
+#line 961 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1604,7 +1609,7 @@ case 112:
 #line 223 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1608 "y.tab.c"
+#line 1613 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
