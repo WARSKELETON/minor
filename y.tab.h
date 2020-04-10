@@ -39,15 +39,14 @@
 #define QUALIFIER 295
 #define VARS 296
 #define VAR 297
-#define BODY 298
-#define RETURN_EXPR 299
-#define BLOCK 300
-#define INSTRS 301
-#define TWO_INTEGERS 302
-#define MORE_INTEGERS 303
-#define ARGS 304
-#define LOCAL 305
-#define CALL 306
+#define SIZE 298
+#define BODY 299
+#define RETURN_EXPR 300
+#define BLOCK 301
+#define INSTRS 302
+#define ARGS 303
+#define LOCAL 304
+#define CALL 305
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

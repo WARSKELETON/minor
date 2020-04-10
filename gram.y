@@ -22,6 +22,7 @@ int checkargs(char *name, Node *args);
 static int ncicl;
 static char *fpar;
 int typereturn;
+int arraysize;
 %}
 
 %union {
@@ -48,9 +49,9 @@ int typereturn;
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block blockfunc instrs lvalue expr literal integer integerlist string stringintegerlist args
+%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block blockfunc instrs lvalue expr literal integer integerlist string args
 
-%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY RETURN_EXPR BLOCK INSTRS TWO_INTEGERS MORE_INTEGERS ARGS LOCAL CALL
+%token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR SIZE BODY RETURN_EXPR BLOCK INSTRS ARGS LOCAL CALL
 
 %%
 file    : program                       { printNode($1,0,yynames); }
@@ -109,7 +110,7 @@ param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(
 
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, intNode(SIZE, $4->value.i), strNode(ID, $2)); $$->info = 3; }
     | ARRAY ID                      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
     ;
 
@@ -165,7 +166,7 @@ block   : /* empty */               { $$ = nilNode(NIL); }
 
 blockfunc   : /* empty */           { $$ = nilNode(NIL); }
     | instrterm                     { $$ = binNode(BLOCK, $1, 0); }
-    | instrs                        { $$ = binNode(BLOCK, $1, 0); printf("%d\n", IDlevel()); if (IDlevel() > 0 && typereturn != 4) yyerror("non void function without return"); }
+    | instrs                        { $$ = binNode(BLOCK, $1, 0); if (IDlevel() > 0 && typereturn != 4) yyerror("non void function without return"); }
     | instrs instrterm              { $$ = binNode(BLOCK, $1, $2); }
     ;
 
@@ -214,15 +215,13 @@ literal : string                { $$ = $1; $$->info = $1->info; }
 integer : INTEGER               { $$ = intNode(INTEGER, $1); $$->info = 1; }
     ;
 
-string  : stringintegerlist     { $$ = $1; $$->info = $1->info; }
-    | STR                       { $$ = strNode(STR, $1); $$->info = 2; }
-    ;
+string   : integer integer   { $$ = binNode(STR, $1, $2); $$->info = 2; }
+    | STR                    { $$ = binNode(STR, strNode(STR, $1), 0); $$->info = 2; }
+    | string STR             { $$ = binNode(STR, $1, $2); $$->info = 2; }
+    | string integer         { $$ = binNode(STR, $1, $2); $$->info = 2; }
 
-stringintegerlist   : integer integer   { $$ = binNode(TWO_INTEGERS, $1, $2); $$->info = 2; }
-    | stringintegerlist integer         { $$ = binNode(MORE_INTEGERS, $1, $2); $$->info = 2; }
-
-integerlist : integer                   { $$ = $1; $$->info = $1->info; }
-    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 3; }
+integerlist : integer                   { $$ = $1; $$->info = $1->info; arraysize = 1; }
+    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 3; arraysize++; }
     ;
 
 args	: expr	                      { $$ = binNode(ARGS, nilNode(NIL), $1); }
@@ -296,9 +295,14 @@ void declare(Node *qualifier, int cnst, Node *type, char *name, Node *value)
   if (value->attrib = INTEGER && value->value.i == 0 && type->value.i > 10)
   	return; /* NULL pointer */
   if ((typ = value->info) % 10 > 5) typ -= 5;
-  if (type->info != typ)
+  if (type->info == 3) {
+    if (LEFT_CHILD(type)->value.i != arraysize) {
+        yyerror("array size doesn't correspond to attributions");
+    }
+  }
+  else if (type->info != typ) {
     yyerror("wrong types in initialization");
-
+  }
 }
 
 void enter(Node *qualifier, int typ, char *name) {
