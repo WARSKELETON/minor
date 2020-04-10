@@ -48,7 +48,7 @@ int typereturn;
 %nonassoc ADDR UMINUS '?'
 %nonassoc '(' '['
 
-%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block instrs lvalue expr literal integer integerlist string stringintegerlist args
+%type <n> program module decls decl body bodyprincipal bodyinstrs bodyvars func funcend functype qualifier params param var type instr instrterm elif elifs block blockfunc instrs lvalue expr literal integer integerlist string stringintegerlist args
 
 %token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR BODY RETURN_EXPR BLOCK INSTRS TWO_INTEGERS MORE_INTEGERS ARGS LOCAL CALL
 
@@ -122,8 +122,8 @@ bodyprincipal    : bodyvars bodyinstrs   { $$ = binNode(BODY, $1, $2); }
     | bodyinstrs                         { $$ = binNode(BODY, $1, 0); }
     ;
 
-body    : bodyvars block   { $$ = binNode(BODY, $1, $2); }
-    | block                { $$ = binNode(BODY, $1, 0); }
+body    : bodyvars blockfunc   { $$ = binNode(BODY, $1, $2); }
+    | blockfunc                { $$ = binNode(BODY, $1, 0); }
     ;
 
 bodyinstrs : /* empty */        { $$ = nilNode(NIL); }
@@ -140,7 +140,7 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); if ($2->info % 5 == 4 || $4->info % 5 == 4 || $6->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
     | expr ';'                                            { $$ = $1; }
-    | expr '!'                                            { $$ = $1; }
+    | expr '!'                                            { $$ = $1; if ($1->info % 5 == 4) yyerror("printing void expression"); }
     | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); }
     ;
 
@@ -160,6 +160,12 @@ elifs    : elif                     { $$ = binNode(ELIF, $1, 0); }
 block   : /* empty */               { $$ = nilNode(NIL); }
     | instrterm                     { $$ = binNode(BLOCK, $1, 0); }
     | instrs                        { $$ = binNode(BLOCK, $1, 0); }
+    | instrs instrterm              { $$ = binNode(BLOCK, $1, $2); }
+    ;
+
+blockfunc   : /* empty */           { $$ = nilNode(NIL); }
+    | instrterm                     { $$ = binNode(BLOCK, $1, 0); }
+    | instrs                        { $$ = binNode(BLOCK, $1, 0); printf("%d\n", IDlevel()); if (IDlevel() > 0 && typereturn != 4) yyerror("non void function without return"); }
     | instrs instrterm              { $$ = binNode(BLOCK, $1, $2); }
     ;
 
