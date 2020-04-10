@@ -19,6 +19,8 @@ void sametype(Node *arg1, Node *arg2);
 int intonly(Node *arg);
 int noassign(Node *arg1, Node *arg2);
 int checkargs(char *name, Node *args);
+int sum(Node *arg1, Node *arg2);
+int sub(Node *arg1, Node *arg2);
 static int ncicl;
 static char *fpar;
 int typereturn;
@@ -192,8 +194,8 @@ expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
     | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); $$->info = 3; }
     | expr '^' expr           { $$ = binNode('^', $1, $3); $$->info = intonly($1); intonly($3); }
-    | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = intonly($1); intonly($3); }
-	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = intonly($1); intonly($3); }
+    | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = sum($1, $3); }
+	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = sub($1, $3); }
 	| expr '*' expr           { $$ = binNode('*', $1, $3); $$->info = intonly($1); intonly($3); }
 	| expr '/' expr           { $$ = binNode('/', $1, $3); $$->info = intonly($1); intonly($3); }
 	| expr '%' expr           { $$ = binNode('%', $1, $3); $$->info = intonly($1); intonly($3); }
@@ -260,6 +262,24 @@ int intonly(Node *arg) {
 	if (arg->info % 10 > 5)
 		yyerror("argument is constant");
 	return 1;
+}
+
+int sum(Node *arg1, Node *arg2) {
+	if ((arg1->info % 5 == 1 && (arg2->info % 5 == 3 || arg2->info % 5 == 1)) || (arg2->info % 5 == 1 && (arg1->info % 5 == 3 || arg1->info % 5 == 1)))
+		return 1;
+	if (arg1->info % 10 > 5)
+		yyerror("argument is constant");
+	yyerror("only integers or vectors can be used");
+}
+
+int sub(Node *arg1, Node *arg2) {
+	if ((arg1->info % 5 == 1 && (arg2->info % 5 == 3 || arg2->info % 5 == 1)) || (arg2->info % 5 == 1 && (arg1->info % 5 == 3 || arg1->info % 5 == 1)))
+		return 1;
+	if (arg1->info % 5 == 3 && arg2->info % 5 == 3)
+		return 1;
+	if (arg1->info % 10 > 5)
+		yyerror("argument is constant");
+	yyerror("only integers or vectors can be used");
 }
 
 int noassign(Node *arg1, Node *arg2) {

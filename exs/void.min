@@ -1,7 +1,10 @@
 program
-    number y := 42;
-    function array pointer_to_y number x do
-        return &y
+    array x[3] := 1, 2, 3;
+    number g;
+    array y
 start
-    pointer_to_y(10)[0]!
+   x + 1;
+   y := (x + 1) -  2; 
+   g := y - x;
 end
+
