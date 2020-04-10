@@ -18,6 +18,7 @@ void noarray(Node *arg1, Node *arg2);
 void sametype(Node *arg1, Node *arg2);
 int intonly(Node *arg);
 int noassign(Node *arg1, Node *arg2);
+int checkargs(char *name, Node *args);
 static int ncicl;
 static char *fpar;
 int typereturn;
@@ -101,9 +102,9 @@ params  : param         { $$ = binNode(VARS, $1, 0); }
     | params ';' param  { $$ = binNode(VARS, $1, $3); }
     ;
 
-param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); IDnew(2, $2, 0); $$->info = 2; }
-    | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); IDnew(1, $2, 0); $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); $$->info = 3; }
+param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); IDnew(2, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 2; $$->info = 2; }
+    | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); IDnew(1, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 1; $$->info = 1; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 3; $$->info = 3; }
     ;
 
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
@@ -169,14 +170,14 @@ instrs  : instr                     { $$ = binNode(INSTRS, $1, 0); }
 lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
 	| ID '[' expr ']'               { long pos; int typ = IDfind($1, &pos); 
                                         if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); 
-                                        $$ = binNode('[', $1, $3); if (typ != 3) yyerror("invalid indexation"); intonly($3); $$->info = 1; } /* pode ser array de funcao TODO */
+                                        $$ = binNode('[', $1, $3); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly($3); $$->info = 1; } /* pode ser array de funcao TODO */
     | string '[' expr ']'           { $$ = binNode('[', $1, $3); intonly($3); $$->info = 1; }
 	;
 
 expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | '(' expr ')'            { $$ = $2; $$->info = $2->info; }
-	| ID '(' args ')'         { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
-	| ID '(' ')'              { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
+	| ID '(' args ')'         { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, $3); }
+	| ID '(' ')'              { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, 0); }
     | string                  { $$ = $1; $$->info = 2; }
     | integer                 { $$ = $1; $$->info = 1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
@@ -218,7 +219,7 @@ integerlist : integer                   { $$ = $1; $$->info = $1->info; }
     | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 3; }
     ;
 
-args	: expr	                      { $$ = $1; }
+args	: expr	                      { $$ = binNode(ARGS, nilNode(NIL), $1); }
 	| args ',' expr                   { $$ = binNode(ARGS, $1, $3); }
 	;
 %%
@@ -309,4 +310,44 @@ void function(int pub, Node *type, char *name, Node *body, int enter)
 		if (fwd > 40) yyerror("duplicate function");
 		else IDreplace(fwd+40, name, par);
 	}
+}
+
+int checkargs(char *name, Node *args) {
+	char *arg;
+	int typ;
+        if ((typ = IDsearch(name, (long*)&arg,IDlevel(),1)) < 20) {
+		yyerror("ident not a function");
+		return 0;
+	}
+	if (args == 0 && arg[0] == 0)
+		;
+	else if (args == 0 && arg[0] != 0)
+		yyerror("function requires arguments");
+	else if (args != 0 && arg[0] == 0)
+		yyerror("function requires no arguments");
+	else {
+		int err = 0, null, i = arg[0], typ;
+		do {
+			Node *n;
+			if (i == 0) {
+				yyerror("too many arguments.");
+				err = 1;
+				break;
+			}
+			n = RIGHT_CHILD(args);
+			typ = n->info;
+			if (typ % 10 > 5) typ -= 5; /* remove CONST */
+			null =  (n->attrib == INTEGER && n->value.i == 0 && arg[i] > 10) ? 1 : 0;
+			if (!null && arg[i] != typ) {
+				yyerror("wrong argument type");
+				err = 1;
+				break;
+			}
+			args = LEFT_CHILD(args);
+			i--;
+		} while (args->attrib != NIL);
+		if (!err && i > 0)
+			yyerror("missing arguments");
+	}
+	return typ % 20;
 }
