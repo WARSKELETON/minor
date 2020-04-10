@@ -1350,19 +1350,19 @@ case 51:
 break;
 case 52:
 #line 137 "gram.y"
-	{ yyval.n = binNode(IF, yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 53:
 #line 138 "gram.y"
-	{ yyval.n = binNode(IF, yystack.l_mark[-6].n, binNode(THEN, yystack.l_mark[-4].n, binNode(ELIF, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n)))); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-6].n, binNode(THEN, yystack.l_mark[-4].n, binNode(ELIF, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n)))); if (yystack.l_mark[-6].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 54:
 #line 139 "gram.y"
-	{ yyval.n = binNode(IF, yystack.l_mark[-4].n, binNode(THEN, yystack.l_mark[-2].n, binNode(ELIF, yystack.l_mark[-1].n, 0))); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-4].n, binNode(THEN, yystack.l_mark[-2].n, binNode(ELIF, yystack.l_mark[-1].n, 0))); if (yystack.l_mark[-4].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 55:
 #line 140 "gram.y"
-	{ yyval.n = binNode(IF, yystack.l_mark[-5].n, binNode(THEN, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n))); }
+	{ yyval.n = binNode(IF, yystack.l_mark[-5].n, binNode(THEN, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n))); if (yystack.l_mark[-5].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 56:
 #line 141 "gram.y"
@@ -1402,7 +1402,7 @@ case 64:
 break;
 case 65:
 #line 153 "gram.y"
-	{ yyval.n = binNode(ELIF, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(ELIF, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (yystack.l_mark[-2].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 66:
 #line 156 "gram.y"

@@ -134,10 +134,10 @@ bodyvars : var ';'              { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); 
     | bodyvars var ';'          { IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(VARS, $1, $2); }
     ;
 
-instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2, $4); }
-    | IF expr THEN block elifs ELSE block FI              { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, uniNode(ELSE, $7)))); }
-    | IF expr THEN block elifs FI                         { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, 0))); }
-    | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); }
+instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2, $4); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
+    | IF expr THEN block elifs ELSE block FI              { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, uniNode(ELSE, $7)))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
+    | IF expr THEN block elifs FI                         { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, 0))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
+    | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); ncicl--; }
     | expr ';'                                            { $$ = $1; }
     | expr '!'                                            { $$ = $1; }
@@ -150,7 +150,7 @@ instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid
     | RETURN            { if (IDlevel() == 0) yyerror("return void out of function"); if (typereturn != 4) yyerror("return type differs from function type"); $$ = nilNode(RETURN); }
     ;
 
-elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); }
+elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     ;
 
 elifs    : elif                     { $$ = binNode(ELIF, $1, 0); }
