@@ -846,11 +846,14 @@ int intonly(Node *arg) {
 }
 
 int noassign(Node *arg1, Node *arg2) {
+    /* TODO */
 	int t1 = arg1->info, t2 = arg2->info;
+    t1 = t1 % 5;
+    t2 = t2 % 5;
 	if (t1 == t2) return 0;
 	if (t1 == 3 && t2 == 1) return 0; /* array := int */
 	if (t1 == 1 && t2 == 3) return 0; /* int := array */
-	if (t1 == 2 && t2 == 11) return 0; /* string := int* */
+	if (t1 == 2 && t2 == 1) return 0; /* string := int* */
 	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* string := 0 */
 	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
@@ -898,7 +901,7 @@ void function(int pub, Node *type, char *name, Node *body, int enter)
 		else IDreplace(fwd+40, name, par);
 	}
 }
-#line 902 "y.tab.c"
+#line 905 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1412,7 +1415,7 @@ case 77:
 break;
 case 78:
 #line 177 "gram.y"
-	{ yyval.n = yystack.l_mark[-1].n; }
+	{ yyval.n = yystack.l_mark[-1].n; yyval.n->info = yystack.l_mark[-1].n->info; }
 break;
 case 79:
 #line 178 "gram.y"
@@ -1436,7 +1439,7 @@ case 83:
 break;
 case 84:
 #line 183 "gram.y"
-	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); }
+	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); yyval.n->info = 1; }
 break;
 case 85:
 #line 184 "gram.y"
@@ -1488,7 +1491,7 @@ case 96:
 break;
 case 97:
 #line 196 "gram.y"
-	{ yyval.n = binNode(ATTR, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(ATTR, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (yyval.n->info % 10 > 5) yyerror("constant value to assignment"); if (noassign(yystack.l_mark[-2].n, yystack.l_mark[0].n)) yyerror("illegal assignment"); yyval.n->info = yystack.l_mark[-2].n->info; }
 break;
 case 98:
 #line 197 "gram.y"
@@ -1504,7 +1507,7 @@ case 100:
 break;
 case 101:
 #line 200 "gram.y"
-	{ yyval.n = nilNode('?'); }
+	{ yyval.n = nilNode('?'); yyval.n->info = 1; }
 break;
 case 102:
 #line 203 "gram.y"
@@ -1550,7 +1553,7 @@ case 112:
 #line 222 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1554 "y.tab.c"
+#line 1557 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

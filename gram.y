@@ -174,13 +174,13 @@ lvalue	: ID                        { long pos; int typ = IDfind($1, &pos); if (p
 	;
 
 expr    : lvalue              { $$ = $1; $$->info = $1->info; }
-    | '(' expr ')'            { $$ = $2; }
+    | '(' expr ')'            { $$ = $2; $$->info = $2->info; }
 	| ID '(' args ')'         { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
 	| ID '(' ')'              { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = typ; }
     | string                  { $$ = $1; $$->info = 2; }
     | integer                 { $$ = $1; $$->info = 1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
-    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); }
+    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); $$->info = 1; }
     | expr '^' expr           { $$ = binNode('^', $1, $3); $$->info = intonly($1); intonly($3); }
     | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = intonly($1); intonly($3); }
 	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = intonly($1); intonly($3); }
@@ -193,11 +193,11 @@ expr    : lvalue              { $$ = $1; $$->info = $1->info; }
 	| expr LE expr            { $$ = binNode(LE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
 	| expr NE expr            { $$ = binNode(NE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
 	| expr '=' expr           { $$ = binNode('=', $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
-    | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); }
+    | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); if ($$->info % 10 > 5) yyerror("constant value to assignment"); if (noassign($1, $3)) yyerror("illegal assignment"); $$->info = $1->info; }
     | expr '&' expr           { $$ = binNode('&', $1, $3); $$->info = intonly($1); intonly($3); }
     | expr '|' expr           { $$ = binNode('|', $1, $3); $$->info = intonly($1); intonly($3); }
     | '~' expr                { $$ = uniNode('~', $2); $$->info = intonly($2); }
-    | '?'                     { $$ = nilNode('?'); }
+    | '?'                     { $$ = nilNode('?'); $$->info = 1; }
     ;
 
 literal : string                { $$ = $1; $$->info = $1->info; }
@@ -255,11 +255,14 @@ int intonly(Node *arg) {
 }
 
 int noassign(Node *arg1, Node *arg2) {
+    /* TODO */
 	int t1 = arg1->info, t2 = arg2->info;
+    t1 = t1 % 5;
+    t2 = t2 % 5;
 	if (t1 == t2) return 0;
 	if (t1 == 3 && t2 == 1) return 0; /* array := int */
 	if (t1 == 1 && t2 == 3) return 0; /* int := array */
-	if (t1 == 2 && t2 == 11) return 0; /* string := int* */
+	if (t1 == 2 && t2 == 1) return 0; /* string := int* */
 	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* string := 0 */
 	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
