@@ -1,7 +1,4 @@
 program
-    function void test do 123;
+    function public void hello done $$ should be forward
 start
-    if test then
-        "what?" !
-    fi
 end

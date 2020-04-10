@@ -30,8 +30,8 @@ void evaluate(Node *p);
 void yyerror(char *s);
 
 void declare(Node *pub, int cnst, Node *type, char *name, Node *value);
-void enter(int pub, int typ, char *name);
-void function(int pub, Node *type, char *name, Node *body,int enter);
+void enter(Node *qualifier, int typ, char *name);
+void function(Node *qualifier, Node *type, char *name, Node *body);
 int nostring(Node *arg1, Node *arg2);
 void noarray(Node *arg1, Node *arg2);
 void sametype(Node *arg1, Node *arg2);
@@ -881,7 +881,7 @@ void declare(Node *pub, int cnst, Node *type, char *name, Node *value)
 
 }
 
-void enter(int pub, int typ, char *name) {
+void enter(Node *qualifier, int typ, char *name) {
 	fpar = malloc(32); /* 31 arguments, at most */
 	fpar[0] = 0; /* argument count */
 	if (IDfind(name, (long*)IDtest) < 20)
@@ -890,17 +890,27 @@ void enter(int pub, int typ, char *name) {
 	if (typ != 4) IDnew(typ, name, 0);
 }
 
-void function(int pub, Node *type, char *name, Node *body, int enter)
+void function(Node *qualifier, Node *type, char *name, Node *body)
 {
-
 	Node *bloco = LEFT_CHILD(body);
 	IDpop();
-	if (bloco != 0) { /* not a forward declaration */
+    if (qualifier) {
+        if (qualifier->info == 2 && bloco != 0) {
+            yyerror("forward function with body");
+        }
+        if (qualifier->info == 1 && bloco == 0) {
+            yyerror("not forward function without body");
+        }
+    }
+    else if (bloco == 0) {
+        yyerror("not forward function without body");
+    }
+	/* if (bloco != 0) {
 		long par;
 		int fwd = IDfind(name, &par);
 		if (fwd > 40) yyerror("duplicate function");
 		else IDreplace(fwd+40, name, par);
-	}
+	} */
 }
 
 int checkargs(char *name, Node *args) {
@@ -942,7 +952,7 @@ int checkargs(char *name, Node *args) {
 	}
 	return typ % 20;
 }
-#line 946 "y.tab.c"
+#line 956 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1218,7 +1228,7 @@ case 18:
 break;
 case 19:
 #line 83 "gram.y"
-	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-5].n, binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n))))); IDpop(); }
+	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-5].n, binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n))))); function(yystack.l_mark[-5].n, yystack.l_mark[-4].n, yystack.l_mark[-3].s, yystack.l_mark[0].n); }
 break;
 case 20:
 #line 84 "gram.y"
@@ -1226,7 +1236,7 @@ case 20:
 break;
 case 21:
 #line 84 "gram.y"
-	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n)))); IDpop(); }
+	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n)))); function(0, yystack.l_mark[-4].n, yystack.l_mark[-3].s, yystack.l_mark[0].n); }
 break;
 case 22:
 #line 85 "gram.y"
@@ -1234,7 +1244,7 @@ case 22:
 break;
 case 23:
 #line 85 "gram.y"
-	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-4].n, binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n)))); IDpop(); }
+	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-4].n, binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n)))); function(yystack.l_mark[-4].n, yystack.l_mark[-3].n, yystack.l_mark[-2].s, yystack.l_mark[0].n); }
 break;
 case 24:
 #line 86 "gram.y"
@@ -1242,15 +1252,15 @@ case 24:
 break;
 case 25:
 #line 86 "gram.y"
-	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n))); IDpop(); }
+	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n))); function(0, yystack.l_mark[-3].n, yystack.l_mark[-2].s, yystack.l_mark[0].n); }
 break;
 case 26:
 #line 89 "gram.y"
-	{ yyval.n = nilNode(DONE); }
+	{ yyval.n = binNode(DO, 0, 0); }
 break;
 case 27:
 #line 90 "gram.y"
-	{ yyval.n = uniNode(DO, yystack.l_mark[0].n); }
+	{ yyval.n = binNode(DO, yystack.l_mark[0].n, 0); }
 break;
 case 28:
 #line 93 "gram.y"
@@ -1370,7 +1380,7 @@ case 56:
 break;
 case 57:
 #line 141 "gram.y"
-	{ yyval.n = binNode(FOR, yystack.l_mark[-8].n, binNode(UNTIL, yystack.l_mark[-6].n, binNode(STEP, yystack.l_mark[-4].n, uniNode(DO, yystack.l_mark[-1].n)))); ncicl--; }
+	{ yyval.n = binNode(FOR, yystack.l_mark[-8].n, binNode(UNTIL, yystack.l_mark[-6].n, binNode(STEP, yystack.l_mark[-4].n, uniNode(DO, yystack.l_mark[-1].n)))); if (yystack.l_mark[-8].n->info % 5 == 4 || yystack.l_mark[-6].n->info % 5 == 4 || yystack.l_mark[-4].n->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
 break;
 case 58:
 #line 142 "gram.y"
@@ -1594,7 +1604,7 @@ case 112:
 #line 223 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1598 "y.tab.c"
+#line 1608 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

@@ -11,8 +11,8 @@ void evaluate(Node *p);
 void yyerror(char *s);
 
 void declare(Node *pub, int cnst, Node *type, char *name, Node *value);
-void enter(int pub, int typ, char *name);
-void function(int pub, Node *type, char *name, Node *body,int enter);
+void enter(Node *qualifier, int typ, char *name);
+void function(Node *qualifier, Node *type, char *name, Node *body);
 int nostring(Node *arg1, Node *arg2);
 void noarray(Node *arg1, Node *arg2);
 void sametype(Node *arg1, Node *arg2);
@@ -80,14 +80,14 @@ decl    : func                          { $$ = $1; }
     | var ATTR literal                  { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
     ;
 
-func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $6, uniNode(END, $7))))); IDpop(); }
-    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } params funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $5, uniNode(END, $6)))); IDpop(); }
-    | FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $6)))); IDpop(); }
-    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $5))); IDpop(); }
+func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $6, uniNode(END, $7))))); function($2, $3, $4, $7); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } params funcend                 { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), binNode(VARS, $5, uniNode(END, $6)))); function(0, $2, $3, $6); }
+    | FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } funcend            { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), uniNode(END, $6)))); function($2, $3, $4, $6); }
+    | FUNCTION functype ID { enter(0, $2->info, $3); typereturn = $2->info; } funcend                      { $$ = binNode(FUNCTYPE, $2, binNode(ID, strNode(ID, $3), uniNode(END, $5))); function(0, $2, $3, $5); }
     ;
 
-funcend : DONE          { $$ = nilNode(DONE); }
-    | DO body           { $$ = uniNode(DO, $2); }
+funcend : DONE          { $$ = binNode(DO, 0, 0); }
+    | DO body           { $$ = binNode(DO, $2, 0); }
     ;
 
 functype    : type      { $$ = $1; $$->info = $1->info; }
@@ -138,7 +138,7 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | IF expr THEN block elifs ELSE block FI              { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, uniNode(ELSE, $7)))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     | IF expr THEN block elifs FI                         { $$ = binNode(IF, $2, binNode(THEN, $4, binNode(ELIF, $5, 0))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
-    | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); ncicl--; }
+    | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); if ($2->info % 5 == 4 || $4->info % 5 == 4 || $6->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
     | expr ';'                                            { $$ = $1; }
     | expr '!'                                            { $$ = $1; }
     | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); }
@@ -290,7 +290,7 @@ void declare(Node *pub, int cnst, Node *type, char *name, Node *value)
 
 }
 
-void enter(int pub, int typ, char *name) {
+void enter(Node *qualifier, int typ, char *name) {
 	fpar = malloc(32); /* 31 arguments, at most */
 	fpar[0] = 0; /* argument count */
 	if (IDfind(name, (long*)IDtest) < 20)
@@ -299,17 +299,27 @@ void enter(int pub, int typ, char *name) {
 	if (typ != 4) IDnew(typ, name, 0);
 }
 
-void function(int pub, Node *type, char *name, Node *body, int enter)
+void function(Node *qualifier, Node *type, char *name, Node *body)
 {
-
 	Node *bloco = LEFT_CHILD(body);
 	IDpop();
-	if (bloco != 0) { /* not a forward declaration */
+    if (qualifier) {
+        if (qualifier->info == 2 && bloco != 0) {
+            yyerror("forward function with body");
+        }
+        if (qualifier->info == 1 && bloco == 0) {
+            yyerror("not forward function without body");
+        }
+    }
+    else if (bloco == 0) {
+        yyerror("not forward function without body");
+    }
+	/* if (bloco != 0) {
 		long par;
 		int fwd = IDfind(name, &par);
 		if (fwd > 40) yyerror("duplicate function");
 		else IDreplace(fwd+40, name, par);
-	}
+	} */
 }
 
 int checkargs(char *name, Node *args) {
