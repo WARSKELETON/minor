@@ -1376,7 +1376,7 @@ case 39:
 break;
 case 40:
 #line 116 "gram.y"
-	{ yyval.n = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, yystack.l_mark[0].s)); yyval.n->info = 3; }
+	{ yyval.n = binNode(VAR, intNode(SIZE, 0), strNode(ID, yystack.l_mark[0].s)); yyval.n->info = 3; }
 break;
 case 41:
 #line 119 "gram.y"
@@ -1630,7 +1630,7 @@ case 102:
 break;
 case 103:
 #line 208 "gram.y"
-	{ yyval.n = binNode(ATTR, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (yyval.n->info % 10 > 5) yyerror("constant value to assignment"); if (noassign(yystack.l_mark[-2].n, yystack.l_mark[0].n)) yyerror("illegal assignment"); yyval.n->info = yystack.l_mark[-2].n->info; }
+	{ yyval.n = binNode(ATTR, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (noassign(yystack.l_mark[-2].n, yystack.l_mark[0].n) || yystack.l_mark[-2].n->info > 5) yyerror("illegal assignment"); yyval.n->info = yystack.l_mark[-2].n->info; }
 break;
 case 104:
 #line 209 "gram.y"

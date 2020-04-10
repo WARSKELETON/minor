@@ -113,7 +113,7 @@ param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
     | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, intNode(SIZE, $4->value.i), strNode(ID, $2)); $$->info = 3; }
-    | ARRAY ID                      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); $$->info = 3; }
+    | ARRAY ID                      { $$ = binNode(VAR, intNode(SIZE, 0), strNode(ID, $2)); $$->info = 3; }
     ;
 
 type    : NUMBER            { $$ = nilNode(NUMBER); $$->info = 1; }
@@ -205,7 +205,7 @@ expr    : lvalue              { $$ = $1; $$->info = $1->info; }
 	| expr LE expr            { $$ = binNode(LE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
 	| expr NE expr            { $$ = binNode(NE, $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
 	| expr '=' expr           { $$ = binNode('=', $1, $3); $$->info = 1; sametype($1, $3); noarray($1, $3); }
-    | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); if ($$->info % 10 > 5) yyerror("constant value to assignment"); if (noassign($1, $3)) yyerror("illegal assignment"); $$->info = $1->info; }
+    | lvalue ATTR expr        { $$ = binNode(ATTR, $1, $3); if (noassign($1, $3) || $1->info > 5) yyerror("illegal assignment"); $$->info = $1->info; }
     | expr '&' expr           { $$ = binNode('&', $1, $3); $$->info = intonly($1); intonly($3); }
     | expr '|' expr           { $$ = binNode('|', $1, $3); $$->info = intonly($1); intonly($3); }
     | '~' expr                { $$ = uniNode('~', $2); $$->info = intonly($2); }

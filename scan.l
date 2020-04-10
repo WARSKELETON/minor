@@ -18,6 +18,8 @@ extern void yyerror(const char *msg);
 
 ^"program"	yy_push_state(X_FILE); return PROGRAM;
 ^"module"	yy_push_state(X_FILE); return MODULE;
+<X_FILE>"program"	return PROGRAM;
+<X_FILE>"module"	return MODULE;
 <X_FILE>"start"		return START;
 <X_FILE>"end"		yy_pop_state(); return END;
 <X_FILE>"function"	return FUNCTION;
