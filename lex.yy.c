@@ -1087,22 +1087,22 @@ YY_RULE_SETUP
 case 39:
 YY_RULE_SETUP
 #line 54 "scan.l"
-{ yylval.i = strtol(yytext, 0, 8); if (errno == ERANGE) yyerror("octal overflow"); return INTEGER; }
+{ yylval.i = strtoimax(yytext, 0, 8); if (errno == ERANGE) yyerror("octal overflow"); return INTEGER; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 55 "scan.l"
-{ yylval.i = strtol(yytext, 0, 10); if (errno == ERANGE) yyerror("decimal overflow"); return INTEGER; } /* Ver melhor */
+{ yylval.i = strtoimax(yytext, 0, 10); if (errno == ERANGE) yyerror("decimal overflow"); return INTEGER; } /* Ver melhor */
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 56 "scan.l"
-{ yylval.i = strtol(yytext, 0, 0); if (errno == ERANGE) yyerror("hexadecimal overflow"); return INTEGER; }
+{ yylval.i = strtoimax(yytext, 0, 0); if (errno == ERANGE) yyerror("hexadecimal overflow"); return INTEGER; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 57 "scan.l"
-{ yylval.i = strtol(yytext+2, 0, 2); if (errno == ERANGE) yyerror("binary overflow"); printf("%d\n", yylval.i); return INTEGER; }
+{ yylval.i = strtoimax(yytext+2, 0, 2); if (errno == ERANGE) yyerror("binary overflow"); printf("%d\n", yylval.i); return INTEGER; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP

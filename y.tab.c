@@ -1360,7 +1360,7 @@ case 35:
 break;
 case 36:
 #line 110 "gram.y"
-	{ yyval.n = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, yystack.l_mark[-3].s)); IDnew(3, yystack.l_mark[-3].s, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 3; yyval.n->info = 3; }
+	{ yyval.n = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, yystack.l_mark[-3].s)); IDnew(3, yystack.l_mark[-3].s, 0); if (yystack.l_mark[-1].n->value.i <= 0) yyerror("invalid array dimensions"); if (IDlevel() == 1) fpar[++fpar[0]] = 3; yyval.n->info = 3; }
 break;
 case 37:
 #line 113 "gram.y"
@@ -1372,7 +1372,7 @@ case 38:
 break;
 case 39:
 #line 115 "gram.y"
-	{ yyval.n = binNode(VAR, intNode(SIZE, yystack.l_mark[-1].n->value.i), strNode(ID, yystack.l_mark[-3].s)); yyval.n->info = 3; }
+	{ yyval.n = binNode(VAR, intNode(SIZE, yystack.l_mark[-1].n->value.i), strNode(ID, yystack.l_mark[-3].s)); if (yystack.l_mark[-1].n->value.i <= 0) yyerror("invalid array dimensions"); yyval.n->info = 3; }
 break;
 case 40:
 #line 116 "gram.y"
@@ -1456,7 +1456,7 @@ case 59:
 break;
 case 60:
 #line 147 "gram.y"
-	{ yyval.n = binNode('#', yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
+	{ yyval.n = binNode('#', yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 5 != 3 && yystack.l_mark[-3].n->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
 break;
 case 61:
 #line 150 "gram.y"

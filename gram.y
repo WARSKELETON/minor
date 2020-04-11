@@ -107,12 +107,12 @@ params  : param         { $$ = binNode(VARS, $1, 0); }
 
 param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); IDnew(2, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 2; $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); IDnew(1, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 1; $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 3; $$->info = 3; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); if ($4->value.i <= 0) yyerror("invalid array dimensions"); if (IDlevel() == 1) fpar[++fpar[0]] = 3; $$->info = 3; }
     ;
 
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, intNode(SIZE, $4->value.i), strNode(ID, $2)); $$->info = 3; }
+    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, intNode(SIZE, $4->value.i), strNode(ID, $2)); if ($4->value.i <= 0) yyerror("invalid array dimensions"); $$->info = 3; }
     | ARRAY ID                      { $$ = binNode(VAR, intNode(SIZE, 0), strNode(ID, $2)); $$->info = 3; }
     ;
 
@@ -144,7 +144,7 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); if ($2->info % 5 == 4 || $4->info % 5 == 4 || $6->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
     | expr ';'                                            { $$ = $1; }
     | expr '!'                                            { $$ = $1; if ($1->info % 5 == 4) yyerror("printing void expression"); }
-    | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); }
+    | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); if ($1->info % 5 != 3 && $1->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
     ;
 
 instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
