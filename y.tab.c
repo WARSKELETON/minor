@@ -1578,7 +1578,7 @@ case 89:
 break;
 case 90:
 #line 195 "gram.y"
-	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); yyval.n->info = 3; }
+	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); if (yystack.l_mark[0].n->info % 5 == 2 || yystack.l_mark[0].n->info % 5 == 4) yyerror("not a pointer"); yyval.n->info = 3; }
 break;
 case 91:
 #line 196 "gram.y"

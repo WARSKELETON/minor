@@ -587,10 +587,9 @@ char *yytext_ptr;
 #include "y.tab.h" 
 char *dupstr(const char *s);
 extern void yyerror(const char *msg);
-int binary(int n);
-#line 592 "lex.yy.c"
+#line 591 "lex.yy.c"
 
-#line 594 "lex.yy.c"
+#line 593 "lex.yy.c"
 
 #define INITIAL 0
 #define X_FILE 1
@@ -822,9 +821,9 @@ YY_DECL
 		}
 
 	{
-#line 14 "scan.l"
+#line 13 "scan.l"
 
-#line 828 "lex.yy.c"
+#line 827 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -895,244 +894,244 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 15 "scan.l"
+#line 14 "scan.l"
 ; /* ignore comments */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 17 "scan.l"
+#line 16 "scan.l"
 yy_push_state(X_COMMENT);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "scan.l"
+#line 17 "scan.l"
 yy_pop_state();
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 19 "scan.l"
+#line 18 "scan.l"
 ; /* ignore content */
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 21 "scan.l"
+#line 20 "scan.l"
 yy_push_state(X_FILE); return PROGRAM;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 22 "scan.l"
+#line 21 "scan.l"
 yy_push_state(X_FILE); return MODULE;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 23 "scan.l"
+#line 22 "scan.l"
 return PROGRAM;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 24 "scan.l"
+#line 23 "scan.l"
 return MODULE;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 25 "scan.l"
+#line 24 "scan.l"
 return START;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 26 "scan.l"
+#line 25 "scan.l"
 yy_pop_state(); return END;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 27 "scan.l"
+#line 26 "scan.l"
 return FUNCTION;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 28 "scan.l"
+#line 27 "scan.l"
 return PUBLIC;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 29 "scan.l"
+#line 28 "scan.l"
 return FORWARD;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 30 "scan.l"
+#line 29 "scan.l"
 return NUMBER;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 31 "scan.l"
+#line 30 "scan.l"
 return ARRAY;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 32 "scan.l"
+#line 31 "scan.l"
 return VOID;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 33 "scan.l"
+#line 32 "scan.l"
 return STRING;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 34 "scan.l"
+#line 33 "scan.l"
 return CONST;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 35 "scan.l"
+#line 34 "scan.l"
 return DO;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 36 "scan.l"
+#line 35 "scan.l"
 return DONE;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 37 "scan.l"
+#line 36 "scan.l"
 return IF;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 38 "scan.l"
+#line 37 "scan.l"
 return THEN;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 39 "scan.l"
+#line 38 "scan.l"
 return ELSE;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 40 "scan.l"
+#line 39 "scan.l"
 return ELIF;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 41 "scan.l"
+#line 40 "scan.l"
 return FI;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 42 "scan.l"
+#line 41 "scan.l"
 return FOR;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 43 "scan.l"
+#line 42 "scan.l"
 return UNTIL;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 44 "scan.l"
+#line 43 "scan.l"
 return STEP;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 45 "scan.l"
+#line 44 "scan.l"
 return REPEAT;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 46 "scan.l"
+#line 45 "scan.l"
 return STOP;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 47 "scan.l"
+#line 46 "scan.l"
 return RETURN;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 48 "scan.l"
+#line 47 "scan.l"
 return LE;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 49 "scan.l"
+#line 48 "scan.l"
 return GE;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 50 "scan.l"
+#line 49 "scan.l"
 return NE;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 51 "scan.l"
+#line 50 "scan.l"
 return ATTR;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 53 "scan.l"
+#line 52 "scan.l"
 { yylval.s = strdup(yytext); return ID; }
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 54 "scan.l"
+#line 53 "scan.l"
 { yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 55 "scan.l"
+#line 54 "scan.l"
 { yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 56 "scan.l"
+#line 55 "scan.l"
 { int n = (int)strtol(yytext, 0, 8); if (n > INT_MAX || n < 0) yyerror("octal overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 57 "scan.l"
+#line 56 "scan.l"
 { yylval.i = atoi(yytext); if (yylval.i > INT_MAX || yylval.i < 0) yyerror("decimal overflow"); return INTEGER; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 58 "scan.l"
+#line 57 "scan.l"
 { int n = (int)strtol(yytext, 0, 0); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 59 "scan.l"
+#line 58 "scan.l"
 { int n = (int)strtol(yytext+2, 0, 2); if (n > INT_MAX || n < 0) yyerror("binary overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 60 "scan.l"
+#line 59 "scan.l"
 return *yytext;
 	YY_BREAK
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 62 "scan.l"
+#line 61 "scan.l"
 ; /* ignore whitespace */
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 64 "scan.l"
+#line 63 "scan.l"
 yyerror("Unknown character"); /* yyerror("Unknown character") */
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 66 "scan.l"
+#line 65 "scan.l"
 ;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 68 "scan.l"
+#line 67 "scan.l"
 ECHO;
 	YY_BREAK
-#line 1136 "lex.yy.c"
+#line 1135 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(X_FILE):
 case YY_STATE_EOF(X_COMMENT):
@@ -2199,7 +2198,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 68 "scan.l"
+#line 67 "scan.l"
 
 int yywrap() { return 1; } 
 char *getyytext() { return yytext; }

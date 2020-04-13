@@ -192,7 +192,7 @@ expr    : lvalue              { $$ = $1; $$->info = $1->info; }
     | string                  { $$ = $1; $$->info = 2; }
     | integer                 { $$ = $1; $$->info = 1; }
     | '-' expr %prec UMINUS   { $$ = uniNode(UMINUS, $2); $$->info = $2->info; intonly($2);}
-    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); $$->info = 3; }
+    | '&' lvalue %prec ADDR   { $$ = uniNode(ADDR, $2); if ($2->info % 5 == 2 || $2->info % 5 == 4) yyerror("not a pointer"); $$->info = 3; }
     | expr '^' expr           { $$ = binNode('^', $1, $3); $$->info = intonly($1); intonly($3); }
     | expr '+' expr           { $$ = binNode('+', $1, $3); $$->info = sum($1, $3); }
 	| expr '-' expr           { $$ = binNode('-', $1, $3); $$->info = sub($1, $3); }

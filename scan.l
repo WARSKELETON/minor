@@ -7,19 +7,18 @@
 #include "y.tab.h" 
 char *dupstr(const char *s);
 extern void yyerror(const char *msg);
-int binary(int n);
 %}
 
 %x X_FILE X_COMMENT
 %%
 <X_FILE>"$$".*\n                      	; /* ignore comments */
 
-<X_FILE>"$"                          	yy_push_state(X_COMMENT);
+<X_FILE>"$"                     yy_push_state(X_COMMENT);
 <X_COMMENT>"$"					yy_pop_state();
 <X_COMMENT>.|\n               	; /* ignore content */
 
-^"program"	yy_push_state(X_FILE); return PROGRAM;
-^"module"	yy_push_state(X_FILE); return MODULE;
+^"program"			yy_push_state(X_FILE); return PROGRAM;
+^"module"			yy_push_state(X_FILE); return MODULE;
 <X_FILE>"program"	return PROGRAM;
 <X_FILE>"module"	return MODULE;
 <X_FILE>"start"		return START;
