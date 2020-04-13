@@ -1,5 +1,5 @@
 program
-    string s := "Hello," 32 'w' 'o' 'r' 'l' 'd' 33 '\n'
+    string s := "Hello," 32 '\4C' 'o' 'r' 'l' 'd' 33 '\n'
 start
     s!
     s := "a";
