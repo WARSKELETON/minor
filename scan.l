@@ -2,10 +2,12 @@
 %{
 #include <stdlib.h> 
 #include <string.h> 
+#include <limits.h>
 #include "node.h" 
 #include "y.tab.h" 
 char *dupstr(const char *s);
 extern void yyerror(const char *msg);
+int binary(int n);
 %}
 
 %x X_FILE X_COMMENT
@@ -51,10 +53,10 @@ extern void yyerror(const char *msg);
 <X_FILE>[A-Za-z][A-Za-z0-9_]*		{ yylval.s = strdup(yytext); return ID; }
 <X_FILE>\'(([^']|\\[nrt']){1})\'	{ yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
 <X_FILE>\"(([^"]|\\[nrt"])*)\"		{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
-<X_FILE>[0][0-7]*					{ yylval.i = strtol(yytext, 0, 8); if (errno == ERANGE) yyerror("octal overflow"); return INTEGER; }
-<X_FILE>[0-9]+						{ yylval.i = strtol(yytext, 0, 10); if (errno == ERANGE) yyerror("decimal overflow"); return INTEGER; } /* Ver melhor */
-<X_FILE>"0x"[0-9a-fA-F]+			{ yylval.i = strtol(yytext, 0, 0); if (errno == ERANGE) yyerror("hexadecimal overflow"); return INTEGER; }
-<X_FILE>"0b"[0-1]+					{ yylval.i = strtol(yytext+2, 0, 2); if (errno == ERANGE) yyerror("binary overflow"); printf("%d\n", yylval.i); return INTEGER; }
+<X_FILE>[0][0-7]*					{ int n = (int)strtol(yytext, 0, 8); if (n > INT_MAX || n < 0) yyerror("octal overflow"); yylval.i = n; return INTEGER; }
+<X_FILE>[1-9][0-9]*				    { yylval.i = atoi(yytext); if (yylval.i > INT_MAX || yylval.i < 0) yyerror("decimal overflow"); return INTEGER; }
+<X_FILE>"0x"[0-9a-fA-F]+			{ int n = (int)strtol(yytext, 0, 0); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
+<X_FILE>"0b"[0-1]+					{ int n = (int)strtol(yytext+2, 0, 2); if (n > INT_MAX || n < 0) yyerror("binary overflow"); yylval.i = n; return INTEGER; }
 <X_FILE>[-+*/%!;,#&|~^<>=()?\[\]]	return *yytext;
 
 <X_FILE>[ \t\n\r]+		; /* ignore whitespace */
