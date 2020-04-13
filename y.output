@@ -52,11 +52,11 @@
 
   34  param : STRING ID
   35        | NUMBER ID
-  36        | ARRAY ID '[' integer ']'
+  36        | ARRAY ID '[' INTEGER ']'
 
   37  var : STRING ID
   38      | NUMBER ID
-  39      | ARRAY ID '[' integer ']'
+  39      | ARRAY ID '[' INTEGER ']'
   40      | ARRAY ID
 
   41  type : NUMBER
@@ -146,17 +146,18 @@
  109          | integerlist
 
  110  integer : INTEGER
+ 111          | CHAR
 
- 111  string : integer integer
- 112         | STR
- 113         | string STR
- 114         | string integer
+ 112  string : integer integer
+ 113         | STR
+ 114         | string STR
+ 115         | string integer
 
- 115  integerlist : integer
- 116              | integerlist ',' integer
+ 116  integerlist : INTEGER
+ 117              | integerlist ',' INTEGER
 
- 117  args : expr
- 118       | args ',' expr
+ 118  args : expr
+ 119       | args ',' expr
 
 state 0
 	$accept : . file $end  (0)
@@ -235,30 +236,31 @@ state 6
 	bodyinstrs : .  (48)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	IF  shift 24
-	FOR  shift 25
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	IF  shift 25
+	FOR  shift 26
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	END  reduce 48
 
-	bodyprincipal  goto 31
-	bodyinstrs  goto 32
-	bodyvars  goto 33
-	var  goto 34
-	instr  goto 35
-	instrs  goto 36
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	bodyprincipal  goto 32
+	bodyinstrs  goto 33
+	bodyvars  goto 34
+	var  goto 35
+	instr  goto 36
+	instrs  goto 37
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 7
@@ -269,15 +271,15 @@ state 7
 
 	PUBLIC  shift 8
 	FORWARD  shift 9
-	NUMBER  shift 41
-	ARRAY  shift 42
-	VOID  shift 43
-	STRING  shift 44
+	NUMBER  shift 42
+	ARRAY  shift 43
+	VOID  shift 44
+	STRING  shift 45
 	.  error
 
-	functype  goto 45
-	qualifier  goto 46
-	type  goto 47
+	functype  goto 46
+	qualifier  goto 47
+	type  goto 48
 
 
 state 8
@@ -295,22 +297,22 @@ state 9
 state 10
 	var : NUMBER . ID  (38)
 
-	ID  shift 48
+	ID  shift 49
 	.  error
 
 
 state 11
-	var : ARRAY . ID '[' integer ']'  (39)
+	var : ARRAY . ID '[' INTEGER ']'  (39)
 	var : ARRAY . ID  (40)
 
-	ID  shift 49
+	ID  shift 50
 	.  error
 
 
 state 12
 	var : STRING . ID  (37)
 
-	ID  shift 50
+	ID  shift 51
 	.  error
 
 
@@ -323,15 +325,15 @@ state 13
 	STRING  shift 12
 	.  error
 
-	var  goto 51
+	var  goto 52
 
 
 state 14
 	program : PROGRAM decls . START bodyprincipal END  (3)
 	decls : decls . ';' decl  (8)
 
-	START  shift 52
-	';'  shift 53
+	START  shift 53
+	';'  shift 54
 	.  error
 
 
@@ -356,17 +358,17 @@ state 17
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	CONST  shift 54
+	CONST  shift 55
 	.  error
 
-	var  goto 55
+	var  goto 56
 
 
 state 18
 	decl : var .  (16)
 	decl : var . ATTR literal  (17)
 
-	ATTR  shift 56
+	ATTR  shift 57
 	START  reduce 16
 	END  reduce 16
 	';'  reduce 16
@@ -382,8 +384,8 @@ state 20
 	module : MODULE decls . END  (5)
 	decls : decls . ';' decl  (8)
 
-	END  shift 57
-	';'  shift 53
+	END  shift 58
+	';'  shift 54
 	.  error
 
 
@@ -394,6 +396,12 @@ state 21
 
 
 state 22
+	integer : CHAR .  (111)
+
+	.  reduce 111
+
+
+state 23
 	lvalue : ID .  (78)
 	lvalue : ID . '[' expr ']'  (79)
 	lvalue : ID . '(' args ')' '[' expr ']'  (81)
@@ -401,8 +409,8 @@ state 22
 	expr : ID . '(' args ')'  (85)
 	expr : ID . '(' ')'  (86)
 
-	'('  shift 58
-	'['  shift 59
+	'('  shift 59
+	'['  shift 60
 	START  reduce 78
 	END  reduce 78
 	DONE  reduce 78
@@ -436,215 +444,223 @@ state 22
 	','  reduce 78
 
 
-state 23
-	string : STR .  (112)
-
-	.  reduce 112
-
-
 state 24
+	string : STR .  (113)
+
+	.  reduce 113
+
+
+state 25
 	instr : IF . expr THEN block FI  (52)
 	instr : IF . expr THEN block elifs ELSE block FI  (53)
 	instr : IF . expr THEN block elifs FI  (54)
 	instr : IF . expr THEN block ELSE block FI  (55)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
-	expr  goto 61
-	integer  goto 39
-	string  goto 40
-
-
-state 25
-	instr : FOR . expr UNTIL expr STEP expr DO $$5 block DONE  (57)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 62
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 26
-	expr : '&' . lvalue  (90)
+	instr : FOR . expr UNTIL expr STEP expr DO $$5 block DONE  (57)
 
 	INTEGER  shift 21
-	ID  shift 63
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 64
-	integer  goto 65
-	string  goto 66
+	lvalue  goto 61
+	expr  goto 63
+	integer  goto 40
+	string  goto 41
 
 
 state 27
-	expr : '~' . expr  (106)
+	expr : '&' . lvalue  (90)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 64
+	STR  shift 24
 	.  error
 
-	lvalue  goto 60
-	expr  goto 67
-	integer  goto 39
-	string  goto 40
+	lvalue  goto 65
+	integer  goto 66
+	string  goto 67
 
 
 state 28
-	expr : '-' . expr  (89)
+	expr : '~' . expr  (106)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 68
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 29
+	expr : '-' . expr  (89)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 69
+	integer  goto 40
+	string  goto 41
+
+
+state 30
 	expr : '?' .  (107)
 
 	.  reduce 107
 
 
-state 30
+state 31
 	expr : '(' . expr ')'  (84)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
-	expr  goto 69
-	integer  goto 39
-	string  goto 40
-
-
-state 31
-	program : PROGRAM START bodyprincipal . END  (4)
-
-	END  shift 70
-	.  error
+	lvalue  goto 61
+	expr  goto 70
+	integer  goto 40
+	string  goto 41
 
 
 state 32
+	program : PROGRAM START bodyprincipal . END  (4)
+
+	END  shift 71
+	.  error
+
+
+state 33
 	bodyprincipal : bodyinstrs .  (45)
 
 	.  reduce 45
 
 
-state 33
+state 34
 	bodyprincipal : bodyvars . bodyinstrs  (44)
 	bodyvars : bodyvars . var ';'  (51)
 	bodyinstrs : .  (48)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	IF  shift 24
-	FOR  shift 25
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	IF  shift 25
+	FOR  shift 26
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	END  reduce 48
 
-	bodyinstrs  goto 71
-	var  goto 72
-	instr  goto 35
-	instrs  goto 36
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
-
-
-state 34
-	bodyvars : var . ';'  (50)
-
-	';'  shift 73
-	.  error
+	bodyinstrs  goto 72
+	var  goto 73
+	instr  goto 36
+	instrs  goto 37
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 35
+	bodyvars : var . ';'  (50)
+
+	';'  shift 74
+	.  error
+
+
+state 36
 	instrs : instr .  (76)
 
 	.  reduce 76
 
 
-state 36
+state 37
 	bodyinstrs : instrs .  (49)
 	instrs : instrs . instr  (77)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	END  reduce 49
 
-	instr  goto 74
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	instr  goto 75
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 37
+state 38
 	instr : lvalue . '#' expr ';'  (60)
 	expr : lvalue .  (83)
 	expr : lvalue . ATTR expr  (103)
 
-	ATTR  shift 75
-	'#'  shift 76
+	ATTR  shift 76
+	'#'  shift 77
 	'|'  reduce 83
 	'&'  reduce 83
 	NE  reduce 83
@@ -663,7 +679,7 @@ state 37
 	'!'  reduce 83
 
 
-state 38
+state 39
 	instr : expr . ';'  (58)
 	instr : expr . '!'  (59)
 	expr : expr . '^' expr  (91)
@@ -681,30 +697,31 @@ state 38
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	';'  shift 91
-	'!'  shift 92
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	';'  shift 92
+	'!'  shift 93
 	.  error
 
 
-state 39
+state 40
 	expr : integer .  (88)
-	string : integer . integer  (111)
+	string : integer . integer  (112)
 
 	INTEGER  shift 21
+	CHAR  shift 22
 	START  reduce 88
 	END  reduce 88
 	DONE  reduce 88
@@ -735,18 +752,19 @@ state 39
 	')'  reduce 88
 	','  reduce 88
 
-	integer  goto 93
+	integer  goto 94
 
 
-state 40
+state 41
 	lvalue : string . '[' expr ']'  (80)
 	expr : string .  (87)
-	string : string . STR  (113)
-	string : string . integer  (114)
+	string : string . STR  (114)
+	string : string . integer  (115)
 
 	INTEGER  shift 21
-	STR  shift 94
-	'['  shift 95
+	CHAR  shift 22
+	STR  shift 95
+	'['  shift 96
 	START  reduce 87
 	END  reduce 87
 	DONE  reduce 87
@@ -777,126 +795,127 @@ state 40
 	')'  reduce 87
 	','  reduce 87
 
-	integer  goto 96
+	integer  goto 97
 
 
-state 41
+state 42
 	type : NUMBER .  (41)
 
 	.  reduce 41
 
 
-state 42
+state 43
 	type : ARRAY .  (42)
 
 	.  reduce 42
 
 
-state 43
+state 44
 	functype : VOID .  (29)
 
 	.  reduce 29
 
 
-state 44
+state 45
 	type : STRING .  (43)
 
 	.  reduce 43
 
 
-state 45
+state 46
 	func : FUNCTION functype . ID $$2 params funcend  (21)
 	func : FUNCTION functype . ID $$4 funcend  (25)
 
-	ID  shift 97
+	ID  shift 98
 	.  error
-
-
-state 46
-	func : FUNCTION qualifier . functype ID $$1 params funcend  (19)
-	func : FUNCTION qualifier . functype ID $$3 funcend  (23)
-
-	NUMBER  shift 41
-	ARRAY  shift 42
-	VOID  shift 43
-	STRING  shift 44
-	.  error
-
-	functype  goto 98
-	type  goto 47
 
 
 state 47
+	func : FUNCTION qualifier . functype ID $$1 params funcend  (19)
+	func : FUNCTION qualifier . functype ID $$3 funcend  (23)
+
+	NUMBER  shift 42
+	ARRAY  shift 43
+	VOID  shift 44
+	STRING  shift 45
+	.  error
+
+	functype  goto 99
+	type  goto 48
+
+
+state 48
 	functype : type .  (28)
 
 	.  reduce 28
 
 
-state 48
+state 49
 	var : NUMBER ID .  (38)
 
 	.  reduce 38
 
 
-state 49
-	var : ARRAY ID . '[' integer ']'  (39)
+state 50
+	var : ARRAY ID . '[' INTEGER ']'  (39)
 	var : ARRAY ID .  (40)
 
-	'['  shift 99
+	'['  shift 100
 	START  reduce 40
 	END  reduce 40
 	ATTR  reduce 40
 	';'  reduce 40
 
 
-state 50
+state 51
 	var : STRING ID .  (37)
 
 	.  reduce 37
 
 
-state 51
+state 52
 	decl : CONST var .  (14)
 	decl : CONST var . ATTR literal  (15)
 
-	ATTR  shift 100
+	ATTR  shift 101
 	START  reduce 14
 	END  reduce 14
 	';'  reduce 14
 
 
-state 52
+state 53
 	program : PROGRAM decls START . bodyprincipal END  (3)
 	bodyinstrs : .  (48)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	IF  shift 24
-	FOR  shift 25
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	IF  shift 25
+	FOR  shift 26
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	END  reduce 48
 
-	bodyprincipal  goto 101
-	bodyinstrs  goto 32
-	bodyvars  goto 33
-	var  goto 34
-	instr  goto 35
-	instrs  goto 36
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	bodyprincipal  goto 102
+	bodyinstrs  goto 33
+	bodyvars  goto 34
+	var  goto 35
+	instr  goto 36
+	instrs  goto 37
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 53
+state 54
 	decls : decls ';' . decl  (8)
 
 	FUNCTION  shift 7
@@ -908,13 +927,13 @@ state 53
 	CONST  shift 13
 	.  error
 
-	decl  goto 102
+	decl  goto 103
 	func  goto 16
 	qualifier  goto 17
 	var  goto 18
 
 
-state 54
+state 55
 	decl : qualifier CONST . var ATTR literal  (10)
 	decl : qualifier CONST . var  (13)
 
@@ -923,86 +942,89 @@ state 54
 	STRING  shift 12
 	.  error
 
-	var  goto 103
+	var  goto 104
 
 
-state 55
+state 56
 	decl : qualifier var . ATTR literal  (11)
 	decl : qualifier var .  (12)
 
-	ATTR  shift 104
+	ATTR  shift 105
 	START  reduce 12
 	END  reduce 12
 	';'  reduce 12
 
 
-state 56
+state 57
 	decl : var ATTR . literal  (17)
 
-	INTEGER  shift 21
-	STR  shift 23
+	INTEGER  shift 106
+	CHAR  shift 22
+	STR  shift 24
 	.  error
 
-	literal  goto 105
-	integer  goto 106
-	integerlist  goto 107
-	string  goto 108
+	literal  goto 107
+	integer  goto 66
+	integerlist  goto 108
+	string  goto 109
 
 
-state 57
+state 58
 	module : MODULE decls END .  (5)
 
 	.  reduce 5
 
 
-state 58
+state 59
 	lvalue : ID '(' . args ')' '[' expr ']'  (81)
 	lvalue : ID '(' . ')' '[' expr ']'  (82)
 	expr : ID '(' . args ')'  (85)
 	expr : ID '(' . ')'  (86)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	')'  shift 109
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	')'  shift 110
 	.  error
 
-	lvalue  goto 60
-	expr  goto 110
-	integer  goto 39
-	string  goto 40
-	args  goto 111
-
-
-state 59
-	lvalue : ID '[' . expr ']'  (79)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
-	expr  goto 112
-	integer  goto 39
-	string  goto 40
+	lvalue  goto 61
+	expr  goto 111
+	integer  goto 40
+	string  goto 41
+	args  goto 112
 
 
 state 60
+	lvalue : ID '[' . expr ']'  (79)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 113
+	integer  goto 40
+	string  goto 41
+
+
+state 61
 	expr : lvalue .  (83)
 	expr : lvalue . ATTR expr  (103)
 
-	ATTR  shift 75
+	ATTR  shift 76
 	START  reduce 83
 	END  reduce 83
 	DONE  reduce 83
@@ -1034,7 +1056,7 @@ state 60
 	','  reduce 83
 
 
-state 61
+state 62
 	instr : IF expr . THEN block FI  (52)
 	instr : IF expr . THEN block elifs ELSE block FI  (53)
 	instr : IF expr . THEN block elifs FI  (54)
@@ -1054,25 +1076,25 @@ state 61
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	THEN  shift 113
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	THEN  shift 114
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	.  error
 
 
-state 62
+state 63
 	instr : FOR expr . UNTIL expr STEP expr DO $$5 block DONE  (57)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -1089,32 +1111,32 @@ state 62
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	UNTIL  shift 114
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	UNTIL  shift 115
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	.  error
 
 
-state 63
+state 64
 	lvalue : ID .  (78)
 	lvalue : ID . '[' expr ']'  (79)
 	lvalue : ID . '(' args ')' '[' expr ']'  (81)
 	lvalue : ID . '(' ')' '[' expr ']'  (82)
 
-	'('  shift 115
-	'['  shift 59
+	'('  shift 116
+	'['  shift 60
 	START  reduce 78
 	END  reduce 78
 	DONE  reduce 78
@@ -1146,35 +1168,37 @@ state 63
 	','  reduce 78
 
 
-state 64
+state 65
 	expr : '&' lvalue .  (90)
 
 	.  reduce 90
 
 
-state 65
-	string : integer . integer  (111)
-
-	INTEGER  shift 21
-	.  error
-
-	integer  goto 93
-
-
 state 66
-	lvalue : string . '[' expr ']'  (80)
-	string : string . STR  (113)
-	string : string . integer  (114)
+	string : integer . integer  (112)
 
 	INTEGER  shift 21
-	STR  shift 94
-	'['  shift 95
+	CHAR  shift 22
 	.  error
 
-	integer  goto 96
+	integer  goto 94
 
 
 state 67
+	lvalue : string . '[' expr ']'  (80)
+	string : string . STR  (114)
+	string : string . integer  (115)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	STR  shift 95
+	'['  shift 96
+	.  error
+
+	integer  goto 97
+
+
+state 68
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -1191,18 +1215,18 @@ state 67
 	expr : expr . '|' expr  (105)
 	expr : '~' expr .  (106)
 
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 106
 	END  reduce 106
 	DONE  reduce 106
@@ -1222,7 +1246,7 @@ state 67
 	','  reduce 106
 
 
-state 68
+state 69
 	expr : '-' expr .  (89)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -1242,7 +1266,7 @@ state 68
 	.  reduce 89
 
 
-state 69
+state 70
 	expr : '(' expr . ')'  (84)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -1259,409 +1283,426 @@ state 69
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	')'  shift 116
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	')'  shift 117
 	.  error
 
 
-state 70
+state 71
 	program : PROGRAM START bodyprincipal END .  (4)
 
 	.  reduce 4
 
 
-state 71
+state 72
 	bodyprincipal : bodyvars bodyinstrs .  (44)
 
 	.  reduce 44
 
 
-state 72
+state 73
 	bodyvars : bodyvars var . ';'  (51)
 
-	';'  shift 117
+	';'  shift 118
 	.  error
 
 
-state 73
+state 74
 	bodyvars : var ';' .  (50)
 
 	.  reduce 50
 
 
-state 74
+state 75
 	instrs : instrs instr .  (77)
 
 	.  reduce 77
 
 
-state 75
+state 76
 	expr : lvalue ATTR . expr  (103)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
-	expr  goto 118
-	integer  goto 39
-	string  goto 40
-
-
-state 76
-	instr : lvalue '#' . expr ';'  (60)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 119
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 77
-	expr : expr '|' . expr  (105)
+	instr : lvalue '#' . expr ';'  (60)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 120
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 78
-	expr : expr '&' . expr  (104)
+	expr : expr '|' . expr  (105)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 121
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 79
-	expr : expr NE . expr  (101)
+	expr : expr '&' . expr  (104)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 122
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 80
-	expr : expr '=' . expr  (102)
+	expr : expr NE . expr  (101)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 123
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 81
-	expr : expr '<' . expr  (97)
+	expr : expr '=' . expr  (102)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 124
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 82
-	expr : expr '>' . expr  (98)
+	expr : expr '<' . expr  (97)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 125
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 83
-	expr : expr LE . expr  (100)
+	expr : expr '>' . expr  (98)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 126
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 84
-	expr : expr GE . expr  (99)
+	expr : expr LE . expr  (100)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 127
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 85
-	expr : expr '+' . expr  (92)
+	expr : expr GE . expr  (99)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 128
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 86
-	expr : expr '-' . expr  (93)
+	expr : expr '+' . expr  (92)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 129
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 87
-	expr : expr '*' . expr  (94)
+	expr : expr '-' . expr  (93)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 130
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 88
-	expr : expr '/' . expr  (95)
+	expr : expr '*' . expr  (94)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 131
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 89
-	expr : expr '%' . expr  (96)
+	expr : expr '/' . expr  (95)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 132
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 90
-	expr : expr '^' . expr  (91)
+	expr : expr '%' . expr  (96)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
+	lvalue  goto 61
 	expr  goto 133
-	integer  goto 39
-	string  goto 40
+	integer  goto 40
+	string  goto 41
 
 
 state 91
+	expr : expr '^' . expr  (91)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 134
+	integer  goto 40
+	string  goto 41
+
+
+state 92
 	instr : expr ';' .  (58)
 
 	.  reduce 58
 
 
-state 92
+state 93
 	instr : expr '!' .  (59)
 
 	.  reduce 59
 
 
-state 93
-	string : integer integer .  (111)
-
-	.  reduce 111
-
-
 state 94
-	string : string STR .  (113)
+	string : integer integer .  (112)
 
-	.  reduce 113
+	.  reduce 112
 
 
 state 95
-	lvalue : string '[' . expr ']'  (80)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
-	expr  goto 134
-	integer  goto 39
-	string  goto 40
-
-
-state 96
-	string : string integer .  (114)
+	string : string STR .  (114)
 
 	.  reduce 114
 
 
+state 96
+	lvalue : string '[' . expr ']'  (80)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 135
+	integer  goto 40
+	string  goto 41
+
+
 state 97
+	string : string integer .  (115)
+
+	.  reduce 115
+
+
+state 98
 	func : FUNCTION functype ID . $$2 params funcend  (21)
 	func : FUNCTION functype ID . $$4 funcend  (25)
 	$$2 : .  (20)
@@ -1673,124 +1714,124 @@ state 97
 	DONE  reduce 24
 	DO  reduce 24
 
-	$$2  goto 135
-	$$4  goto 136
-
-
-state 98
-	func : FUNCTION qualifier functype . ID $$1 params funcend  (19)
-	func : FUNCTION qualifier functype . ID $$3 funcend  (23)
-
-	ID  shift 137
-	.  error
+	$$2  goto 136
+	$$4  goto 137
 
 
 state 99
-	var : ARRAY ID '[' . integer ']'  (39)
+	func : FUNCTION qualifier functype . ID $$1 params funcend  (19)
+	func : FUNCTION qualifier functype . ID $$3 funcend  (23)
 
-	INTEGER  shift 21
+	ID  shift 138
 	.  error
-
-	integer  goto 138
 
 
 state 100
-	decl : CONST var ATTR . literal  (15)
+	var : ARRAY ID '[' . INTEGER ']'  (39)
 
-	INTEGER  shift 21
-	STR  shift 23
+	INTEGER  shift 139
 	.  error
-
-	literal  goto 139
-	integer  goto 106
-	integerlist  goto 107
-	string  goto 108
 
 
 state 101
-	program : PROGRAM decls START bodyprincipal . END  (3)
+	decl : CONST var ATTR . literal  (15)
 
-	END  shift 140
+	INTEGER  shift 106
+	CHAR  shift 22
+	STR  shift 24
 	.  error
+
+	literal  goto 140
+	integer  goto 66
+	integerlist  goto 108
+	string  goto 109
 
 
 state 102
+	program : PROGRAM decls START bodyprincipal . END  (3)
+
+	END  shift 141
+	.  error
+
+
+state 103
 	decls : decls ';' decl .  (8)
 
 	.  reduce 8
 
 
-state 103
+state 104
 	decl : qualifier CONST var . ATTR literal  (10)
 	decl : qualifier CONST var .  (13)
 
-	ATTR  shift 141
+	ATTR  shift 142
 	START  reduce 13
 	END  reduce 13
 	';'  reduce 13
 
 
-state 104
+state 105
 	decl : qualifier var ATTR . literal  (11)
 
-	INTEGER  shift 21
-	STR  shift 23
+	INTEGER  shift 106
+	CHAR  shift 22
+	STR  shift 24
 	.  error
 
-	literal  goto 142
-	integer  goto 106
-	integerlist  goto 107
-	string  goto 108
+	literal  goto 143
+	integer  goto 66
+	integerlist  goto 108
+	string  goto 109
 
 
-state 105
+state 106
+	integer : INTEGER .  (110)
+	integerlist : INTEGER .  (116)
+
+	INTEGER  reduce 110
+	CHAR  reduce 110
+	START  reduce 116
+	END  reduce 116
+	';'  reduce 116
+	','  reduce 116
+
+
+state 107
 	decl : var ATTR literal .  (17)
 
 	.  reduce 17
 
 
-state 106
-	string : integer . integer  (111)
-	integerlist : integer .  (115)
-
-	INTEGER  shift 21
-	START  reduce 115
-	END  reduce 115
-	';'  reduce 115
-	','  reduce 115
-
-	integer  goto 93
-
-
-state 107
+state 108
 	literal : integerlist .  (109)
-	integerlist : integerlist . ',' integer  (116)
+	integerlist : integerlist . ',' INTEGER  (117)
 
-	','  shift 143
+	','  shift 144
 	START  reduce 109
 	END  reduce 109
 	';'  reduce 109
 
 
-state 108
+state 109
 	literal : string .  (108)
-	string : string . STR  (113)
-	string : string . integer  (114)
+	string : string . STR  (114)
+	string : string . integer  (115)
 
 	INTEGER  shift 21
-	STR  shift 94
+	CHAR  shift 22
+	STR  shift 95
 	START  reduce 108
 	END  reduce 108
 	';'  reduce 108
 
-	integer  goto 96
+	integer  goto 97
 
 
-state 109
+state 110
 	lvalue : ID '(' ')' . '[' expr ']'  (82)
 	expr : ID '(' ')' .  (86)
 
-	'['  shift 144
+	'['  shift 145
 	START  reduce 86
 	END  reduce 86
 	DONE  reduce 86
@@ -1822,7 +1863,7 @@ state 109
 	','  reduce 86
 
 
-state 110
+state 111
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -1837,37 +1878,37 @@ state 110
 	expr : expr . '=' expr  (102)
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
-	args : expr .  (117)
+	args : expr .  (118)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	')'  reduce 117
-	','  reduce 117
-
-
-state 111
-	lvalue : ID '(' args . ')' '[' expr ']'  (81)
-	expr : ID '(' args . ')'  (85)
-	args : args . ',' expr  (118)
-
-	')'  shift 145
-	','  shift 146
-	.  error
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	')'  reduce 118
+	','  reduce 118
 
 
 state 112
+	lvalue : ID '(' args . ')' '[' expr ']'  (81)
+	expr : ID '(' args . ')'  (85)
+	args : args . ',' expr  (119)
+
+	')'  shift 146
+	','  shift 147
+	.  error
+
+
+state 113
 	lvalue : ID '[' expr . ']'  (79)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -1884,25 +1925,25 @@ state 112
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	']'  shift 147
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	']'  shift 148
 	.  error
 
 
-state 113
+state 114
 	instr : IF expr THEN . block FI  (52)
 	instr : IF expr THEN . block elifs ELSE block FI  (53)
 	instr : IF expr THEN . block elifs FI  (54)
@@ -1910,86 +1951,89 @@ state 113
 	block : .  (68)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	ELSE  reduce 68
 	ELIF  reduce 68
 	FI  reduce 68
 
-	instr  goto 35
-	instrterm  goto 151
-	block  goto 152
-	instrs  goto 153
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
-
-
-state 114
-	instr : FOR expr UNTIL . expr STEP expr DO $$5 block DONE  (57)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
-	expr  goto 154
-	integer  goto 39
-	string  goto 40
+	instr  goto 36
+	instrterm  goto 152
+	block  goto 153
+	instrs  goto 154
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 115
+	instr : FOR expr UNTIL . expr STEP expr DO $$5 block DONE  (57)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 155
+	integer  goto 40
+	string  goto 41
+
+
+state 116
 	lvalue : ID '(' . args ')' '[' expr ']'  (81)
 	lvalue : ID '(' . ')' '[' expr ']'  (82)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	')'  shift 155
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	')'  shift 156
 	.  error
 
-	lvalue  goto 60
-	expr  goto 110
-	integer  goto 39
-	string  goto 40
-	args  goto 156
+	lvalue  goto 61
+	expr  goto 111
+	integer  goto 40
+	string  goto 41
+	args  goto 157
 
 
-state 116
+state 117
 	expr : '(' expr ')' .  (84)
 
 	.  reduce 84
 
 
-state 117
+state 118
 	bodyvars : bodyvars var ';' .  (51)
 
 	.  reduce 51
 
 
-state 118
+state 119
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2006,20 +2050,20 @@ state 118
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 103
 	END  reduce 103
 	DONE  reduce 103
@@ -2037,7 +2081,7 @@ state 118
 	','  reduce 103
 
 
-state 119
+state 120
 	instr : lvalue '#' expr . ';'  (60)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -2054,25 +2098,25 @@ state 119
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	';'  shift 157
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	';'  shift 158
 	.  error
 
 
-state 120
+state 121
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2089,19 +2133,19 @@ state 120
 	expr : expr . '|' expr  (105)
 	expr : expr '|' expr .  (105)
 
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 105
 	END  reduce 105
 	DONE  reduce 105
@@ -2120,7 +2164,7 @@ state 120
 	','  reduce 105
 
 
-state 121
+state 122
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2137,18 +2181,18 @@ state 121
 	expr : expr '&' expr .  (104)
 	expr : expr . '|' expr  (105)
 
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 104
 	END  reduce 104
 	DONE  reduce 104
@@ -2168,7 +2212,7 @@ state 121
 	','  reduce 104
 
 
-state 122
+state 123
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2185,16 +2229,16 @@ state 122
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 101
 	END  reduce 101
 	DONE  reduce 101
@@ -2216,7 +2260,7 @@ state 122
 	','  reduce 101
 
 
-state 123
+state 124
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2233,16 +2277,16 @@ state 123
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 102
 	END  reduce 102
 	DONE  reduce 102
@@ -2264,7 +2308,7 @@ state 123
 	','  reduce 102
 
 
-state 124
+state 125
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2281,12 +2325,12 @@ state 124
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 97
 	END  reduce 97
 	DONE  reduce 97
@@ -2312,7 +2356,7 @@ state 124
 	','  reduce 97
 
 
-state 125
+state 126
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2329,12 +2373,12 @@ state 125
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 98
 	END  reduce 98
 	DONE  reduce 98
@@ -2360,7 +2404,7 @@ state 125
 	','  reduce 98
 
 
-state 126
+state 127
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2377,12 +2421,12 @@ state 126
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 100
 	END  reduce 100
 	DONE  reduce 100
@@ -2408,7 +2452,7 @@ state 126
 	','  reduce 100
 
 
-state 127
+state 128
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2425,12 +2469,12 @@ state 127
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 99
 	END  reduce 99
 	DONE  reduce 99
@@ -2456,7 +2500,7 @@ state 127
 	','  reduce 99
 
 
-state 128
+state 129
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr '+' expr .  (92)
@@ -2473,10 +2517,10 @@ state 128
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 92
 	END  reduce 92
 	DONE  reduce 92
@@ -2504,7 +2548,7 @@ state 128
 	','  reduce 92
 
 
-state 129
+state 130
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2521,10 +2565,10 @@ state 129
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 93
 	END  reduce 93
 	DONE  reduce 93
@@ -2552,7 +2596,7 @@ state 129
 	','  reduce 93
 
 
-state 130
+state 131
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2569,7 +2613,7 @@ state 130
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'^'  shift 90
+	'^'  shift 91
 	START  reduce 94
 	END  reduce 94
 	DONE  reduce 94
@@ -2600,7 +2644,7 @@ state 130
 	','  reduce 94
 
 
-state 131
+state 132
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2617,7 +2661,7 @@ state 131
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'^'  shift 90
+	'^'  shift 91
 	START  reduce 95
 	END  reduce 95
 	DONE  reduce 95
@@ -2648,7 +2692,7 @@ state 131
 	','  reduce 95
 
 
-state 132
+state 133
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -2665,7 +2709,7 @@ state 132
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'^'  shift 90
+	'^'  shift 91
 	START  reduce 96
 	END  reduce 96
 	DONE  reduce 96
@@ -2696,7 +2740,7 @@ state 132
 	','  reduce 96
 
 
-state 133
+state 134
 	expr : expr . '^' expr  (91)
 	expr : expr '^' expr .  (91)
 	expr : expr . '+' expr  (92)
@@ -2713,7 +2757,7 @@ state 133
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'^'  shift 90
+	'^'  shift 91
 	START  reduce 91
 	END  reduce 91
 	DONE  reduce 91
@@ -2744,7 +2788,7 @@ state 133
 	','  reduce 91
 
 
-state 134
+state 135
 	lvalue : string '[' expr . ']'  (80)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -2761,47 +2805,47 @@ state 134
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	']'  shift 158
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	']'  shift 159
 	.  error
-
-
-state 135
-	func : FUNCTION functype ID $$2 . params funcend  (21)
-
-	NUMBER  shift 159
-	ARRAY  shift 160
-	STRING  shift 161
-	.  error
-
-	params  goto 162
-	param  goto 163
 
 
 state 136
-	func : FUNCTION functype ID $$4 . funcend  (25)
+	func : FUNCTION functype ID $$2 . params funcend  (21)
 
-	DONE  shift 164
-	DO  shift 165
+	NUMBER  shift 160
+	ARRAY  shift 161
+	STRING  shift 162
 	.  error
 
-	funcend  goto 166
+	params  goto 163
+	param  goto 164
 
 
 state 137
+	func : FUNCTION functype ID $$4 . funcend  (25)
+
+	DONE  shift 165
+	DO  shift 166
+	.  error
+
+	funcend  goto 167
+
+
+state 138
 	func : FUNCTION qualifier functype ID . $$1 params funcend  (19)
 	func : FUNCTION qualifier functype ID . $$3 funcend  (23)
 	$$1 : .  (18)
@@ -2813,81 +2857,81 @@ state 137
 	DONE  reduce 22
 	DO  reduce 22
 
-	$$1  goto 167
-	$$3  goto 168
-
-
-state 138
-	var : ARRAY ID '[' integer . ']'  (39)
-
-	']'  shift 169
-	.  error
+	$$1  goto 168
+	$$3  goto 169
 
 
 state 139
+	var : ARRAY ID '[' INTEGER . ']'  (39)
+
+	']'  shift 170
+	.  error
+
+
+state 140
 	decl : CONST var ATTR literal .  (15)
 
 	.  reduce 15
 
 
-state 140
+state 141
 	program : PROGRAM decls START bodyprincipal END .  (3)
 
 	.  reduce 3
 
 
-state 141
+state 142
 	decl : qualifier CONST var ATTR . literal  (10)
 
-	INTEGER  shift 21
-	STR  shift 23
+	INTEGER  shift 106
+	CHAR  shift 22
+	STR  shift 24
 	.  error
 
-	literal  goto 170
-	integer  goto 106
-	integerlist  goto 107
-	string  goto 108
+	literal  goto 171
+	integer  goto 66
+	integerlist  goto 108
+	string  goto 109
 
 
-state 142
+state 143
 	decl : qualifier var ATTR literal .  (11)
 
 	.  reduce 11
 
 
-state 143
-	integerlist : integerlist ',' . integer  (116)
-
-	INTEGER  shift 21
-	.  error
-
-	integer  goto 171
-
-
 state 144
-	lvalue : ID '(' ')' '[' . expr ']'  (82)
+	integerlist : integerlist ',' . INTEGER  (117)
 
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	INTEGER  shift 172
 	.  error
-
-	lvalue  goto 60
-	expr  goto 172
-	integer  goto 39
-	string  goto 40
 
 
 state 145
+	lvalue : ID '(' ')' '[' . expr ']'  (82)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 173
+	integer  goto 40
+	string  goto 41
+
+
+state 146
 	lvalue : ID '(' args ')' . '[' expr ']'  (81)
 	expr : ID '(' args ')' .  (85)
 
-	'['  shift 173
+	'['  shift 174
 	START  reduce 85
 	END  reduce 85
 	DONE  reduce 85
@@ -2919,55 +2963,57 @@ state 145
 	','  reduce 85
 
 
-state 146
-	args : args ',' . expr  (118)
+state 147
+	args : args ',' . expr  (119)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
-	expr  goto 174
-	integer  goto 39
-	string  goto 40
+	lvalue  goto 61
+	expr  goto 175
+	integer  goto 40
+	string  goto 41
 
 
-state 147
+state 148
 	lvalue : ID '[' expr ']' .  (79)
 
 	.  reduce 79
 
 
-state 148
+state 149
 	instrterm : REPEAT .  (61)
 
 	.  reduce 61
 
 
-state 149
+state 150
 	instrterm : STOP .  (62)
 
 	.  reduce 62
 
 
-state 150
+state 151
 	instrterm : RETURN . expr  (63)
 	instrterm : RETURN .  (64)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	START  reduce 64
 	END  reduce 64
 	DONE  reduce 64
@@ -2976,65 +3022,66 @@ state 150
 	FI  reduce 64
 	';'  reduce 64
 
-	lvalue  goto 60
-	expr  goto 175
-	integer  goto 39
-	string  goto 40
+	lvalue  goto 61
+	expr  goto 176
+	integer  goto 40
+	string  goto 41
 
 
-state 151
+state 152
 	block : instrterm .  (69)
 
 	.  reduce 69
 
 
-state 152
+state 153
 	instr : IF expr THEN block . FI  (52)
 	instr : IF expr THEN block . elifs ELSE block FI  (53)
 	instr : IF expr THEN block . elifs FI  (54)
 	instr : IF expr THEN block . ELSE block FI  (55)
 
-	ELSE  shift 176
-	ELIF  shift 177
-	FI  shift 178
+	ELSE  shift 177
+	ELIF  shift 178
+	FI  shift 179
 	.  error
 
-	elif  goto 179
-	elifs  goto 180
+	elif  goto 180
+	elifs  goto 181
 
 
-state 153
+state 154
 	block : instrs .  (70)
 	block : instrs . instrterm  (71)
 	instrs : instrs . instr  (77)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	DONE  reduce 70
 	ELSE  reduce 70
 	ELIF  reduce 70
 	FI  reduce 70
 
-	instr  goto 74
-	instrterm  goto 181
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	instr  goto 75
+	instrterm  goto 182
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 154
+state 155
 	instr : FOR expr UNTIL expr . STEP expr DO $$5 block DONE  (57)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3051,181 +3098,182 @@ state 154
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	STEP  shift 182
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	.  error
-
-
-state 155
-	lvalue : ID '(' ')' . '[' expr ']'  (82)
-
-	'['  shift 144
+	STEP  shift 183
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	.  error
 
 
 state 156
-	lvalue : ID '(' args . ')' '[' expr ']'  (81)
-	args : args . ',' expr  (118)
+	lvalue : ID '(' ')' . '[' expr ']'  (82)
 
-	')'  shift 183
-	','  shift 146
+	'['  shift 145
 	.  error
 
 
 state 157
+	lvalue : ID '(' args . ')' '[' expr ']'  (81)
+	args : args . ',' expr  (119)
+
+	')'  shift 184
+	','  shift 147
+	.  error
+
+
+state 158
 	instr : lvalue '#' expr ';' .  (60)
 
 	.  reduce 60
 
 
-state 158
+state 159
 	lvalue : string '[' expr ']' .  (80)
 
 	.  reduce 80
 
 
-state 159
-	param : NUMBER . ID  (35)
-
-	ID  shift 184
-	.  error
-
-
 state 160
-	param : ARRAY . ID '[' integer ']'  (36)
+	param : NUMBER . ID  (35)
 
 	ID  shift 185
 	.  error
 
 
 state 161
-	param : STRING . ID  (34)
+	param : ARRAY . ID '[' INTEGER ']'  (36)
 
 	ID  shift 186
 	.  error
 
 
 state 162
-	func : FUNCTION functype ID $$2 params . funcend  (21)
-	params : params . ';' param  (33)
+	param : STRING . ID  (34)
 
-	DONE  shift 164
-	DO  shift 165
-	';'  shift 187
+	ID  shift 187
 	.  error
-
-	funcend  goto 188
 
 
 state 163
+	func : FUNCTION functype ID $$2 params . funcend  (21)
+	params : params . ';' param  (33)
+
+	DONE  shift 165
+	DO  shift 166
+	';'  shift 188
+	.  error
+
+	funcend  goto 189
+
+
+state 164
 	params : param .  (32)
 
 	.  reduce 32
 
 
-state 164
+state 165
 	funcend : DONE .  (26)
 
 	.  reduce 26
 
 
-state 165
+state 166
 	funcend : DO . body  (27)
 	blockfunc : .  (72)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	START  reduce 72
 	END  reduce 72
 	';'  reduce 72
 
-	body  goto 189
-	bodyvars  goto 190
-	var  goto 34
-	instr  goto 35
-	instrterm  goto 191
-	blockfunc  goto 192
-	instrs  goto 193
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	body  goto 190
+	bodyvars  goto 191
+	var  goto 35
+	instr  goto 36
+	instrterm  goto 192
+	blockfunc  goto 193
+	instrs  goto 194
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 166
+state 167
 	func : FUNCTION functype ID $$4 funcend .  (25)
 
 	.  reduce 25
 
 
-state 167
+state 168
 	func : FUNCTION qualifier functype ID $$1 . params funcend  (19)
 
-	NUMBER  shift 159
-	ARRAY  shift 160
-	STRING  shift 161
+	NUMBER  shift 160
+	ARRAY  shift 161
+	STRING  shift 162
 	.  error
 
-	params  goto 194
-	param  goto 163
-
-
-state 168
-	func : FUNCTION qualifier functype ID $$3 . funcend  (23)
-
-	DONE  shift 164
-	DO  shift 165
-	.  error
-
-	funcend  goto 195
+	params  goto 195
+	param  goto 164
 
 
 state 169
-	var : ARRAY ID '[' integer ']' .  (39)
+	func : FUNCTION qualifier functype ID $$3 . funcend  (23)
+
+	DONE  shift 165
+	DO  shift 166
+	.  error
+
+	funcend  goto 196
+
+
+state 170
+	var : ARRAY ID '[' INTEGER ']' .  (39)
 
 	.  reduce 39
 
 
-state 170
+state 171
 	decl : qualifier CONST var ATTR literal .  (10)
 
 	.  reduce 10
 
 
-state 171
-	integerlist : integerlist ',' integer .  (116)
-
-	.  reduce 116
-
-
 state 172
+	integerlist : integerlist ',' INTEGER .  (117)
+
+	.  reduce 117
+
+
+state 173
 	lvalue : ID '(' ')' '[' expr . ']'  (82)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3242,44 +3290,45 @@ state 172
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	']'  shift 196
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	']'  shift 197
 	.  error
-
-
-state 173
-	lvalue : ID '(' args ')' '[' . expr ']'  (81)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
-	expr  goto 197
-	integer  goto 39
-	string  goto 40
 
 
 state 174
+	lvalue : ID '(' args ')' '[' . expr ']'  (81)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 198
+	integer  goto 40
+	string  goto 41
+
+
+state 175
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
 	expr : expr . '-' expr  (93)
@@ -3294,27 +3343,27 @@ state 174
 	expr : expr . '=' expr  (102)
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
-	args : args ',' expr .  (118)
+	args : args ',' expr .  (119)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	')'  reduce 118
-	','  reduce 118
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	')'  reduce 119
+	','  reduce 119
 
 
-state 175
+state 176
 	instrterm : RETURN expr .  (63)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3331,20 +3380,20 @@ state 175
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	START  reduce 63
 	END  reduce 63
 	DONE  reduce 63
@@ -3354,256 +3403,261 @@ state 175
 	';'  reduce 63
 
 
-state 176
+state 177
 	instr : IF expr THEN block ELSE . block FI  (55)
 	block : .  (68)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	FI  reduce 68
 
-	instr  goto 35
-	instrterm  goto 151
-	block  goto 198
-	instrs  goto 153
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
-
-
-state 177
-	elif : ELIF . expr THEN block  (65)
-
-	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
-	.  error
-
-	lvalue  goto 60
-	expr  goto 199
-	integer  goto 39
-	string  goto 40
+	instr  goto 36
+	instrterm  goto 152
+	block  goto 199
+	instrs  goto 154
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 178
+	elif : ELIF . expr THEN block  (65)
+
+	INTEGER  shift 21
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
+	.  error
+
+	lvalue  goto 61
+	expr  goto 200
+	integer  goto 40
+	string  goto 41
+
+
+state 179
 	instr : IF expr THEN block FI .  (52)
 
 	.  reduce 52
 
 
-state 179
+state 180
 	elifs : elif .  (66)
 
 	.  reduce 66
 
 
-state 180
+state 181
 	instr : IF expr THEN block elifs . ELSE block FI  (53)
 	instr : IF expr THEN block elifs . FI  (54)
 	elifs : elifs . elif  (67)
 
-	ELSE  shift 200
-	ELIF  shift 177
-	FI  shift 201
+	ELSE  shift 201
+	ELIF  shift 178
+	FI  shift 202
 	.  error
 
-	elif  goto 202
+	elif  goto 203
 
 
-state 181
+state 182
 	block : instrs instrterm .  (71)
 
 	.  reduce 71
 
 
-state 182
+state 183
 	instr : FOR expr UNTIL expr STEP . expr DO $$5 block DONE  (57)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	.  error
 
-	lvalue  goto 60
-	expr  goto 203
-	integer  goto 39
-	string  goto 40
-
-
-state 183
-	lvalue : ID '(' args ')' . '[' expr ']'  (81)
-
-	'['  shift 173
-	.  error
+	lvalue  goto 61
+	expr  goto 204
+	integer  goto 40
+	string  goto 41
 
 
 state 184
+	lvalue : ID '(' args ')' . '[' expr ']'  (81)
+
+	'['  shift 174
+	.  error
+
+
+state 185
 	param : NUMBER ID .  (35)
 
 	.  reduce 35
 
 
-state 185
-	param : ARRAY ID . '[' integer ']'  (36)
+state 186
+	param : ARRAY ID . '[' INTEGER ']'  (36)
 
-	'['  shift 204
+	'['  shift 205
 	.  error
 
 
-state 186
+state 187
 	param : STRING ID .  (34)
 
 	.  reduce 34
 
 
-state 187
+state 188
 	params : params ';' . param  (33)
 
-	NUMBER  shift 159
-	ARRAY  shift 160
-	STRING  shift 161
+	NUMBER  shift 160
+	ARRAY  shift 161
+	STRING  shift 162
 	.  error
 
-	param  goto 205
+	param  goto 206
 
 
-state 188
+state 189
 	func : FUNCTION functype ID $$2 params funcend .  (21)
 
 	.  reduce 21
 
 
-state 189
+state 190
 	funcend : DO body .  (27)
 
 	.  reduce 27
 
 
-state 190
+state 191
 	body : bodyvars . blockfunc  (46)
 	bodyvars : bodyvars . var ';'  (51)
 	blockfunc : .  (72)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
 	NUMBER  shift 10
 	ARRAY  shift 11
 	STRING  shift 12
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	START  reduce 72
 	END  reduce 72
 	';'  reduce 72
 
-	var  goto 72
-	instr  goto 35
-	instrterm  goto 191
-	blockfunc  goto 206
-	instrs  goto 193
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	var  goto 73
+	instr  goto 36
+	instrterm  goto 192
+	blockfunc  goto 207
+	instrs  goto 194
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 191
+state 192
 	blockfunc : instrterm .  (73)
 
 	.  reduce 73
 
 
-state 192
+state 193
 	body : blockfunc .  (47)
 
 	.  reduce 47
 
 
-state 193
+state 194
 	blockfunc : instrs .  (74)
 	blockfunc : instrs . instrterm  (75)
 	instrs : instrs . instr  (77)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	START  reduce 74
 	END  reduce 74
 	';'  reduce 74
 
-	instr  goto 74
-	instrterm  goto 207
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
-
-
-state 194
-	func : FUNCTION qualifier functype ID $$1 params . funcend  (19)
-	params : params . ';' param  (33)
-
-	DONE  shift 164
-	DO  shift 165
-	';'  shift 187
-	.  error
-
-	funcend  goto 208
+	instr  goto 75
+	instrterm  goto 208
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 195
+	func : FUNCTION qualifier functype ID $$1 params . funcend  (19)
+	params : params . ';' param  (33)
+
+	DONE  shift 165
+	DO  shift 166
+	';'  shift 188
+	.  error
+
+	funcend  goto 209
+
+
+state 196
 	func : FUNCTION qualifier functype ID $$3 funcend .  (23)
 
 	.  reduce 23
 
 
-state 196
+state 197
 	lvalue : ID '(' ')' '[' expr ']' .  (82)
 
 	.  reduce 82
 
 
-state 197
+state 198
 	lvalue : ID '(' args ')' '[' expr . ']'  (81)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3620,32 +3674,32 @@ state 197
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
-	']'  shift 209
-	.  error
-
-
-state 198
-	instr : IF expr THEN block ELSE block . FI  (55)
-
-	FI  shift 210
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
+	']'  shift 210
 	.  error
 
 
 state 199
+	instr : IF expr THEN block ELSE block . FI  (55)
+
+	FI  shift 211
+	.  error
+
+
+state 200
 	elif : ELIF expr . THEN block  (65)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3662,66 +3716,67 @@ state 199
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	THEN  shift 211
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	THEN  shift 212
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	.  error
 
 
-state 200
+state 201
 	instr : IF expr THEN block elifs ELSE . block FI  (53)
 	block : .  (68)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	FI  reduce 68
 
-	instr  goto 35
-	instrterm  goto 151
-	block  goto 212
-	instrs  goto 153
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	instr  goto 36
+	instrterm  goto 152
+	block  goto 213
+	instrs  goto 154
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 201
+state 202
 	instr : IF expr THEN block elifs FI .  (54)
 
 	.  reduce 54
 
 
-state 202
+state 203
 	elifs : elifs elif .  (67)
 
 	.  reduce 67
 
 
-state 203
+state 204
 	instr : FOR expr UNTIL expr STEP expr . DO $$5 block DONE  (57)
 	expr : expr . '^' expr  (91)
 	expr : expr . '+' expr  (92)
@@ -3738,182 +3793,182 @@ state 203
 	expr : expr . '&' expr  (104)
 	expr : expr . '|' expr  (105)
 
-	DO  shift 213
-	'|'  shift 77
-	'&'  shift 78
-	NE  shift 79
-	'='  shift 80
-	'<'  shift 81
-	'>'  shift 82
-	LE  shift 83
-	GE  shift 84
-	'+'  shift 85
-	'-'  shift 86
-	'*'  shift 87
-	'/'  shift 88
-	'%'  shift 89
-	'^'  shift 90
+	DO  shift 214
+	'|'  shift 78
+	'&'  shift 79
+	NE  shift 80
+	'='  shift 81
+	'<'  shift 82
+	'>'  shift 83
+	LE  shift 84
+	GE  shift 85
+	'+'  shift 86
+	'-'  shift 87
+	'*'  shift 88
+	'/'  shift 89
+	'%'  shift 90
+	'^'  shift 91
 	.  error
-
-
-state 204
-	param : ARRAY ID '[' . integer ']'  (36)
-
-	INTEGER  shift 21
-	.  error
-
-	integer  goto 214
 
 
 state 205
+	param : ARRAY ID '[' . INTEGER ']'  (36)
+
+	INTEGER  shift 215
+	.  error
+
+
+state 206
 	params : params ';' param .  (33)
 
 	.  reduce 33
 
 
-state 206
+state 207
 	body : bodyvars blockfunc .  (46)
 
 	.  reduce 46
 
 
-state 207
+state 208
 	blockfunc : instrs instrterm .  (75)
 
 	.  reduce 75
 
 
-state 208
+state 209
 	func : FUNCTION qualifier functype ID $$1 params funcend .  (19)
 
 	.  reduce 19
 
 
-state 209
+state 210
 	lvalue : ID '(' args ')' '[' expr ']' .  (81)
 
 	.  reduce 81
 
 
-state 210
+state 211
 	instr : IF expr THEN block ELSE block FI .  (55)
 
 	.  reduce 55
 
 
-state 211
+state 212
 	elif : ELIF expr THEN . block  (65)
 	block : .  (68)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	ELSE  reduce 68
 	ELIF  reduce 68
 	FI  reduce 68
 
-	instr  goto 35
-	instrterm  goto 151
-	block  goto 215
-	instrs  goto 153
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
-
-
-state 212
-	instr : IF expr THEN block elifs ELSE block . FI  (53)
-
-	FI  shift 216
-	.  error
+	instr  goto 36
+	instrterm  goto 152
+	block  goto 216
+	instrs  goto 154
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
 state 213
+	instr : IF expr THEN block elifs ELSE block . FI  (53)
+
+	FI  shift 217
+	.  error
+
+
+state 214
 	instr : FOR expr UNTIL expr STEP expr DO . $$5 block DONE  (57)
 	$$5 : .  (56)
 
 	.  reduce 56
 
-	$$5  goto 217
-
-
-state 214
-	param : ARRAY ID '[' integer . ']'  (36)
-
-	']'  shift 218
-	.  error
+	$$5  goto 218
 
 
 state 215
+	param : ARRAY ID '[' INTEGER . ']'  (36)
+
+	']'  shift 219
+	.  error
+
+
+state 216
 	elif : ELIF expr THEN block .  (65)
 
 	.  reduce 65
 
 
-state 216
+state 217
 	instr : IF expr THEN block elifs ELSE block FI .  (53)
 
 	.  reduce 53
 
 
-state 217
+state 218
 	instr : FOR expr UNTIL expr STEP expr DO $$5 . block DONE  (57)
 	block : .  (68)
 
 	INTEGER  shift 21
-	ID  shift 22
-	STR  shift 23
-	IF  shift 24
-	FOR  shift 25
-	REPEAT  shift 148
-	STOP  shift 149
-	RETURN  shift 150
-	'&'  shift 26
-	'~'  shift 27
-	'-'  shift 28
-	'?'  shift 29
-	'('  shift 30
+	CHAR  shift 22
+	ID  shift 23
+	STR  shift 24
+	IF  shift 25
+	FOR  shift 26
+	REPEAT  shift 149
+	STOP  shift 150
+	RETURN  shift 151
+	'&'  shift 27
+	'~'  shift 28
+	'-'  shift 29
+	'?'  shift 30
+	'('  shift 31
 	DONE  reduce 68
 
-	instr  goto 35
-	instrterm  goto 151
-	block  goto 219
-	instrs  goto 153
-	lvalue  goto 37
-	expr  goto 38
-	integer  goto 39
-	string  goto 40
+	instr  goto 36
+	instrterm  goto 152
+	block  goto 220
+	instrs  goto 154
+	lvalue  goto 38
+	expr  goto 39
+	integer  goto 40
+	string  goto 41
 
 
-state 218
-	param : ARRAY ID '[' integer ']' .  (36)
+state 219
+	param : ARRAY ID '[' INTEGER ']' .  (36)
 
 	.  reduce 36
 
 
-state 219
+state 220
 	instr : FOR expr UNTIL expr STEP expr DO $$5 block . DONE  (57)
 
-	DONE  shift 220
+	DONE  shift 221
 	.  error
 
 
-state 220
+state 221
 	instr : FOR expr UNTIL expr STEP expr DO $$5 block DONE .  (57)
 
 	.  reduce 57
 
 
-72 terminals, 37 nonterminals
-119 grammar rules, 221 states
+73 terminals, 37 nonterminals
+120 grammar rules, 222 states

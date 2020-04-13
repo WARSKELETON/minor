@@ -34,7 +34,7 @@ int arraysize;
     Node *n;	    /* tree node */
 }
 
-%token <i> INTEGER
+%token <i> INTEGER CHAR
 %token <s> ID STR
 %token PROGRAM MODULE START END FUNCTION PUBLIC FORWARD NUMBER ARRAY VOID STRING CONST DONE DO
 %token IF THEN ELSE ELIF FI FOR UNTIL STEP REPEAT STOP RETURN
@@ -107,12 +107,12 @@ params  : param         { $$ = binNode(VARS, $1, 0); }
 
 param    : STRING ID                { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); IDnew(2, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 2; $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); IDnew(1, $2, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 1; $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, uniNode(ARRAY, nilNode(ARRAY)), strNode(ID, $2)); IDnew(3, $2, 0); if ($4->value.i <= 0) yyerror("invalid array dimensions"); if (IDlevel() == 1) fpar[++fpar[0]] = 3; $$->info = 3; }
+    | ARRAY ID '[' INTEGER ']'      { $$ = binNode(VAR, intNode(SIZE, $4), strNode(ID, $2)); IDnew(3, $2, 0); if ($4 <= 0) yyerror("invalid array dimensions"); if (IDlevel() == 1) fpar[++fpar[0]] = 3; $$->info = 3; }
     ;
 
 var    : STRING ID                  { $$ = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, $2)); $$->info = 2; }
     | NUMBER ID                     { $$ = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, $2)); $$->info = 1; }
-    | ARRAY ID '[' integer ']'      { $$ = binNode(VAR, intNode(SIZE, $4->value.i), strNode(ID, $2)); if ($4->value.i <= 0) yyerror("invalid array dimensions"); $$->info = 3; }
+    | ARRAY ID '[' INTEGER ']'      { $$ = binNode(VAR, intNode(SIZE, $4), strNode(ID, $2)); if ($4 <= 0) yyerror("invalid array dimensions"); $$->info = 3; }
     | ARRAY ID                      { $$ = binNode(VAR, intNode(SIZE, 0), strNode(ID, $2)); $$->info = 3; }
     ;
 
@@ -217,6 +217,7 @@ literal : string                { $$ = $1; $$->info = $1->info; }
     ;
 
 integer : INTEGER               { $$ = intNode(INTEGER, $1); $$->info = 1; }
+    | CHAR                      { $$ = intNode(INTEGER, $1); $$->info = 1; }
     ;
 
 string   : integer integer   { $$ = binNode(STR, $1, $2); $$->info = 2; }
@@ -224,8 +225,8 @@ string   : integer integer   { $$ = binNode(STR, $1, $2); $$->info = 2; }
     | string STR             { $$ = binNode(STR, $1, $2); $$->info = 2; }
     | string integer         { $$ = binNode(STR, $1, $2); $$->info = 2; }
 
-integerlist : integer                   { $$ = $1; $$->info = $1->info; arraysize = 1; }
-    | integerlist ',' integer           { $$ = binNode(',', $1, $3); $$->info = 3; arraysize++; }
+integerlist : INTEGER                   { $$ = intNode(INTEGER, $1); $$->info = 1; arraysize = 1; }
+    | integerlist ',' INTEGER           { $$ = binNode(',', $1, intNode(INTEGER, $3)); $$->info = 3; arraysize++; }
     ;
 
 args	: expr	                      { $$ = binNode(ARGS, nilNode(NIL), $1); }

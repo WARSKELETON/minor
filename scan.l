@@ -7,7 +7,6 @@
 #include "y.tab.h" 
 char *dupstr(const char *s);
 extern void yyerror(const char *msg);
-int character(char *s);
 int n;
 %}
 
@@ -24,7 +23,7 @@ int n;
 <X_FILE>"program"	return PROGRAM;
 <X_FILE>"module"	return MODULE;
 <X_FILE>"start"		return START;
-<X_FILE>"end"		yy_pop_state(); return END;
+<X_FILE>^"end"		yy_pop_state(); return END;
 <X_FILE>"function"	return FUNCTION;
 <X_FILE>"public"	return PUBLIC;
 <X_FILE>"forward"	return FORWARD;
@@ -55,8 +54,8 @@ int n;
 
 <X_FILE>"\'"                            { yy_push_state(X_CHAR); n = 0; }
 <X_CHAR>"\\"                		    { yy_push_state(X_CHAR_BACKSLASH); }
-<X_CHAR>"\'"                		    { yy_pop_state(); if (n > 1) yyerror("invalid character"); return INTEGER; }
-<X_CHAR>.                   		    { yylval.i = yytext[0]; n++; printf("%c %d\n", yytext[0], yylval.i); }
+<X_CHAR>"\'"                		    { yy_pop_state(); if (n > 1) yyerror("invalid character"); return CHAR; }
+<X_CHAR>.                   		    { yylval.i = yytext[0]; n++; }
 <X_CHAR_BACKSLASH>"\'"             		{ yylval.i = "\'"[0]; n++; yy_pop_state(); }
 <X_CHAR_BACKSLASH>"\\"             		{ yylval.i = "\\"[0]; n++; yy_pop_state(); }
 <X_CHAR_BACKSLASH>"n"              		{ yylval.i = "\n"[0]; n++; yy_pop_state(); }
@@ -86,27 +85,10 @@ int n;
 
 <X_FILE>[ \t\n\r]+		; /* ignore whitespace */
 
-<X_FILE>.				yyerror("Unknown character"); /* yyerror("Unknown character") */
+<X_FILE>.				yyerror("Unknown character");
 
 .						;
 
 %% 
 int yywrap() { return 1; } 
 char *getyytext() { return yytext; }
-
-int character(char *s) {
-  int val, i, pos;
-  for (val = pos = i = 0; s[pos] != '\'' && i < 4; i++, pos++) {
-    if (s[pos] == '*')
-      switch(s[++pos]) {
-        case '*': case '(': case ')':  case '\'': case '"':  break;
-	case 't': s[pos] = '\t'; break;
-	case 'n': s[pos] = '\n'; break;
-	case '0': s[pos] = '\0'; break;
-	default: yyerror("invalid character escape sequence"); break;
-      }
-    val |= s[pos] << (i*8);
-  }
-  if (i == 4 && s[pos] != '\'') yyerror("character sequence too long");
-  return val;
-}
