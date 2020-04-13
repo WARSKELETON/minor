@@ -935,7 +935,7 @@ void declare(Node *qualifier, int cnst, Node *type, char *name, Node *value)
   	return; /* NULL pointer */
   if ((typ = value->info) % 10 > 5) typ -= 5;
   if (type->info == 3) {
-    if (LEFT_CHILD(type)->value.i != arraysize) {
+    if (LEFT_CHILD(type)->value.i < arraysize) {
         yyerror("array size doesn't correspond to attributions");
     }
   }

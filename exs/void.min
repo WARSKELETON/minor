@@ -1,4 +1,6 @@
 program
-    array x['\2'] := 1, 2
+    function forward number sum number x; number y done;
+    function number sum number x; string y do
+        return x
 start
 end
