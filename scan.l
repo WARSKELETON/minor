@@ -9,7 +9,7 @@ char *dupstr(const char *s);
 extern void yyerror(const char *msg);
 %}
 
-%x X_FILE X_COMMENT
+%x X_FILE X_COMMENT X_STRING X_BACKSLASH
 %%
 <X_FILE>"$$".*\n                      	; /* ignore comments */
 
@@ -51,7 +51,18 @@ extern void yyerror(const char *msg);
 
 <X_FILE>[A-Za-z][A-Za-z0-9_]*		{ yylval.s = strdup(yytext); return ID; }
 <X_FILE>\'(([^']|\\[nrt']){1})\'	{ yytext[yyleng-1] = 0; yylval.i = strtol(yytext, 0, 10); return INTEGER; } /* resolver este e overflows */
-<X_FILE>\"(([^"]|\\[nrt"])*)\"		{ yytext[yyleng-1] = 0; yylval.s = dupstr(yytext+1); return STR; }
+<X_FILE>\"([^*"]|\*.)*\"			{ yylval.s = malloc(yyleng); *yylval.s = 0; REJECT; }
+<X_FILE>"\""                        { yy_push_state(X_STRING); }
+<X_STRING>"\\"                		{ yy_push_state(X_BACKSLASH); }
+<X_STRING>"\""                		{ yy_pop_state(); return STR; }
+<X_STRING>.                   		{ strcat(yylval.s, yytext); }
+<X_BACKSLASH>"\""             		{ strcat(yylval.s, yytext); yy_pop_state(); }
+<X_BACKSLASH>"\\"             		{ strcat(yylval.s, "\\"); yy_pop_state(); }
+<X_BACKSLASH>"n"              		{ strcat(yylval.s, "\n"); yy_pop_state(); }
+<X_BACKSLASH>"r"              		{ strcat(yylval.s, "\r"); yy_pop_state(); }
+<X_BACKSLASH>"t"              		{ strcat(yylval.s, "\t"); yy_pop_state(); }
+<X_BACKSLASH>[0-9A-Fa-f]{1,2} 		{ strcat(yylval.s, yytext); yy_pop_state(); }
+<X_BACKSLASH>.                		{ strcat(yylval.s, yytext); yy_pop_state(); }
 <X_FILE>[0][0-7]*					{ int n = (int)strtol(yytext, 0, 8); if (n > INT_MAX || n < 0) yyerror("octal overflow"); yylval.i = n; return INTEGER; }
 <X_FILE>[1-9][0-9]*				    { yylval.i = atoi(yytext); if (yylval.i > INT_MAX || yylval.i < 0) yyerror("decimal overflow"); return INTEGER; }
 <X_FILE>"0x"[0-9a-fA-F]+			{ int n = (int)strtol(yytext, 0, 0); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
