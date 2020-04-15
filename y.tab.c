@@ -916,18 +916,15 @@ int sub(Node *arg1, Node *arg2) {
 }
 
 int noassign(Node *arg1, Node *arg2) {
-    /* TODO */
 	int t1 = arg1->info, t2 = arg2->info;
     t1 = t1 % 5;
     t2 = t2 % 5;
 	if (t1 == t2) return 0;
+    if (t1 == 2 && t2 == 1 && arg2->attrib == CHAR && arg2->value.i == 0) return 1; /* string := '\0' */
 	if (t1 == 3 && t2 == 1) return 0; /* array := int */
-	if (t1 == 1 && t2 == 3) return 0; /* int := array */
-	if (t1 == 2 && t2 == 1) return 0; /* string := int* */
+	if (t1 == 2 && t2 == 1 && arg2->attrib == CHAR) return 0; /* string := char */
 	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* string := 0 */
-	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
-		return 0; /* pointer := 0 */
 	return 1;
 }
 
@@ -1031,7 +1028,7 @@ int checkargs(char *name, Node *args) {
 	}
 	return typ % 20;
 }
-#line 1035 "y.tab.c"
+#line 1032 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1693,7 +1690,7 @@ case 114:
 break;
 case 115:
 #line 222 "gram.y"
-	{ yyval.n = intNode(INTEGER, yystack.l_mark[0].i); yyval.n->info = 1; }
+	{ yyval.n = intNode(CHAR, yystack.l_mark[0].i); yyval.n->info = 1; }
 break;
 case 116:
 #line 225 "gram.y"
@@ -1727,7 +1724,7 @@ case 123:
 #line 235 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1731 "y.tab.c"
+#line 1728 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

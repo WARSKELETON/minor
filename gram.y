@@ -219,7 +219,7 @@ literal : string                { $$ = $1; $$->info = $1->info; }
     ;
 
 integer : INTEGER               { $$ = intNode(INTEGER, $1); $$->info = 1; }
-    | CHAR                      { $$ = intNode(INTEGER, $1); $$->info = 1; }
+    | CHAR                      { $$ = intNode(CHAR, $1); $$->info = 1; }
     ;
 
 string   : integer integer   { $$ = binNode(STR, $1, $2); $$->info = 2; }
@@ -286,18 +286,15 @@ int sub(Node *arg1, Node *arg2) {
 }
 
 int noassign(Node *arg1, Node *arg2) {
-    /* TODO */
 	int t1 = arg1->info, t2 = arg2->info;
     t1 = t1 % 5;
     t2 = t2 % 5;
 	if (t1 == t2) return 0;
+    if (t1 == 2 && t2 == 1 && arg2->attrib == CHAR && arg2->value.i == 0) return 1; /* string := '\0' */
 	if (t1 == 3 && t2 == 1) return 0; /* array := int */
-	if (t1 == 1 && t2 == 3) return 0; /* int := array */
-	if (t1 == 2 && t2 == 1) return 0; /* string := int* */
+	if (t1 == 2 && t2 == 1 && arg2->attrib == CHAR) return 0; /* string := char */
 	if (t1 == 2 && arg2->attrib == INTEGER && arg2->value.i == 0)
 		return 0; /* string := 0 */
-	if (t1 > 10 && t1 < 20 && arg2->attrib == INTEGER && arg2->value.i == 0)
-		return 0; /* pointer := 0 */
 	return 1;
 }
 
