@@ -1,19 +1,8 @@
-Funcao de ackermann: nao usar argumentos superiores a m=3 n=12
-program $ ackermann $
-number cnt := 0;
-char x;
-function forward number atoi string s done;
-function forward number argc done;
-function forward string argv number n done;
-function number ackermann number m ; number n do
-  cnt := cnt + 1;
-  if m = 0 then return n+1 fi
-  if n = 0 then return ackermann(m-1, 1) fi
-  return ackermann(m-1, ackermann(m, n-1))
+program
+    number i := 2;
+    function void f number i do i+1!
 start
-  cnt + 2 := 2;
-  if argc > 2 then
-     ackermann(atoi(argv(1)), atoi(argv(2)))! " #"! cnt! "\n"!
-  fi
+    number i;
+    i := 0;
+    f(i); $$ Should print 1
 end
-Fim da funcao de ackermann

@@ -24,6 +24,7 @@ static int ncicl;
 static char *fpar;
 int typereturn;
 int arraysize;
+int inMain = 0;
 %}
 
 %union {
@@ -59,8 +60,8 @@ file    : program                       { if (yynerrs == 0) printNode($1,0,yynam
     | module                            { if (yynerrs == 0) printNode($1,0,yynames); }
     ;
 
-program : PROGRAM decls START bodyprincipal END  { $$ = binNode(PROGRAM, $2, $4); }
-    | PROGRAM START bodyprincipal END            { $$ = uniNode(PROGRAM, $3); }
+program : PROGRAM decls START { IDpush(); inMain = 1; } bodyprincipal END  { $$ = binNode(PROGRAM, $2, $5); IDpop(); }
+    | PROGRAM START { IDpush(); inMain = 1; } bodyprincipal END            { $$ = uniNode(PROGRAM, $4); IDpop(); }
     ;
 
 module  : MODULE decls END              { $$ = uniNode(MODULE, $2); }
@@ -133,8 +134,8 @@ bodyinstrs : /* empty */        { $$ = nilNode(NIL); }
     | instrs                    { $$ = binNode(BODY, $1, 0); }
     ;
 
-bodyvars : var ';'              { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); $$ = binNode(VARS, $1, 0); }
-    | bodyvars var ';'          { IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); $$ = binNode(VARS, $1, $2); }
+bodyvars : var ';'              { int typ = IDsearch(RIGHT_CHILD($1)->value.s, (long*)IDtest,0,1); if (typ <= 0) IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); else yyerror("duplicated var"); $$ = binNode(VARS, $1, 0); }
+    | bodyvars var ';'          { int typ = IDsearch(RIGHT_CHILD($2)->value.s, (long*)IDtest,0,1); if (typ <= 0) IDnew($2->info, RIGHT_CHILD($2)->value.s, 0); else yyerror("duplicated var"); $$ = binNode(VARS, $1, $2); }
     ;
 
 instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2, $4); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
@@ -150,8 +151,8 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
 
 instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
     | STOP              { $$ = nilNode(STOP); if (ncicl <= 0) yyerror("invalid stop argument"); }
-    | RETURN expr       { if (IDlevel() == 0 && $2->info != 1) yyerror("return non integer out of function"); if (IDlevel() > 0 && typereturn != $2->info) yyerror("return type differs from function type"); $$ = uniNode(RETURN_EXPR, $2); }
-    | RETURN            { if (IDlevel() == 0) yyerror("return void out of function"); if (typereturn != 4) yyerror("return type differs from function type"); $$ = nilNode(RETURN); }
+    | RETURN expr       { if (inMain && $2->info != 1) yyerror("return non integer out of function"); if (!inMain && typereturn != $2->info) yyerror("return type differs from function type"); $$ = uniNode(RETURN_EXPR, $2); }
+    | RETURN            { if (inMain) yyerror("return void out of function"); if (typereturn != 4) yyerror("return type differs from function type"); $$ = nilNode(RETURN); }
     ;
 
 elif    : ELIF expr THEN block    { $$ = binNode(ELIF, $2, $4); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
@@ -353,12 +354,12 @@ void function(Node *qualifier, Node *type, char *name, Node *body)
     else if (bloco == 0) {
         yyerror("not forward function without body");
     }
-	/* if (bloco != 0) {
+	if (bloco != 0) {
 		long par;
 		int fwd = IDfind(name, &par);
 		if (fwd > 40) yyerror("duplicate function");
 		else IDreplace(fwd+40, name, par);
-	} */
+	}
 }
 
 int checkargs(char *name, Node *args) {
