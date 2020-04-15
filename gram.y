@@ -81,6 +81,7 @@ decl    : func                          { $$ = $1; }
     | CONST var ATTR literal            { IDnew($2->info+5, RIGHT_CHILD($2)->value.s, 0); declare(0, 1, $2, RIGHT_CHILD($2)->value.s, $4); $$ = binNode(DECL, $2, $4); }
     | var                               { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, 0); $$ = $1; }
     | var ATTR literal                  { IDnew($1->info, RIGHT_CHILD($1)->value.s, 0); declare(0, 0, $1, RIGHT_CHILD($1)->value.s, $3); $$ = binNode(DECL, $1, $3); }
+    | error                             { $$ = nilNode(NIL); }
     ;
 
 func    : FUNCTION qualifier functype ID { enter($2, $3->info, $4); typereturn = $3->info; } params funcend   { $$ = binNode(QUALIFIER, $2, binNode(FUNCTYPE, $3, binNode(ID, strNode(ID, $4), binNode(VARS, $6, uniNode(END, $7))))); function($2, $3, $4, $7); }
@@ -143,6 +144,7 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | IF expr THEN block ELSE block FI                    { $$ = binNode(IF, $2, binNode(THEN, $4, uniNode(ELSE, $6))); if ($2->info % 5 == 4) yyerror("condition as void expression"); }
     | FOR expr UNTIL expr STEP expr DO { ncicl++; } block DONE         { $$ = binNode(FOR, $2, binNode(UNTIL, $4, binNode(STEP, $6, uniNode(DO, $9)))); if ($2->info % 5 == 4 || $4->info % 5 == 4 || $6->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
     | expr ';'                                            { $$ = $1; }
+    | error ';'                                           { $$ = nilNode(NIL); }
     | expr '!'                                            { $$ = $1; if ($1->info % 5 == 4) yyerror("printing void expression"); }
     | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); if ($1->info % 5 != 3 && $1->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
     ;

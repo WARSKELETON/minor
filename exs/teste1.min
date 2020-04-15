@@ -1,0 +1,5 @@
+program
+number cnt := 0
+start
+  2 + cnt := 2;
+end
