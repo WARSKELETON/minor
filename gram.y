@@ -5,7 +5,6 @@
 #include <string.h>
 #include "node.h"
 #include "tabid.h"
-#define YYDEBUG 1
 int yylex();
 void evaluate(Node *p);
 void yyerror(char *s);
@@ -56,8 +55,8 @@ int arraysize;
 %token NIL DECLS DECL FUNCTYPE QUALIFIER VARS VAR SIZE BODY RETURN_EXPR BLOCK INSTRS ARGS LOCAL CALL
 
 %%
-file    : program                       { printNode($1,0,yynames); }
-    | module                            { printNode($1,0,yynames); }
+file    : program                       { if (yynerrs == 0) printNode($1,0,yynames); }
+    | module                            { if (yynerrs == 0) printNode($1,0,yynames); }
     ;
 
 program : PROGRAM decls START bodyprincipal END  { $$ = binNode(PROGRAM, $2, $4); }

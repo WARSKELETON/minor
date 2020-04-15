@@ -2,8 +2,6 @@ forward
     IDFind com IDtest
     IDFind
 trunca a 255 dos inteiros nas strings
-ynerror > 0 não imprimir
-makefile
 program
     function forward number sum number x; number y done;
     function number sum number x; string y do

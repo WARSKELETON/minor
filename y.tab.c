@@ -24,7 +24,6 @@
 #include <string.h>
 #include "node.h"
 #include "tabid.h"
-#define YYDEBUG 1
 int yylex();
 void evaluate(Node *p);
 void yyerror(char *s);
@@ -44,7 +43,7 @@ static int ncicl;
 static char *fpar;
 int typereturn;
 int arraysize;
-#line 30 "gram.y"
+#line 29 "gram.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -58,7 +57,7 @@ typedef union {
     Node *n;	    /* tree node */
 } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 62 "y.tab.c"
+#line 61 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -864,7 +863,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 238 "gram.y"
+#line 237 "gram.y"
 
 char **yynames =
 #if YYDEBUG > 0
@@ -1031,7 +1030,7 @@ int checkargs(char *name, Node *args) {
 	}
 	return typ % 20;
 }
-#line 1035 "y.tab.c"
+#line 1034 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1234,492 +1233,492 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 59 "gram.y"
-	{ printNode(yystack.l_mark[0].n,0,yynames); }
+#line 58 "gram.y"
+	{ if (yynerrs == 0) printNode(yystack.l_mark[0].n,0,yynames); }
 break;
 case 2:
-#line 60 "gram.y"
-	{ printNode(yystack.l_mark[0].n,0,yynames); }
+#line 59 "gram.y"
+	{ if (yynerrs == 0) printNode(yystack.l_mark[0].n,0,yynames); }
 break;
 case 3:
-#line 63 "gram.y"
+#line 62 "gram.y"
 	{ yyval.n = binNode(PROGRAM, yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
 break;
 case 4:
-#line 64 "gram.y"
+#line 63 "gram.y"
 	{ yyval.n = uniNode(PROGRAM, yystack.l_mark[-1].n); }
 break;
 case 5:
-#line 67 "gram.y"
+#line 66 "gram.y"
 	{ yyval.n = uniNode(MODULE, yystack.l_mark[-1].n); }
 break;
 case 6:
-#line 68 "gram.y"
+#line 67 "gram.y"
 	{ yyval.n = nilNode(MODULE); }
 break;
 case 7:
-#line 71 "gram.y"
+#line 70 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 8:
-#line 72 "gram.y"
+#line 71 "gram.y"
 	{ yyval.n = binNode(DECLS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 9:
-#line 75 "gram.y"
+#line 74 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 10:
-#line 76 "gram.y"
+#line 75 "gram.y"
 	{ IDnew(yystack.l_mark[-2].n->info+5, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, 0); declare(yystack.l_mark[-4].n, 1, yystack.l_mark[-2].n, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, yystack.l_mark[0].n); yyval.n = binNode(QUALIFIER, yystack.l_mark[-4].n, binNode(VAR, yystack.l_mark[-2].n, yystack.l_mark[0].n)); }
 break;
 case 11:
-#line 77 "gram.y"
+#line 76 "gram.y"
 	{ IDnew(yystack.l_mark[-2].n->info, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, 0); declare(yystack.l_mark[-3].n, 0, yystack.l_mark[-2].n, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, yystack.l_mark[0].n); yyval.n = binNode(QUALIFIER, yystack.l_mark[-3].n, binNode(VAR, yystack.l_mark[-2].n, yystack.l_mark[0].n)); }
 break;
 case 12:
-#line 78 "gram.y"
+#line 77 "gram.y"
 	{ IDnew(yystack.l_mark[0].n->info, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); declare(yystack.l_mark[-1].n, 0, yystack.l_mark[0].n, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); yyval.n = binNode(DECL, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 13:
-#line 79 "gram.y"
+#line 78 "gram.y"
 	{ IDnew(yystack.l_mark[0].n->info+5, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); declare(yystack.l_mark[-2].n, 1, yystack.l_mark[0].n, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); yyval.n = binNode(DECL, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 14:
-#line 80 "gram.y"
+#line 79 "gram.y"
 	{ IDnew(yystack.l_mark[0].n->info+5, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); declare(0, 1, yystack.l_mark[0].n, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); yyval.n = yystack.l_mark[0].n; }
 break;
 case 15:
-#line 81 "gram.y"
+#line 80 "gram.y"
 	{ IDnew(yystack.l_mark[-2].n->info+5, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, 0); declare(0, 1, yystack.l_mark[-2].n, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, yystack.l_mark[0].n); yyval.n = binNode(DECL, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 16:
-#line 82 "gram.y"
+#line 81 "gram.y"
 	{ IDnew(yystack.l_mark[0].n->info, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); declare(0, 0, yystack.l_mark[0].n, RIGHT_CHILD(yystack.l_mark[0].n)->value.s, 0); yyval.n = yystack.l_mark[0].n; }
 break;
 case 17:
-#line 83 "gram.y"
+#line 82 "gram.y"
 	{ IDnew(yystack.l_mark[-2].n->info, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, 0); declare(0, 0, yystack.l_mark[-2].n, RIGHT_CHILD(yystack.l_mark[-2].n)->value.s, yystack.l_mark[0].n); yyval.n = binNode(DECL, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 18:
-#line 84 "gram.y"
+#line 83 "gram.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 19:
-#line 87 "gram.y"
+#line 86 "gram.y"
 	{ enter(yystack.l_mark[-2].n, yystack.l_mark[-1].n->info, yystack.l_mark[0].s); typereturn = yystack.l_mark[-1].n->info; }
 break;
 case 20:
-#line 87 "gram.y"
+#line 86 "gram.y"
 	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-5].n, binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n))))); function(yystack.l_mark[-5].n, yystack.l_mark[-4].n, yystack.l_mark[-3].s, yystack.l_mark[0].n); }
 break;
 case 21:
-#line 88 "gram.y"
+#line 87 "gram.y"
 	{ enter(0, yystack.l_mark[-1].n->info, yystack.l_mark[0].s); typereturn = yystack.l_mark[-1].n->info; }
 break;
 case 22:
-#line 88 "gram.y"
+#line 87 "gram.y"
 	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-4].n, binNode(ID, strNode(ID, yystack.l_mark[-3].s), binNode(VARS, yystack.l_mark[-1].n, uniNode(END, yystack.l_mark[0].n)))); function(0, yystack.l_mark[-4].n, yystack.l_mark[-3].s, yystack.l_mark[0].n); }
 break;
 case 23:
-#line 89 "gram.y"
+#line 88 "gram.y"
 	{ enter(yystack.l_mark[-2].n, yystack.l_mark[-1].n->info, yystack.l_mark[0].s); typereturn = yystack.l_mark[-1].n->info; }
 break;
 case 24:
-#line 89 "gram.y"
+#line 88 "gram.y"
 	{ yyval.n = binNode(QUALIFIER, yystack.l_mark[-4].n, binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n)))); function(yystack.l_mark[-4].n, yystack.l_mark[-3].n, yystack.l_mark[-2].s, yystack.l_mark[0].n); }
 break;
 case 25:
-#line 90 "gram.y"
+#line 89 "gram.y"
 	{ enter(0, yystack.l_mark[-1].n->info, yystack.l_mark[0].s); typereturn = yystack.l_mark[-1].n->info; }
 break;
 case 26:
-#line 90 "gram.y"
+#line 89 "gram.y"
 	{ yyval.n = binNode(FUNCTYPE, yystack.l_mark[-3].n, binNode(ID, strNode(ID, yystack.l_mark[-2].s), uniNode(END, yystack.l_mark[0].n))); function(0, yystack.l_mark[-3].n, yystack.l_mark[-2].s, yystack.l_mark[0].n); }
 break;
 case 27:
-#line 93 "gram.y"
+#line 92 "gram.y"
 	{ yyval.n = binNode(DO, 0, 0); }
 break;
 case 28:
-#line 94 "gram.y"
+#line 93 "gram.y"
 	{ yyval.n = binNode(DO, yystack.l_mark[0].n, 0); }
 break;
 case 29:
-#line 97 "gram.y"
+#line 96 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = yystack.l_mark[0].n->info; }
 break;
 case 30:
-#line 98 "gram.y"
+#line 97 "gram.y"
 	{ yyval.n = nilNode(VOID); yyval.n->info = 4; }
 break;
 case 31:
-#line 101 "gram.y"
+#line 100 "gram.y"
 	{ yyval.n = nilNode(PUBLIC); yyval.n->info = 1; }
 break;
 case 32:
-#line 102 "gram.y"
+#line 101 "gram.y"
 	{ yyval.n = nilNode(FORWARD); yyval.n->info = 2; }
 break;
 case 33:
-#line 105 "gram.y"
+#line 104 "gram.y"
 	{ yyval.n = binNode(VARS, yystack.l_mark[0].n, 0); }
 break;
 case 34:
-#line 106 "gram.y"
+#line 105 "gram.y"
 	{ yyval.n = binNode(VARS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 35:
-#line 109 "gram.y"
+#line 108 "gram.y"
 	{ yyval.n = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, yystack.l_mark[0].s)); IDnew(2, yystack.l_mark[0].s, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 2; yyval.n->info = 2; }
 break;
 case 36:
-#line 110 "gram.y"
+#line 109 "gram.y"
 	{ yyval.n = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, yystack.l_mark[0].s)); IDnew(1, yystack.l_mark[0].s, 0); if (IDlevel() == 1) fpar[++fpar[0]] = 1; yyval.n->info = 1; }
 break;
 case 37:
-#line 111 "gram.y"
+#line 110 "gram.y"
 	{ yyval.n = binNode(VAR, intNode(SIZE, yystack.l_mark[-1].i), strNode(ID, yystack.l_mark[-3].s)); IDnew(3, yystack.l_mark[-3].s, 0); if (yystack.l_mark[-1].i <= 0) yyerror("invalid array dimensions"); if (IDlevel() == 1) fpar[++fpar[0]] = 3; yyval.n->info = 3; }
 break;
 case 38:
-#line 114 "gram.y"
+#line 113 "gram.y"
 	{ yyval.n = binNode(VAR, uniNode(STRING, nilNode(STRING)), strNode(ID, yystack.l_mark[0].s)); yyval.n->info = 2; }
 break;
 case 39:
-#line 115 "gram.y"
+#line 114 "gram.y"
 	{ yyval.n = binNode(VAR, uniNode(NUMBER, nilNode(NUMBER)), strNode(ID, yystack.l_mark[0].s)); yyval.n->info = 1; }
 break;
 case 40:
-#line 116 "gram.y"
+#line 115 "gram.y"
 	{ yyval.n = binNode(VAR, intNode(SIZE, yystack.l_mark[-1].i), strNode(ID, yystack.l_mark[-3].s)); if (yystack.l_mark[-1].i <= 0) yyerror("invalid array dimensions"); yyval.n->info = 3; }
 break;
 case 41:
-#line 117 "gram.y"
+#line 116 "gram.y"
 	{ yyval.n = binNode(VAR, intNode(SIZE, 0), strNode(ID, yystack.l_mark[0].s)); yyval.n->info = 3; }
 break;
 case 42:
-#line 120 "gram.y"
+#line 119 "gram.y"
 	{ yyval.n = nilNode(NUMBER); yyval.n->info = 1; }
 break;
 case 43:
-#line 121 "gram.y"
+#line 120 "gram.y"
 	{ yyval.n = nilNode(ARRAY); yyval.n->info = 3; }
 break;
 case 44:
-#line 122 "gram.y"
+#line 121 "gram.y"
 	{ yyval.n = nilNode(STRING); yyval.n->info = 2; }
 break;
 case 45:
-#line 125 "gram.y"
+#line 124 "gram.y"
 	{ yyval.n = binNode(BODY, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 46:
-#line 126 "gram.y"
+#line 125 "gram.y"
 	{ yyval.n = binNode(BODY, yystack.l_mark[0].n, 0); }
 break;
 case 47:
-#line 129 "gram.y"
+#line 128 "gram.y"
 	{ yyval.n = binNode(BODY, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 48:
-#line 130 "gram.y"
+#line 129 "gram.y"
 	{ yyval.n = binNode(BODY, yystack.l_mark[0].n, 0); }
 break;
 case 49:
-#line 133 "gram.y"
+#line 132 "gram.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 50:
-#line 134 "gram.y"
+#line 133 "gram.y"
 	{ yyval.n = binNode(BODY, yystack.l_mark[0].n, 0); }
 break;
 case 51:
-#line 137 "gram.y"
+#line 136 "gram.y"
 	{ IDnew(yystack.l_mark[-1].n->info, RIGHT_CHILD(yystack.l_mark[-1].n)->value.s, 0); yyval.n = binNode(VARS, yystack.l_mark[-1].n, 0); }
 break;
 case 52:
-#line 138 "gram.y"
+#line 137 "gram.y"
 	{ IDnew(yystack.l_mark[-1].n->info, RIGHT_CHILD(yystack.l_mark[-1].n)->value.s, 0); yyval.n = binNode(VARS, yystack.l_mark[-2].n, yystack.l_mark[-1].n); }
 break;
 case 53:
-#line 141 "gram.y"
+#line 140 "gram.y"
 	{ yyval.n = binNode(IF, yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 54:
-#line 142 "gram.y"
+#line 141 "gram.y"
 	{ yyval.n = binNode(IF, yystack.l_mark[-6].n, binNode(THEN, yystack.l_mark[-4].n, binNode(ELIF, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n)))); if (yystack.l_mark[-6].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 55:
-#line 143 "gram.y"
+#line 142 "gram.y"
 	{ yyval.n = binNode(IF, yystack.l_mark[-4].n, binNode(THEN, yystack.l_mark[-2].n, binNode(ELIF, yystack.l_mark[-1].n, 0))); if (yystack.l_mark[-4].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 56:
-#line 144 "gram.y"
+#line 143 "gram.y"
 	{ yyval.n = binNode(IF, yystack.l_mark[-5].n, binNode(THEN, yystack.l_mark[-3].n, uniNode(ELSE, yystack.l_mark[-1].n))); if (yystack.l_mark[-5].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 57:
-#line 145 "gram.y"
+#line 144 "gram.y"
 	{ ncicl++; }
 break;
 case 58:
-#line 145 "gram.y"
+#line 144 "gram.y"
 	{ yyval.n = binNode(FOR, yystack.l_mark[-8].n, binNode(UNTIL, yystack.l_mark[-6].n, binNode(STEP, yystack.l_mark[-4].n, uniNode(DO, yystack.l_mark[-1].n)))); if (yystack.l_mark[-8].n->info % 5 == 4 || yystack.l_mark[-6].n->info % 5 == 4 || yystack.l_mark[-4].n->info % 5 == 4) yyerror("condition as void expression"); ncicl--; }
 break;
 case 59:
-#line 146 "gram.y"
+#line 145 "gram.y"
 	{ yyval.n = yystack.l_mark[-1].n; }
 break;
 case 60:
-#line 147 "gram.y"
+#line 146 "gram.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 61:
-#line 148 "gram.y"
+#line 147 "gram.y"
 	{ yyval.n = yystack.l_mark[-1].n; if (yystack.l_mark[-1].n->info % 5 == 4) yyerror("printing void expression"); }
 break;
 case 62:
-#line 149 "gram.y"
+#line 148 "gram.y"
 	{ yyval.n = binNode('#', yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 5 != 3 && yystack.l_mark[-3].n->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
 break;
 case 63:
-#line 152 "gram.y"
+#line 151 "gram.y"
 	{ yyval.n = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
 break;
 case 64:
-#line 153 "gram.y"
+#line 152 "gram.y"
 	{ yyval.n = nilNode(STOP); if (ncicl <= 0) yyerror("invalid stop argument"); }
 break;
 case 65:
-#line 154 "gram.y"
+#line 153 "gram.y"
 	{ if (IDlevel() == 0 && yystack.l_mark[0].n->info != 1) yyerror("return non integer out of function"); if (IDlevel() > 0 && typereturn != yystack.l_mark[0].n->info) yyerror("return type differs from function type"); yyval.n = uniNode(RETURN_EXPR, yystack.l_mark[0].n); }
 break;
 case 66:
-#line 155 "gram.y"
+#line 154 "gram.y"
 	{ if (IDlevel() == 0) yyerror("return void out of function"); if (typereturn != 4) yyerror("return type differs from function type"); yyval.n = nilNode(RETURN); }
 break;
 case 67:
-#line 158 "gram.y"
+#line 157 "gram.y"
 	{ yyval.n = binNode(ELIF, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (yystack.l_mark[-2].n->info % 5 == 4) yyerror("condition as void expression"); }
 break;
 case 68:
-#line 161 "gram.y"
+#line 160 "gram.y"
 	{ yyval.n = binNode(ELIF, yystack.l_mark[0].n, 0); }
 break;
 case 69:
-#line 162 "gram.y"
+#line 161 "gram.y"
 	{ yyval.n = binNode(ELIF, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 70:
-#line 165 "gram.y"
+#line 164 "gram.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 71:
-#line 166 "gram.y"
+#line 165 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[0].n, 0); }
 break;
 case 72:
-#line 167 "gram.y"
+#line 166 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[0].n, 0); }
 break;
 case 73:
-#line 168 "gram.y"
+#line 167 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 74:
-#line 171 "gram.y"
+#line 170 "gram.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 75:
-#line 172 "gram.y"
+#line 171 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[0].n, 0); }
 break;
 case 76:
-#line 173 "gram.y"
+#line 172 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[0].n, 0); if (IDlevel() > 0 && typereturn != 4) yyerror("non void function without return"); }
 break;
 case 77:
-#line 174 "gram.y"
+#line 173 "gram.y"
 	{ yyval.n = binNode(BLOCK, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 78:
-#line 177 "gram.y"
+#line 176 "gram.y"
 	{ yyval.n = binNode(INSTRS, yystack.l_mark[0].n, 0); }
 break;
 case 79:
-#line 178 "gram.y"
+#line 177 "gram.y"
 	{ yyval.n = binNode(INSTRS, yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 80:
-#line 181 "gram.y"
+#line 180 "gram.y"
 	{ long pos; int typ = IDfind(yystack.l_mark[0].s, &pos); if (pos == 0) yyval.n = strNode(ID, yystack.l_mark[0].s); else yyval.n = intNode(LOCAL, pos); yyval.n->info = typ; }
 break;
 case 81:
-#line 182 "gram.y"
+#line 181 "gram.y"
 	{ long pos; int typ = IDfind(yystack.l_mark[-3].s, &pos); 
                                             if (pos == 0) yyval.n = strNode(ID, yystack.l_mark[-3].s); else yyval.n = intNode(LOCAL, pos); 
                                             yyval.n = binNode('[', yystack.l_mark[-3].s, yystack.l_mark[-1].n); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly(yystack.l_mark[-1].n); yyval.n->info = 1; }
 break;
 case 82:
-#line 185 "gram.y"
+#line 184 "gram.y"
 	{ yyval.n = binNode('[', yystack.l_mark[-3].n, yystack.l_mark[-1].n); intonly(yystack.l_mark[-1].n); yyval.n->info = 1; }
 break;
 case 83:
-#line 186 "gram.y"
+#line 185 "gram.y"
 	{ yyval.n = binNode(CALL, strNode(ID, yystack.l_mark[-6].s), yystack.l_mark[-4].n); long pos; int typ = IDfind(yystack.l_mark[-6].s, &pos); yyval.n->info = checkargs(yystack.l_mark[-6].s, yystack.l_mark[-4].n); }
 break;
 case 84:
-#line 187 "gram.y"
+#line 186 "gram.y"
 	{ yyval.n = binNode(CALL, strNode(ID, yystack.l_mark[-5].s), nilNode(NIL)); long pos; int typ = IDfind(yystack.l_mark[-5].s, &pos); yyval.n->info = checkargs(yystack.l_mark[-5].s, 0); }
 break;
 case 85:
-#line 190 "gram.y"
+#line 189 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = yystack.l_mark[0].n->info; }
 break;
 case 86:
-#line 191 "gram.y"
+#line 190 "gram.y"
 	{ yyval.n = yystack.l_mark[-1].n; yyval.n->info = yystack.l_mark[-1].n->info; }
 break;
 case 87:
-#line 192 "gram.y"
+#line 191 "gram.y"
 	{ yyval.n = binNode(CALL, strNode(ID, yystack.l_mark[-3].s), yystack.l_mark[-1].n); long pos; int typ = IDfind(yystack.l_mark[-3].s, &pos); yyval.n->info = checkargs(yystack.l_mark[-3].s, yystack.l_mark[-1].n); }
 break;
 case 88:
-#line 193 "gram.y"
+#line 192 "gram.y"
 	{ yyval.n = binNode(CALL, strNode(ID, yystack.l_mark[-2].s), nilNode(NIL)); long pos; int typ = IDfind(yystack.l_mark[-2].s, &pos); yyval.n->info = checkargs(yystack.l_mark[-2].s, 0); }
 break;
 case 89:
-#line 194 "gram.y"
+#line 193 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = 2; }
 break;
 case 90:
-#line 195 "gram.y"
+#line 194 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = 1; }
 break;
 case 91:
-#line 196 "gram.y"
+#line 195 "gram.y"
 	{ yyval.n = uniNode(UMINUS, yystack.l_mark[0].n); yyval.n->info = yystack.l_mark[0].n->info; intonly(yystack.l_mark[0].n);}
 break;
 case 92:
-#line 197 "gram.y"
+#line 196 "gram.y"
 	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); if (yystack.l_mark[0].n->info % 5 == 2 || yystack.l_mark[0].n->info % 5 == 4) yyerror("not a pointer"); yyval.n->info = 3; }
 break;
 case 93:
-#line 198 "gram.y"
+#line 197 "gram.y"
 	{ yyval.n = binNode('^', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 94:
-#line 199 "gram.y"
+#line 198 "gram.y"
 	{ yyval.n = binNode('+', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = sum(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 95:
-#line 200 "gram.y"
+#line 199 "gram.y"
 	{ yyval.n = binNode('-', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = sub(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 96:
-#line 201 "gram.y"
+#line 200 "gram.y"
 	{ yyval.n = binNode('*', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 97:
-#line 202 "gram.y"
+#line 201 "gram.y"
 	{ yyval.n = binNode('/', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 98:
-#line 203 "gram.y"
+#line 202 "gram.y"
 	{ yyval.n = binNode('%', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 99:
-#line 204 "gram.y"
+#line 203 "gram.y"
 	{ yyval.n = binNode('<', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 100:
-#line 205 "gram.y"
+#line 204 "gram.y"
 	{ yyval.n = binNode('>', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 101:
-#line 206 "gram.y"
+#line 205 "gram.y"
 	{ yyval.n = binNode(GE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 102:
-#line 207 "gram.y"
+#line 206 "gram.y"
 	{ yyval.n = binNode(LE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 103:
-#line 208 "gram.y"
+#line 207 "gram.y"
 	{ yyval.n = binNode(NE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 104:
-#line 209 "gram.y"
+#line 208 "gram.y"
 	{ yyval.n = binNode('=', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = 1; sametype(yystack.l_mark[-2].n, yystack.l_mark[0].n); noarray(yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 105:
-#line 210 "gram.y"
+#line 209 "gram.y"
 	{ yyval.n = binNode(ATTR, yystack.l_mark[-2].n, yystack.l_mark[0].n); if (noassign(yystack.l_mark[-2].n, yystack.l_mark[0].n) || yystack.l_mark[-2].n->info > 5) yyerror("illegal assignment"); yyval.n->info = yystack.l_mark[-2].n->info; }
 break;
 case 106:
-#line 211 "gram.y"
+#line 210 "gram.y"
 	{ yyval.n = binNode('&', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 107:
-#line 212 "gram.y"
+#line 211 "gram.y"
 	{ yyval.n = binNode('|', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[-2].n); intonly(yystack.l_mark[0].n); }
 break;
 case 108:
-#line 213 "gram.y"
+#line 212 "gram.y"
 	{ yyval.n = uniNode('~', yystack.l_mark[0].n); yyval.n->info = intonly(yystack.l_mark[0].n); }
 break;
 case 109:
-#line 214 "gram.y"
+#line 213 "gram.y"
 	{ yyval.n = nilNode('?'); yyval.n->info = 1; }
 break;
 case 110:
-#line 217 "gram.y"
+#line 216 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = yystack.l_mark[0].n->info; }
 break;
 case 111:
-#line 218 "gram.y"
+#line 217 "gram.y"
 	{ yyval.n = yystack.l_mark[0].n; yyval.n->info = yystack.l_mark[0].n->info; }
 break;
 case 112:
-#line 221 "gram.y"
+#line 220 "gram.y"
 	{ yyval.n = intNode(INTEGER, yystack.l_mark[0].i); yyval.n->info = 1; }
 break;
 case 113:
-#line 222 "gram.y"
+#line 221 "gram.y"
 	{ yyval.n = intNode(INTEGER, yystack.l_mark[0].i); yyval.n->info = 1; }
 break;
 case 114:
-#line 225 "gram.y"
+#line 224 "gram.y"
 	{ yyval.n = binNode(STR, yystack.l_mark[-1].n, yystack.l_mark[0].n); yyval.n->info = 2; }
 break;
 case 115:
-#line 226 "gram.y"
+#line 225 "gram.y"
 	{ yyval.n = binNode(STR, strNode(STR, yystack.l_mark[0].s), 0); yyval.n->info = 2; }
 break;
 case 116:
-#line 227 "gram.y"
+#line 226 "gram.y"
 	{ yyval.n = binNode(STR, yystack.l_mark[-1].n, yystack.l_mark[0].s); yyval.n->info = 2; }
 break;
 case 117:
-#line 228 "gram.y"
+#line 227 "gram.y"
 	{ yyval.n = binNode(STR, yystack.l_mark[-1].n, yystack.l_mark[0].n); yyval.n->info = 2; }
 break;
 case 118:
-#line 230 "gram.y"
+#line 229 "gram.y"
 	{ yyval.n = intNode(INTEGER, yystack.l_mark[0].i); yyval.n->info = 1; arraysize = 1; }
 break;
 case 119:
-#line 231 "gram.y"
+#line 230 "gram.y"
 	{ yyval.n = binNode(',', yystack.l_mark[-2].n, intNode(INTEGER, yystack.l_mark[0].i)); yyval.n->info = 3; arraysize++; }
 break;
 case 120:
-#line 234 "gram.y"
+#line 233 "gram.y"
 	{ yyval.n = binNode(ARGS, nilNode(NIL), yystack.l_mark[0].n); }
 break;
 case 121:
-#line 235 "gram.y"
+#line 234 "gram.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
-#line 1723 "y.tab.c"
+#line 1722 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
