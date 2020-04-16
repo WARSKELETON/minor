@@ -1,5 +1,5 @@
 program
 	string s
 start
-	s := 0;
+	s := "\34";
 end

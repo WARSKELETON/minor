@@ -74,12 +74,12 @@ int n;
 <X_STRING_BACKSLASH>"n"              		{ strcat(yylval.s, "\n"); yy_pop_state(); }
 <X_STRING_BACKSLASH>"r"              		{ strcat(yylval.s, "\r"); yy_pop_state(); }
 <X_STRING_BACKSLASH>"t"              		{ strcat(yylval.s, "\t"); yy_pop_state(); }
-<X_STRING_BACKSLASH>[0-9A-Fa-f]{1,2} 		{ strcat(yylval.s, yytext); yy_pop_state(); }
+<X_STRING_BACKSLASH>[0-9A-Fa-f]{1,2} 		{ char* pChar = malloc(sizeof(char)); *pChar =  (char)(unsigned char)strtoul(yytext, 0, 16); strcat(yylval.s, pChar); yy_pop_state(); }
 <X_STRING_BACKSLASH>.                		{ yyerror("non special character"); yy_pop_state(); }
 
 <X_FILE>[0][0-7]*					{ int n = (int)strtol(yytext, 0, 8); if (n > INT_MAX || n < 0) yyerror("octal overflow"); yylval.i = n; return INTEGER; }
 <X_FILE>[1-9][0-9]*				    { yylval.i = atoi(yytext); if (yylval.i > INT_MAX || yylval.i < 0) yyerror("decimal overflow"); return INTEGER; }
-<X_FILE>"0x"[0-9a-fA-F]+			{ int n = (int)strtol(yytext, 0, 0); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
+<X_FILE>"0x"[0-9a-fA-F]+			{ int n = (int)strtol(yytext+2, 0, 16); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
 <X_FILE>"0b"[0-1]+					{ int n = (int)strtol(yytext+2, 0, 2); if (n > INT_MAX || n < 0) yyerror("binary overflow"); yylval.i = n; return INTEGER; }
 <X_FILE>[-+*/%!;,#&|~^<>=()?\[\]]	return *yytext;
 

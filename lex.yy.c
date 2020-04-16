@@ -1266,7 +1266,7 @@ YY_RULE_SETUP
 case 58:
 YY_RULE_SETUP
 #line 77 "scan.l"
-{ strcat(yylval.s, yytext); yy_pop_state(); }
+{ char* pChar = malloc(sizeof(char)); *pChar =  (char)(unsigned char)strtoul(yytext, 0, 16); strcat(yylval.s, pChar); yy_pop_state(); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
@@ -1286,7 +1286,7 @@ YY_RULE_SETUP
 case 62:
 YY_RULE_SETUP
 #line 82 "scan.l"
-{ int n = (int)strtol(yytext, 0, 0); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
+{ int n = (int)strtol(yytext+2, 0, 16); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
