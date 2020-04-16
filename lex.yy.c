@@ -646,8 +646,8 @@ goto find_rule; \
 
 char yytext[YYLMAX];
 char *yytext_ptr;
-#line 1 "scan.l"
-#line 3 "scan.l"
+#line 1 "minor.l"
+#line 3 "minor.l"
 #include <stdlib.h> 
 #include <string.h> 
 #include <limits.h>
@@ -900,7 +900,7 @@ YY_DECL
 		}
 
 	{
-#line 14 "scan.l"
+#line 14 "minor.l"
 
 #line 906 "lex.yy.c"
 
@@ -978,345 +978,345 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 15 "scan.l"
+#line 15 "minor.l"
 ; /* ignore comments */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 17 "scan.l"
+#line 17 "minor.l"
 yy_push_state(X_COMMENT);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "scan.l"
+#line 18 "minor.l"
 yy_pop_state();
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 19 "scan.l"
+#line 19 "minor.l"
 ; /* ignore content */
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 21 "scan.l"
+#line 21 "minor.l"
 yy_push_state(X_FILE); return PROGRAM;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 22 "scan.l"
+#line 22 "minor.l"
 yy_push_state(X_FILE); return MODULE;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 23 "scan.l"
+#line 23 "minor.l"
 return PROGRAM;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 24 "scan.l"
+#line 24 "minor.l"
 return MODULE;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 25 "scan.l"
+#line 25 "minor.l"
 return START;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 26 "scan.l"
+#line 26 "minor.l"
 yy_pop_state(); return END;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 27 "scan.l"
+#line 27 "minor.l"
 return FUNCTION;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 28 "scan.l"
+#line 28 "minor.l"
 return PUBLIC;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 29 "scan.l"
+#line 29 "minor.l"
 return FORWARD;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 30 "scan.l"
+#line 30 "minor.l"
 return NUMBER;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 31 "scan.l"
+#line 31 "minor.l"
 return ARRAY;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 32 "scan.l"
+#line 32 "minor.l"
 return VOID;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 33 "scan.l"
+#line 33 "minor.l"
 return STRING;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 34 "scan.l"
+#line 34 "minor.l"
 return CONST;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 35 "scan.l"
+#line 35 "minor.l"
 return DO;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 36 "scan.l"
+#line 36 "minor.l"
 return DONE;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 37 "scan.l"
+#line 37 "minor.l"
 return IF;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 38 "scan.l"
+#line 38 "minor.l"
 return THEN;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 39 "scan.l"
+#line 39 "minor.l"
 return ELSE;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 40 "scan.l"
+#line 40 "minor.l"
 return ELIF;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 41 "scan.l"
+#line 41 "minor.l"
 return FI;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 42 "scan.l"
+#line 42 "minor.l"
 return FOR;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 43 "scan.l"
+#line 43 "minor.l"
 return UNTIL;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 44 "scan.l"
+#line 44 "minor.l"
 return STEP;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 45 "scan.l"
+#line 45 "minor.l"
 return REPEAT;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 46 "scan.l"
+#line 46 "minor.l"
 return STOP;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 47 "scan.l"
+#line 47 "minor.l"
 return RETURN;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 48 "scan.l"
+#line 48 "minor.l"
 return LE;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 49 "scan.l"
+#line 49 "minor.l"
 return GE;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 50 "scan.l"
+#line 50 "minor.l"
 return NE;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 51 "scan.l"
+#line 51 "minor.l"
 return ATTR;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 53 "scan.l"
+#line 53 "minor.l"
 { yylval.s = strdup(yytext); return ID; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 55 "scan.l"
+#line 55 "minor.l"
 { yy_push_state(X_CHAR); n = 0; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 56 "scan.l"
+#line 56 "minor.l"
 { yy_push_state(X_CHAR_BACKSLASH); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 57 "scan.l"
+#line 57 "minor.l"
 { yy_pop_state(); if (n > 1) yyerror("invalid character"); return CHAR; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 58 "scan.l"
+#line 58 "minor.l"
 { yylval.i = yytext[0]; n++; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 59 "scan.l"
+#line 59 "minor.l"
 { yylval.i = "\'"[0]; n++; yy_pop_state(); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 60 "scan.l"
+#line 60 "minor.l"
 { yylval.i = "\\"[0]; n++; yy_pop_state(); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 61 "scan.l"
+#line 61 "minor.l"
 { yylval.i = "\n"[0]; n++; yy_pop_state(); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 62 "scan.l"
+#line 62 "minor.l"
 { yylval.i = "\r"[0]; n++; yy_pop_state(); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 63 "scan.l"
+#line 63 "minor.l"
 { yylval.i = "\t"[0]; n++; yy_pop_state(); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 64 "scan.l"
+#line 64 "minor.l"
 { yylval.i = strtoul(yytext, 0, 16); n++; yy_pop_state(); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 65 "scan.l"
+#line 65 "minor.l"
 { yyerror("non special character"); yy_pop_state(); }
 	YY_BREAK
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 67 "scan.l"
+#line 67 "minor.l"
 { yylval.s = malloc(yyleng); *yylval.s = 0; REJECT; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 68 "scan.l"
+#line 68 "minor.l"
 { yy_push_state(X_STRING);}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 69 "scan.l"
+#line 69 "minor.l"
 { yy_push_state(X_STRING_BACKSLASH); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 70 "scan.l"
+#line 70 "minor.l"
 { yy_pop_state(); return STR; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 71 "scan.l"
+#line 71 "minor.l"
 { strcat(yylval.s, yytext); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 72 "scan.l"
+#line 72 "minor.l"
 { strcat(yylval.s, yytext); yy_pop_state(); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 73 "scan.l"
+#line 73 "minor.l"
 { strcat(yylval.s, "\\"); yy_pop_state(); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 74 "scan.l"
+#line 74 "minor.l"
 { strcat(yylval.s, "\n"); yy_pop_state(); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 75 "scan.l"
+#line 75 "minor.l"
 { strcat(yylval.s, "\r"); yy_pop_state(); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 76 "scan.l"
+#line 76 "minor.l"
 { strcat(yylval.s, "\t"); yy_pop_state(); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 77 "scan.l"
+#line 77 "minor.l"
 { char* pChar = malloc(sizeof(char)); *pChar =  (char)(unsigned char)strtoul(yytext, 0, 16); strcat(yylval.s, pChar); yy_pop_state(); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 78 "scan.l"
+#line 78 "minor.l"
 { yyerror("non special character"); yy_pop_state(); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 80 "scan.l"
+#line 80 "minor.l"
 { int n = (int)strtol(yytext, 0, 8); if (n > INT_MAX || n < 0) yyerror("octal overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 81 "scan.l"
+#line 81 "minor.l"
 { yylval.i = atoi(yytext); if (yylval.i > INT_MAX || yylval.i < 0) yyerror("decimal overflow"); return INTEGER; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 82 "scan.l"
+#line 82 "minor.l"
 { int n = (int)strtol(yytext+2, 0, 16); if (n > INT_MAX || n < 0) yyerror("hexadecimal overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 83 "scan.l"
+#line 83 "minor.l"
 { int n = (int)strtol(yytext+2, 0, 2); if (n > INT_MAX || n < 0) yyerror("binary overflow"); yylval.i = n; return INTEGER; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 84 "scan.l"
+#line 84 "minor.l"
 return *yytext;
 	YY_BREAK
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 86 "scan.l"
+#line 86 "minor.l"
 ; /* ignore whitespace */
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 88 "scan.l"
+#line 88 "minor.l"
 yyerror("Unknown character");
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 90 "scan.l"
+#line 90 "minor.l"
 ;
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 92 "scan.l"
+#line 92 "minor.l"
 ECHO;
 	YY_BREAK
 #line 1323 "lex.yy.c"
@@ -2363,7 +2363,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 92 "scan.l"
+#line 92 "minor.l"
 
 int yywrap() { return 1; } 
 char *getyytext() { return yytext; }

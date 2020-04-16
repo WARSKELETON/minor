@@ -1,5 +1,5 @@
 LANG=minor
-INI=gram
+INI=minor
 EXT=min # file extension: .$(EXT)
 LIB=lib # compiler library directory
 UTIL=util # compiler library: lib$(LIB).a
@@ -8,10 +8,10 @@ CC=gcc
 CFLAGS=-g -DYYDEBUG
 
 
-$(LANG): $(INI).y scan.l
+$(LANG): $(INI).y $(LANG).l
 	make -C $(LIB)
 	byacc -dv $(INI).y
-	flex -l scan.l
+	flex -l $(LANG).l
 	$(LINK.c) -o $(LANG) $(ARCH) -I$(LIB) lex.yy.c y.tab.c -w -L$(LIB) -l$(UTIL)
 
 examples:: $(LANG)
