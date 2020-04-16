@@ -1252,7 +1252,7 @@ case 5:
 break;
 case 6:
 #line 64 "gram.y"
-	{ yyval.n = uniNode(PROGRAM, yystack.l_mark[-1].n); IDpop(); }
+	{ yyval.n = binNode(PROGRAM, yystack.l_mark[-1].n, 0); IDpop(); }
 break;
 case 7:
 #line 67 "gram.y"
@@ -1260,7 +1260,7 @@ case 7:
 break;
 case 8:
 #line 68 "gram.y"
-	{ yyval.n = nilNode(MODULE); }
+	{ yyval.n = nilNode(NIL); }
 break;
 case 9:
 #line 71 "gram.y"

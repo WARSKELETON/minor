@@ -12,7 +12,7 @@ $(LANG): $(INI).y scan.l
 	make -C $(LIB)
 	byacc -dv $(INI).y
 	flex -l scan.l
-	$(LINK.c) -o $(LANG) $(ARCH) -I$(LIB) lex.yy.c y.tab.c -L$(LIB) -l$(UTIL)
+	$(LINK.c) -o $(LANG) $(ARCH) -I$(LIB) lex.yy.c y.tab.c -w -L$(LIB) -l$(UTIL)
 
 examples:: $(LANG)
 	make -C $(EXS)

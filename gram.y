@@ -61,11 +61,11 @@ file    : program                       { if (yynerrs == 0) printNode($1,0,yynam
     ;
 
 program : PROGRAM decls START { IDpush(); inMain = 1; } bodyprincipal END  { $$ = binNode(PROGRAM, $2, $5); IDpop(); }
-    | PROGRAM START { IDpush(); inMain = 1; } bodyprincipal END            { $$ = uniNode(PROGRAM, $4); IDpop(); }
+    | PROGRAM START { IDpush(); inMain = 1; } bodyprincipal END            { $$ = binNode(PROGRAM, $4, 0); IDpop(); }
     ;
 
 module  : MODULE decls END              { $$ = uniNode(MODULE, $2); }
-    | MODULE END                        { $$ = nilNode(MODULE); }
+    | MODULE END                        { $$ = nilNode(NIL); }
     ;
 
 decls   : decl                          { $$ = $1; }
