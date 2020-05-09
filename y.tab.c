@@ -1484,7 +1484,7 @@ case 63:
 break;
 case 64:
 #line 149 "minor.y"
-	{ yyval.n = binNode('#', yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 5 != 3 && yystack.l_mark[-3].n->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
+	{ yyval.n = binNode('#', yystack.l_mark[-3].n, yystack.l_mark[-1].n); if (yystack.l_mark[-3].n->info % 10 > 5) yyerror("allocating memory to a constant"); if (yystack.l_mark[-3].n->info % 5 != 3 && yystack.l_mark[-3].n->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
 break;
 case 65:
 #line 152 "minor.y"

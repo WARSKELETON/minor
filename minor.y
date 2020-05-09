@@ -146,7 +146,7 @@ instr   : IF expr THEN block FI                           { $$ = binNode(IF, $2,
     | expr ';'                                            { $$ = $1; }
     | error ';'                                           { $$ = nilNode(NIL); }
     | expr '!'                                            { $$ = $1; if ($1->info % 5 == 4) yyerror("printing void expression"); }
-    | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); if ($1->info % 5 != 3 && $1->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
+    | lvalue '#' expr ';'                                 { $$ = binNode('#', $1, $3); if ($1->info % 10 > 5) yyerror("allocating memory to a constant"); if ($1->info % 5 != 3 && $1->info % 5 != 2) yyerror("reserving memory to a non pointer"); }
     ;
 
 instrterm   : REPEAT    { $$ = nilNode(REPEAT); if (ncicl <= 0) yyerror("invalid repeat argument"); }
@@ -181,7 +181,7 @@ instrs  : instr                     { $$ = binNode(INSTRS, $1, 0); }
 lvalue	: ID                              { long pos; int typ = IDfind($1, &pos); if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); $$->info = typ; }
 	| ID '[' expr ']'                     { long pos; int typ = IDfind($1, &pos); 
                                             if (pos == 0) $$ = strNode(ID, $1); else $$ = intNode(LOCAL, pos); 
-                                            $$ = binNode('[', $1, $3); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly($3); $$->info = 1; } /* pode ser array de funcao TODO */
+                                            $$ = binNode('[', $1, $3); if (typ != 3 && typ != 2) yyerror("invalid indexation"); intonly($3); $$->info = 1; }
     | string '[' expr ']'                 { $$ = binNode('[', $1, $3); intonly($3); $$->info = 1; }
     | ID '(' args ')' '[' expr ']'        { $$ = binNode(CALL, strNode(ID, $1), $3); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, $3); }
 	| ID '(' ')' '[' expr ']'             { $$ = binNode(CALL, strNode(ID, $1), nilNode(NIL)); long pos; int typ = IDfind($1, &pos); $$->info = checkargs($1, 0); }
