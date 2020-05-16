@@ -169,7 +169,7 @@ instr	: IF expr THEN block elifs else FI
 				{ $$ = binNode(FI, binNode(THEN, binNode(IF, $2, $4), $5), $6); }
 	| FOR expr UNTIL expr STEP expr DO { cycle++; } block DONE
 				{ $$ = binNode(FOR, binNode(UNTIL, $2, $4), binNode(STEP, $9, $6)); cycle--; }
-	| expr '!'		{ $$ = uniNode('!', $1); isPrint($1); }
+	| expr '!'		{ $$ = uniNode('!', $1); $$->info = $1->info; isPrint($1); }
 	| expr ';'		{ $$ = $1; }
 	| lval '#' expr ';'	{ $$ = binNode('#', $3, $1); isAlloc($1, $3); }
 	;

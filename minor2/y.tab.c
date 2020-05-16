@@ -1423,7 +1423,7 @@ case 68:
 break;
 case 69:
 #line 172 "minor.y"
-	{ yyval.n = uniNode('!', yystack.l_mark[-1].n); isPrint(yystack.l_mark[-1].n); }
+	{ yyval.n = uniNode('!', yystack.l_mark[-1].n); yyval.n->info = yystack.l_mark[-1].n->info; isPrint(yystack.l_mark[-1].n); }
 break;
 case 70:
 #line 173 "minor.y"
