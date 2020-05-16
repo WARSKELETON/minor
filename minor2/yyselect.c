@@ -1,5 +1,5 @@
 /*
-generated at Sun May 10 15:26:50 2020
+generated at Sat May 16 16:28:04 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -49,7 +49,7 @@ static char *mkfunc(char *s) {
 	return buf;
 }
 /* expr: falta '?', falta const type ftype */
-/* expr: expr /* 
+/* expr: expr */
 #ifndef PANIC
 #define PANIC yypanic
 static void yypanic(YYCONST char *rot, YYCONST char *msg, int val) {

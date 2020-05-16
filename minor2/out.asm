@@ -7,6 +7,14 @@ global	$_main:function
 ; LABEL
 $_main:
 ; IMM
+	push	dword 202
+; CALL
+	call	$_printi
+; CALL
+	call	$_println
+; TRASH
+	add	esp, 4
+; IMM
 	push	dword 0
 ; POP
 	pop	eax
