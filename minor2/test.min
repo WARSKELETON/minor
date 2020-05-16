@@ -1,4 +1,5 @@
 program
+	string cona := "cona"
 start
-	202!
+	cona !
 end

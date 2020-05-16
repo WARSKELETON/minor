@@ -1,3 +1,31 @@
+; GLOBL
+global	$cona:object
+; DATA
+segment	.data
+; ALIGN
+align	4
+; LABEL
+$cona:
+; RODATA
+segment	.rodata
+; ALIGN
+align	4
+; LABEL
+$_L1:
+; CHAR
+	db	0x63
+; CHAR
+	db	0x6F
+; CHAR
+	db	0x6E
+; CHAR
+	db	0x61
+; CHAR
+	db	0x00
+; DATA
+segment	.data
+; ID
+	dd	$_L1
 ; TEXT
 segment	.text
 ; ALIGN
@@ -6,8 +34,8 @@ align	4
 global	$_main:function
 ; LABEL
 $_main:
-; IMM
-	push	dword 202
+; ADDRV
+	push	dword [$cona]
 ; CALL
 	call	$_printi
 ; CALL

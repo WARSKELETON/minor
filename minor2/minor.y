@@ -15,6 +15,7 @@ static void isCte(Node*), isFwd(char*,int,Node*), isDim(char*,int,Node*);
 static void isPrint(Node*), isCycle();
 static char *func;
 static int ret, cycle;
+void variable(Node*);
 %}
 
 %union { int i; char *s; Node *n; }
@@ -76,8 +77,8 @@ fvars	: fvar			{ $$ = binNode(ARGS, nilNode(NIL), $1);
 					IDnew($3->info, $3->SUB(0)->value.s, $3->SUB(1)); }
 	;
 
-vardecl	: NUMBER ID eqint	{ $$ = binNode(NUMBER, TID($2), $3); $$->info = tINT; }
-	| STRING ID eqstr	{ $$ = binNode(STRING, TID($2), $3); $$->info = tSTR; }
+vardecl	: NUMBER ID eqint	{ $$ = binNode(NUMBER, TID($2), $3); $$->info = tINT; variable($$); }
+	| STRING ID eqstr	{ $$ = binNode(STRING, TID($2), $3); $$->info = tSTR; variable($$); }
 	| ARRAY ID vdim eqvec	{ $$ = binNode(ARRAY, TID($2), binNode(INTS, TINT($3), $4)); $$->info = tVEC; isDim($2, $3, $4); }
 	;
 

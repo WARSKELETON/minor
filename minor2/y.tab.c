@@ -34,7 +34,8 @@ static void isCte(Node*), isFwd(char*,int,Node*), isDim(char*,int,Node*);
 static void isPrint(Node*), isCycle();
 static char *func;
 static int ret, cycle;
-#line 20 "minor.y"
+void variable(Node*);
+#line 21 "minor.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -43,7 +44,7 @@ static int ret, cycle;
 #define YYSTYPE_IS_DECLARED 1
 typedef union { int i; char *s; Node *n; } YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 47 "y.tab.c"
+#line 48 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -719,7 +720,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 218 "minor.y"
+#line 219 "minor.y"
 char **yynames =
 #ifdef YYDEBUG
 (char**)yyname;
@@ -944,7 +945,7 @@ static void isAlloc(Node *lval, Node *expr) {
 		yyerror(errstr);
 	}
 }
-#line 948 "y.tab.c"
+#line 949 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1147,416 +1148,416 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 46 "minor.y"
+#line 47 "minor.y"
 	{ func="main"; ret=tPUB + tINT + tFUNC; IDpush(); }
 break;
 case 2:
-#line 47 "minor.y"
+#line 48 "minor.y"
 	{ IDpop(); evaluate(binNode(PROGRAM, yystack.l_mark[-4].n, binNode(FUNCTION, binNode(END, TID(func), TINT(ret)), binNode(FARGS, nilNode(NIL), yystack.l_mark[-1].n)))); }
 break;
 case 3:
-#line 49 "minor.y"
+#line 50 "minor.y"
 	{ evaluate(uniNode(MODULE, yystack.l_mark[-1].n)); }
 break;
 case 4:
-#line 52 "minor.y"
+#line 53 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 5:
-#line 53 "minor.y"
+#line 54 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 6:
-#line 56 "minor.y"
+#line 57 "minor.y"
 	{ yyval.n = binNode(DECL, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 7:
-#line 57 "minor.y"
+#line 58 "minor.y"
 	{ yyval.n = binNode(DECL, nilNode(NIL), yystack.l_mark[0].n); }
 break;
 case 8:
-#line 60 "minor.y"
+#line 61 "minor.y"
 	{ yyval.n = uniNode(VAR, yystack.l_mark[0].n); yyval.n->info = yystack.l_mark[-2].i+yystack.l_mark[-1].i+yystack.l_mark[0].n->info; isCte(yyval.n); }
 break;
 case 9:
-#line 61 "minor.y"
+#line 62 "minor.y"
 	{ isFunc(func = yystack.l_mark[0].s, ret = yystack.l_mark[-2].i+yystack.l_mark[-1].i+tFUNC); IDpush(); }
 break;
 case 10:
-#line 61 "minor.y"
+#line 62 "minor.y"
 	{ IDchange(ret, yystack.l_mark[-2].s, yystack.l_mark[0].n, 1); }
 break;
 case 11:
-#line 62 "minor.y"
+#line 63 "minor.y"
 	{ yyval.n = binNode(FUNCTION, binNode(END, TID(yystack.l_mark[-4].s), TINT(ret)), binNode(FARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n)); IDpop(); isFwd(func, ret, yystack.l_mark[0].n); }
 break;
 case 12:
-#line 63 "minor.y"
+#line 64 "minor.y"
 	{ isFunc( func = yystack.l_mark[0].s, ret = yystack.l_mark[-2].i+yystack.l_mark[-1].i+tFUNC); IDpush(); }
 break;
 case 13:
-#line 64 "minor.y"
+#line 65 "minor.y"
 	{ yyval.n = binNode(FUNCTION, binNode(END, TID(yystack.l_mark[-2].s), TINT(ret)), binNode(FARGS, nilNode(NIL), yystack.l_mark[0].n)); IDpop(); isFwd(func, ret, yystack.l_mark[0].n); }
 break;
 case 14:
-#line 65 "minor.y"
+#line 66 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 15:
-#line 68 "minor.y"
+#line 69 "minor.y"
 	{ yyval.n = binNode(NUMBER, TID(yystack.l_mark[0].s), nilNode(NIL)); yyval.n->info = tINT; }
 break;
 case 16:
-#line 69 "minor.y"
+#line 70 "minor.y"
 	{ yyval.n = binNode(STRING, TID(yystack.l_mark[0].s), nilNode(NIL)); yyval.n->info = tSTR; }
 break;
 case 17:
-#line 70 "minor.y"
+#line 71 "minor.y"
 	{ yyval.n = binNode(ARRAY, TID(yystack.l_mark[-1].s), binNode(INTS, TINT(yystack.l_mark[0].i), nilNode(NIL))); yyval.n->info = tVEC; }
 break;
 case 18:
-#line 73 "minor.y"
+#line 74 "minor.y"
 	{ yyval.n = binNode(ARGS, nilNode(NIL), yystack.l_mark[0].n);
 					IDnew(yystack.l_mark[0].n->info, yystack.l_mark[0].n->SUB(0)->value.s, yystack.l_mark[0].n->SUB(1)); }
 break;
 case 19:
-#line 75 "minor.y"
+#line 76 "minor.y"
 	{ yyval.n = binNode(ARGS, yystack.l_mark[-2].n, yystack.l_mark[0].n);
 					IDnew(yystack.l_mark[0].n->info, yystack.l_mark[0].n->SUB(0)->value.s, yystack.l_mark[0].n->SUB(1)); }
 break;
 case 20:
-#line 79 "minor.y"
-	{ yyval.n = binNode(NUMBER, TID(yystack.l_mark[-1].s), yystack.l_mark[0].n); yyval.n->info = tINT; }
+#line 80 "minor.y"
+	{ yyval.n = binNode(NUMBER, TID(yystack.l_mark[-1].s), yystack.l_mark[0].n); yyval.n->info = tINT; variable(yyval.n); }
 break;
 case 21:
-#line 80 "minor.y"
-	{ yyval.n = binNode(STRING, TID(yystack.l_mark[-1].s), yystack.l_mark[0].n); yyval.n->info = tSTR; }
+#line 81 "minor.y"
+	{ yyval.n = binNode(STRING, TID(yystack.l_mark[-1].s), yystack.l_mark[0].n); yyval.n->info = tSTR; variable(yyval.n); }
 break;
 case 22:
-#line 81 "minor.y"
+#line 82 "minor.y"
 	{ yyval.n = binNode(ARRAY, TID(yystack.l_mark[-2].s), binNode(INTS, TINT(yystack.l_mark[-1].i), yystack.l_mark[0].n)); yyval.n->info = tVEC; isDim(yystack.l_mark[-2].s, yystack.l_mark[-1].i, yystack.l_mark[0].n); }
 break;
 case 23:
-#line 84 "minor.y"
+#line 85 "minor.y"
 	{ yyval.i = yystack.l_mark[-1].i; isDim(0, yystack.l_mark[-1].i, 0); }
 break;
 case 24:
-#line 85 "minor.y"
+#line 86 "minor.y"
 	{ yyval.i = 0; }
 break;
 case 25:
-#line 88 "minor.y"
+#line 89 "minor.y"
 	{ yyval.i = tPUB; }
 break;
 case 26:
-#line 89 "minor.y"
+#line 90 "minor.y"
 	{ yyval.i = tFWD; }
 break;
 case 27:
-#line 90 "minor.y"
+#line 91 "minor.y"
 	{ yyval.i = 0; }
 break;
 case 28:
-#line 93 "minor.y"
+#line 94 "minor.y"
 	{ yyval.i = tCNST; }
 break;
 case 29:
-#line 94 "minor.y"
+#line 95 "minor.y"
 	{ yyval.i = 0; }
 break;
 case 30:
-#line 97 "minor.y"
+#line 98 "minor.y"
 	{ yyval.i = tINT; }
 break;
 case 31:
-#line 98 "minor.y"
+#line 99 "minor.y"
 	{ yyval.i = tSTR; }
 break;
 case 32:
-#line 99 "minor.y"
+#line 100 "minor.y"
 	{ yyval.i = tVEC; }
 break;
 case 33:
-#line 102 "minor.y"
+#line 103 "minor.y"
 	{ yyval.i = yystack.l_mark[0].i; }
 break;
 case 34:
-#line 103 "minor.y"
+#line 104 "minor.y"
 	{ yyval.i = tVOID; }
 break;
 case 35:
-#line 106 "minor.y"
+#line 107 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 36:
-#line 107 "minor.y"
+#line 108 "minor.y"
 	{ yyval.n = intNode(INT, yystack.l_mark[0].i); }
 break;
 case 37:
-#line 108 "minor.y"
+#line 109 "minor.y"
 	{ yyval.n = intNode(INT, -yystack.l_mark[0].i); }
 break;
 case 38:
-#line 111 "minor.y"
+#line 112 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 39:
-#line 112 "minor.y"
+#line 113 "minor.y"
 	{ isStr(yyval.n = yystack.l_mark[0].n); }
 break;
 case 40:
-#line 115 "minor.y"
+#line 116 "minor.y"
 	{ yyval.n = binNode(CHARS, nilNode(NIL), yystack.l_mark[0].n); yyval.n->info = yystack.l_mark[0].n->info; }
 break;
 case 41:
-#line 116 "minor.y"
+#line 117 "minor.y"
 	{ yyval.n = binNode(CHARS, yystack.l_mark[-1].n, yystack.l_mark[0].n); yyval.n->info = tSTR; }
 break;
 case 42:
-#line 119 "minor.y"
+#line 120 "minor.y"
 	{ yyval.n = TINT(yystack.l_mark[0].i); yyval.n->info = tINT; }
 break;
 case 43:
-#line 120 "minor.y"
+#line 121 "minor.y"
 	{ yyval.n = intNode(CHAR, yystack.l_mark[0].i); yyval.n->info = tINT; }
 break;
 case 44:
-#line 121 "minor.y"
+#line 122 "minor.y"
 	{ yyval.n = strNode(STR, yystack.l_mark[0].s); yyval.n->info = tSTR; }
 break;
 case 45:
-#line 124 "minor.y"
+#line 125 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 46:
-#line 125 "minor.y"
+#line 126 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 47:
-#line 128 "minor.y"
+#line 129 "minor.y"
 	{ yyval.n = intNode(INT, yystack.l_mark[0].i); }
 break;
 case 48:
-#line 129 "minor.y"
+#line 130 "minor.y"
 	{ yyval.n = intNode(INT, -yystack.l_mark[0].i); }
 break;
 case 49:
-#line 130 "minor.y"
+#line 131 "minor.y"
 	{ yyval.n = binNode(INTS, yystack.l_mark[-2].n, intNode(INT, yystack.l_mark[0].i)); }
 break;
 case 50:
-#line 131 "minor.y"
+#line 132 "minor.y"
 	{ yyval.n = binNode(INTS, yystack.l_mark[-3].n, intNode(INT, -yystack.l_mark[0].i)); }
 break;
 case 51:
-#line 134 "minor.y"
+#line 135 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 52:
-#line 135 "minor.y"
+#line 136 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 53:
-#line 139 "minor.y"
+#line 140 "minor.y"
 	{ yyval.n = binNode(START, yystack.l_mark[-2].n, yystack.l_mark[0].n); }
 break;
 case 54:
-#line 141 "minor.y"
+#line 142 "minor.y"
 	{ yyval.n = binNode(START, nilNode(NIL), yystack.l_mark[0].n); }
 break;
 case 55:
-#line 145 "minor.y"
+#line 146 "minor.y"
 	{ yyval.n = binNode(START, yystack.l_mark[-3].n, binNode(';', yystack.l_mark[-1].n, yystack.l_mark[0].n)); }
 break;
 case 56:
-#line 147 "minor.y"
+#line 148 "minor.y"
 	{ yyval.n = binNode(START, nilNode(NIL), binNode(';', yystack.l_mark[-1].n, yystack.l_mark[0].n)); }
 break;
 case 57:
-#line 150 "minor.y"
+#line 151 "minor.y"
 	{ yyval.n = uniNode(RETURN, nilNode(NIL)); isRet(0); }
 break;
 case 58:
-#line 151 "minor.y"
+#line 152 "minor.y"
 	{ yyval.n = uniNode(RETURN, yystack.l_mark[0].n); isRet(yystack.l_mark[0].n); }
 break;
 case 59:
-#line 152 "minor.y"
+#line 153 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 60:
-#line 155 "minor.y"
+#line 156 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 61:
-#line 156 "minor.y"
+#line 157 "minor.y"
 	{ yyval.n = intNode(REPEAT, 1); isCycle(); }
 break;
 case 62:
-#line 157 "minor.y"
+#line 158 "minor.y"
 	{ yyval.n = intNode(STOP, 1); isCycle(); }
 break;
 case 63:
-#line 160 "minor.y"
+#line 161 "minor.y"
 	{ yyval.n = binNode(';', yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 64:
-#line 163 "minor.y"
+#line 164 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 65:
-#line 164 "minor.y"
+#line 165 "minor.y"
 	{ yyval.n = binNode(';', yystack.l_mark[-1].n, yystack.l_mark[0].n); }
 break;
 case 66:
-#line 168 "minor.y"
+#line 169 "minor.y"
 	{ yyval.n = binNode(FI, binNode(THEN, binNode(IF, yystack.l_mark[-5].n, yystack.l_mark[-3].n), yystack.l_mark[-2].n), yystack.l_mark[-1].n); }
 break;
 case 67:
-#line 169 "minor.y"
+#line 170 "minor.y"
 	{ cycle++; }
 break;
 case 68:
-#line 170 "minor.y"
+#line 171 "minor.y"
 	{ yyval.n = binNode(FOR, binNode(UNTIL, yystack.l_mark[-8].n, yystack.l_mark[-6].n), binNode(STEP, yystack.l_mark[-1].n, yystack.l_mark[-4].n)); cycle--; }
 break;
 case 69:
-#line 171 "minor.y"
+#line 172 "minor.y"
 	{ yyval.n = uniNode('!', yystack.l_mark[-1].n); isPrint(yystack.l_mark[-1].n); }
 break;
 case 70:
-#line 172 "minor.y"
+#line 173 "minor.y"
 	{ yyval.n = yystack.l_mark[-1].n; }
 break;
 case 71:
-#line 173 "minor.y"
+#line 174 "minor.y"
 	{ yyval.n = binNode('#', yystack.l_mark[-1].n, yystack.l_mark[-3].n); isAlloc(yystack.l_mark[-3].n, yystack.l_mark[-1].n); }
 break;
 case 72:
-#line 176 "minor.y"
+#line 177 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 73:
-#line 178 "minor.y"
+#line 179 "minor.y"
 	{ yyval.n = binNode(ELIF, yystack.l_mark[-4].n, binNode(IF, yystack.l_mark[-2].n, yystack.l_mark[0].n)); }
 break;
 case 74:
-#line 181 "minor.y"
+#line 182 "minor.y"
 	{ yyval.n = nilNode(NIL); }
 break;
 case 75:
-#line 182 "minor.y"
+#line 183 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
 case 76:
-#line 185 "minor.y"
+#line 186 "minor.y"
 	{ yyval.n = TID(yystack.l_mark[0].s); yyval.n->info = isId(yystack.l_mark[0].s, 0, 0); }
 break;
 case 77:
-#line 186 "minor.y"
+#line 187 "minor.y"
 	{ yyval.n = binNode('[', yystack.l_mark[-1].n, TID(yystack.l_mark[-3].s)); yyval.n->info = isId(yystack.l_mark[-3].s, yystack.l_mark[-1].n, &yyval.n->SUB(1)->info); }
 break;
 case 78:
-#line 189 "minor.y"
-	{ yyval.n = yystack.l_mark[0].n; }
-break;
-case 79:
 #line 190 "minor.y"
 	{ yyval.n = yystack.l_mark[0].n; }
 break;
-case 80:
+case 79:
 #line 191 "minor.y"
+	{ yyval.n = yystack.l_mark[0].n; }
+break;
+case 80:
+#line 192 "minor.y"
 	{ yyval.n = nilNode('?'); yyval.n->info = tINT; }
 break;
 case 81:
-#line 192 "minor.y"
+#line 193 "minor.y"
 	{ yyval.n = uniNode(ADDR, yystack.l_mark[0].n); yyval.n->info = isAddr(yyval.n); }
 break;
 case 82:
-#line 193 "minor.y"
+#line 194 "minor.y"
 	{ yyval.n = yystack.l_mark[-1].n; yyval.n->info = yystack.l_mark[-1].n->info; }
 break;
 case 83:
-#line 194 "minor.y"
+#line 195 "minor.y"
 	{ yyval.n = binNode('+', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isAddSub(yyval.n, "+"); }
 break;
 case 84:
-#line 195 "minor.y"
+#line 196 "minor.y"
 	{ yyval.n = binNode('-', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isAddSub(yyval.n, "-"); }
 break;
 case 85:
-#line 196 "minor.y"
+#line 197 "minor.y"
 	{ yyval.n = binNode('*', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isInt(yyval.n, "*"); }
 break;
 case 86:
-#line 197 "minor.y"
+#line 198 "minor.y"
 	{ yyval.n = binNode('/', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isInt(yyval.n, "/"); }
 break;
 case 87:
-#line 198 "minor.y"
+#line 199 "minor.y"
 	{ yyval.n = binNode('%', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isInt(yyval.n, "%"); }
 break;
 case 88:
-#line 199 "minor.y"
+#line 200 "minor.y"
 	{ yyval.n = binNode('^', yystack.l_mark[0].n, yystack.l_mark[-2].n); yyval.n->info = isInt(yyval.n, "^"); }
 break;
 case 89:
-#line 200 "minor.y"
+#line 201 "minor.y"
 	{ yyval.n = binNode('=', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, "="); }
 break;
 case 90:
-#line 201 "minor.y"
+#line 202 "minor.y"
 	{ yyval.n = binNode(NE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, "~="); }
 break;
 case 91:
-#line 202 "minor.y"
+#line 203 "minor.y"
 	{ yyval.n = binNode(GE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, ">="); }
 break;
 case 92:
-#line 203 "minor.y"
+#line 204 "minor.y"
 	{ yyval.n = binNode(LE, yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, "<="); }
 break;
 case 93:
-#line 204 "minor.y"
+#line 205 "minor.y"
 	{ yyval.n = binNode('<', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, "<"); }
 break;
 case 94:
-#line 205 "minor.y"
+#line 206 "minor.y"
 	{ yyval.n = binNode('>', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isCmp(yyval.n, ">"); }
 break;
 case 95:
-#line 206 "minor.y"
+#line 207 "minor.y"
 	{ yyval.n = binNode('&', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isInt(yyval.n, "&"); }
 break;
 case 96:
-#line 207 "minor.y"
+#line 208 "minor.y"
 	{ yyval.n = binNode('|', yystack.l_mark[-2].n, yystack.l_mark[0].n); yyval.n->info = isInt(yyval.n, "|"); }
 break;
 case 97:
-#line 208 "minor.y"
+#line 209 "minor.y"
 	{ yyval.n = uniNode('~', yystack.l_mark[0].n); yyval.n->info = isUniInt(yyval.n, "~"); }
 break;
 case 98:
-#line 209 "minor.y"
+#line 210 "minor.y"
 	{ yyval.n = uniNode(UMINUS, yystack.l_mark[0].n); yyval.n->info = isUniInt(yyval.n, "-"); }
 break;
 case 99:
-#line 210 "minor.y"
+#line 211 "minor.y"
 	{ yyval.n = binNode(EQ, yystack.l_mark[0].n, yystack.l_mark[-2].n); yyval.n->info = isAssign(yyval.n); }
 break;
 case 100:
-#line 211 "minor.y"
+#line 212 "minor.y"
 	{ Node *n; int t = IDfind(yystack.l_mark[-3].s, (void**)&n); yyval.n = binNode('(', TID(yystack.l_mark[-3].s), yystack.l_mark[-1].n); yyval.n->user = n; yyval.n->info = yyval.n->SUB(0)->info = t; isCall(yystack.l_mark[-3].s, n, yystack.l_mark[-1].n); }
 break;
 case 101:
-#line 214 "minor.y"
+#line 215 "minor.y"
 	{ yyval.n = binNode(',', yystack.l_mark[0].n, nilNode(NIL)); }
 break;
 case 102:
-#line 215 "minor.y"
+#line 216 "minor.y"
 	{ yyval.n = binNode(',', yystack.l_mark[0].n, yystack.l_mark[-2].n); }
 break;
-#line 1560 "y.tab.c"
+#line 1561 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
