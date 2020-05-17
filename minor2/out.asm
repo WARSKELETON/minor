@@ -6,28 +6,22 @@ segment	.data
 align	4
 ; LABEL
 $cona:
-; INTEGER
-	dd	0
-; GLOBL
-global	$ze:object
-; DATA
-segment	.data
+; RODATA
+segment	.rodata
 ; ALIGN
 align	4
 ; LABEL
-$ze:
-; INTEGER
-	dd	0
-; GLOBL
-global	$y:object
+$_L1:
+; CHAR
+	db	0x50
+; CHAR
+	db	0x43
+; CHAR
+	db	0x00
 ; DATA
 segment	.data
-; ALIGN
-align	4
-; LABEL
-$y:
-; INTEGER
-	dd	0
+; ID
+	dd	$_L1
 ; TEXT
 segment	.text
 ; ALIGN
@@ -38,88 +32,12 @@ global	$_main:function
 $_main:
 ; ADDRV
 	push	dword [$cona]
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L1
-; ADDRV
-	push	dword [$cona]
-; IMM
-	push	dword 1
-; ADD
-	pop	eax
-	add	dword [esp], eax
 ; CALL
-	call	$_printi
+	call	$_prints
 ; CALL
 	call	$_println
 ; TRASH
 	add	esp, 4
-; JMP
-	jmp	dword $_L2
-; LABEL
-$_L1:
-; ADDRV
-	push	dword [$ze]
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L3
-; ADDRV
-	push	dword [$cona]
-; IMM
-	push	dword 3
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; CALL
-	call	$_printi
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; JMP
-	jmp	dword $_L2
-; LABEL
-$_L3:
-; ADDRV
-	push	dword [$y]
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L4
-; ADDRV
-	push	dword [$cona]
-; IMM
-	push	dword 4
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; CALL
-	call	$_printi
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; JMP
-	jmp	dword $_L2
-; LABEL
-$_L4:
-; ADDRV
-	push	dword [$cona]
-; IMM
-	push	dword 2
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; CALL
-	call	$_printi
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; LABEL
-$_L2:
 ; IMM
 	push	dword 0
 ; POP

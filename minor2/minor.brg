@@ -32,6 +32,24 @@ static char *mkfunc(char *s) {
 	strcat(buf, s);
 	return buf;
 }
+static void outchars(Node *chars) {
+	int first = 1;
+
+	while (LEFT_CHILD(chars) || first) {
+		first = 0;
+		
+		if (RIGHT_CHILD(chars)->info == tSTR) {
+			char* s = RIGHT_CHILD(chars)->value.s;
+			while (*s) fprintf(yyout, pfCHAR, (unsigned char)*s++);
+		}
+		if (RIGHT_CHILD(chars)->info == tINT) {
+			fprintf(yyout, pfCHAR, RIGHT_CHILD(chars)->value.i);
+		}
+		
+		chars = LEFT_CHILD(chars);
+	}
+	fprintf(yyout, pfCHAR, 0);
+}
 static void outstr(char *s) {
   while (*s) fprintf(yyout, pfCHAR, (unsigned char)*s++);
   fprintf(yyout, pfCHAR, 0);
@@ -193,7 +211,7 @@ void variable(Node *p) {
 	if (p->info == tSTR) {
 		char *l = mklbl(++lbl);
 		fprintf(yyout, pfRODATA pfALIGN pfLABEL, l);
-		outstr(RIGHT_CHILD(RIGHT_CHILD(p))->value.s);
+		outchars(RIGHT_CHILD(p));
 		fprintf(yyout, pfDATA pfID, l);
 	}
 }
