@@ -1,4 +1,8 @@
 program
+	string cona := "cona";
+	number y := 2
 start
+	cona !
 	"cona\n" !
+	y !
 end
