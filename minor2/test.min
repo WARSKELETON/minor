@@ -1,8 +1,9 @@
 program
-	string cona := "cona";
-	number y := 2
+	number cona := 0
 start
-	cona !
-	"cona\n" !
-	y !
+  if cona then
+    cona + 1 !
+  else
+    cona + 2 !
+  fi
 end
