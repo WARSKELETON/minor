@@ -1,8 +1,14 @@
 program
-	number cona := 0
+	number cona := 0;
+	number ze := 0;
+	number y := 0
 start
   if cona then
     cona + 1 !
+  elif ze then
+	cona + 3 !
+  elif y then
+	cona + 4 !
   else
     cona + 2 !
   fi
