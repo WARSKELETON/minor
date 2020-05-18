@@ -111,12 +111,12 @@ eqchar: INT		1 {}
 eqchar: CHAR	1 {}
 eqchar: STR		1 {}
 
-chars: CHARS(NIL, char)		1 {}
-chars: CHARS(chars, char)	1 {}
+chars: CHARS(NIL, char)			1 {}
+chars: CHARS(chars, char)	    1 {}
 
-char: INT					1 { fprintf(yyout, pfIMM, p->value.i); }
-char: CHAR					1 {}
-char: STR					1 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(p->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
+char: INT
+char: CHAR
+char: STR
 
 eqvec: NIL	1 {}
 eqvec: ints	1 {}
@@ -167,7 +167,10 @@ else: block
 lval: ID				1 { fprintf(yyout, pfADDRV, p->value.s); }
 lval: INDEX(expr, ID)	1 {}
 
-expr: chars				1 {}
+expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
+expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
+expr: CHARS(NIL, STR)	1 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(RIGHT_CHILD(p)->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
+expr: chars				1 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outchars(p); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: lval
 expr: ADDR(lval)		1 {}
 expr: ADD(expr, expr)	1 { fprintf(yyout, pfADD); }
@@ -228,3 +231,4 @@ static void yytrace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost)
 	}
 }
 #endif
+	fprintf(yyout, pfCHAR, 0);

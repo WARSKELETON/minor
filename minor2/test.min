@@ -1,5 +1,8 @@
 program
-	string cona := 'C' 'P'
+	string cona := 'C' 'P' 'A'
 start
   	cona !
+	'C' 'P' 'A' 65 65 !
+	2 + 'A' !
+	"cona" !
 end
