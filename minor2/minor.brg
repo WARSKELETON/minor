@@ -64,7 +64,7 @@ static void pfPrint(int info) {
 }
 /* expr: falta '?', falta const type ftype */
 /* expr: expr */
-/* println ? */
+/* println ? 255 truncar */
 %}
 %term STMT=';' PRINT='!' ALLOC='#' INDEX='[' IDARGS='(' COMMA=','
 %term ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' POW='^' EQU='=' LT='<' GT='>'
@@ -185,8 +185,10 @@ expr: GE(expr, expr)	1 { fprintf(yyout, pfGE); }
 expr: LE(expr, expr)	1 { fprintf(yyout, pfLE); }
 expr: LT(expr, expr)	1 { fprintf(yyout, pfLT); }
 expr: GT(expr, expr)	1 { fprintf(yyout, pfGT); }
-expr: AND(expr, expr)	1 {}
-expr: OR(expr, expr)	1 {}
+expr: AND(and,expr)		1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+and: expr				1 { p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
+expr: OR(or,expr)		1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+or: expr				1 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: NOT(expr)			1 { fprintf(yyout, pfIMM pfEQ, 0); }
 expr: UMINUS(expr)		1 { fprintf(yyout, pfNEG); }
 expr: EQ(expr, lval)	1 {}

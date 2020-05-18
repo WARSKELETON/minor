@@ -1,5 +1,5 @@
 /*
-generated at Mon May 18 11:30:01 2020
+generated at Mon May 18 12:01:29 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -81,7 +81,7 @@ static void pfPrint(int info) {
 }
 /* expr: falta '?', falta const type ftype */
 /* expr: expr */
-/* println ? */
+/* println ? 255 truncar */
 #ifndef PANIC
 #define PANIC yypanic
 static void yypanic(YYCONST char *rot, YYCONST char *msg, int val) {
@@ -123,7 +123,9 @@ static void yykids(NODEPTR_TYPE, int, NODEPTR_TYPE[]);
 #define yylval_NT 30
 #define yycond_NT 31
 #define yyifelse_NT 32
-#define yyexprs_NT 33
+#define yyand_NT 33
+#define yyor_NT 34
+#define yyexprs_NT 35
 
 static YYCONST char *yyntname[] = {
 	0,
@@ -159,6 +161,8 @@ static YYCONST char *yyntname[] = {
 	"lval",
 	"cond",
 	"ifelse",
+	"and",
+	"or",
 	"exprs",
 	0
 };
@@ -248,7 +252,7 @@ static YYCONST char *yytermname[] = {
 };
 
 struct yystate {
-	short cost[34];
+	short cost[36];
 	struct {
 		unsigned int yyprogram:2;
 		unsigned int yydecls:2;
@@ -282,6 +286,8 @@ struct yystate {
 		unsigned int yylval:2;
 		unsigned int yycond:1;
 		unsigned int yyifelse:1;
+		unsigned int yyand:1;
+		unsigned int yyor:1;
 		unsigned int yyexprs:2;
 	} rule;
 };
@@ -325,9 +331,11 @@ static short yynts_35[] = { yyblock_NT, 0 };
 static short yynts_36[] = { yychars_NT, 0 };
 static short yynts_37[] = { yylval_NT, 0 };
 static short yynts_38[] = { yyexpr_NT, yyexpr_NT, 0 };
-static short yynts_39[] = { yyexpr_NT, yylval_NT, 0 };
-static short yynts_40[] = { yyexprs_NT, 0 };
-static short yynts_41[] = { yyexpr_NT, yyexprs_NT, 0 };
+static short yynts_39[] = { yyand_NT, yyexpr_NT, 0 };
+static short yynts_40[] = { yyor_NT, yyexpr_NT, 0 };
+static short yynts_41[] = { yyexpr_NT, yylval_NT, 0 };
+static short yynts_42[] = { yyexprs_NT, 0 };
+static short yynts_43[] = { yyexpr_NT, yyexprs_NT, 0 };
 
 static short *yynts[] = {
 	0,	/* 0 */
@@ -416,14 +424,16 @@ static short *yynts[] = {
 	yynts_38,	/* 83 */
 	yynts_38,	/* 84 */
 	yynts_38,	/* 85 */
-	yynts_38,	/* 86 */
-	yynts_38,	/* 87 */
-	yynts_26,	/* 88 */
+	yynts_39,	/* 86 */
+	yynts_26,	/* 87 */
+	yynts_40,	/* 88 */
 	yynts_26,	/* 89 */
-	yynts_39,	/* 90 */
-	yynts_40,	/* 91 */
-	yynts_26,	/* 92 */
-	yynts_41,	/* 93 */
+	yynts_26,	/* 90 */
+	yynts_26,	/* 91 */
+	yynts_41,	/* 92 */
+	yynts_42,	/* 93 */
+	yynts_26,	/* 94 */
+	yynts_43,	/* 95 */
 };
 
 
@@ -514,14 +524,16 @@ static YYCONST char *yystring[] = {
 /* 83 */	"expr: LE(expr,expr)",
 /* 84 */	"expr: LT(expr,expr)",
 /* 85 */	"expr: GT(expr,expr)",
-/* 86 */	"expr: AND(expr,expr)",
-/* 87 */	"expr: OR(expr,expr)",
-/* 88 */	"expr: NOT(expr)",
-/* 89 */	"expr: UMINUS(expr)",
-/* 90 */	"expr: EQ(expr,lval)",
-/* 91 */	"expr: IDARGS(ID,exprs)",
-/* 92 */	"exprs: COMMA(expr,NIL)",
-/* 93 */	"exprs: COMMA(expr,exprs)",
+/* 86 */	"expr: AND(and,expr)",
+/* 87 */	"and: expr",
+/* 88 */	"expr: OR(or,expr)",
+/* 89 */	"or: expr",
+/* 90 */	"expr: NOT(expr)",
+/* 91 */	"expr: UMINUS(expr)",
+/* 92 */	"expr: EQ(expr,lval)",
+/* 93 */	"expr: IDARGS(ID,exprs)",
+/* 94 */	"exprs: COMMA(expr,NIL)",
+/* 95 */	"exprs: COMMA(expr,exprs)",
 };
 
 #ifndef TRACE
@@ -686,11 +698,11 @@ static short yydecode_expr[] = {
 	84,
 	85,
 	86,
-	87,
 	88,
-	89,
 	90,
 	91,
+	92,
+	93,
 };
 
 static short yydecode_loop[] = {
@@ -752,14 +764,24 @@ static short yydecode_ifelse[] = {
 	60,
 };
 
+static short yydecode_and[] = {
+	0,
+	87,
+};
+
+static short yydecode_or[] = {
+	0,
+	89,
+};
+
 static short yydecode_exprs[] = {
 	0,
-	92,
-	93,
+	94,
+	95,
 };
 
 static int yyrule(void *state, int goalnt) {
-	if (goalnt < 1 || goalnt > 33)
+	if (goalnt < 1 || goalnt > 35)
 		PANIC("yyrule", "Bad goal nonterminal", goalnt);
 	if (!state)
 		return 0;
@@ -796,6 +818,8 @@ static int yyrule(void *state, int goalnt) {
 	case yylval_NT:	return yydecode_lval[((struct yystate *)state)->rule.yylval];
 	case yycond_NT:	return yydecode_cond[((struct yystate *)state)->rule.yycond];
 	case yyifelse_NT:	return yydecode_ifelse[((struct yystate *)state)->rule.yyifelse];
+	case yyand_NT:	return yydecode_and[((struct yystate *)state)->rule.yyand];
+	case yyor_NT:	return yydecode_or[((struct yystate *)state)->rule.yyor];
 	case yyexprs_NT:	return yydecode_exprs[((struct yystate *)state)->rule.yyexprs];
 	default:
 		PANIC("yyrule", "Bad goal nonterminal", goalnt);
@@ -870,6 +894,16 @@ static void yyclosure_ret(NODEPTR_TYPE a, int c) {
 
 static void yyclosure_expr(NODEPTR_TYPE a, int c) {
 	struct yystate *p = (struct yystate *)STATE_LABEL(a);
+	yytrace(a, 89, c + 1, p->cost[yyor_NT]);
+	if (c + 1 < p->cost[yyor_NT]) {
+		p->cost[yyor_NT] = c + 1;
+		p->rule.yyor = 1;
+	}
+	yytrace(a, 87, c + 1, p->cost[yyand_NT]);
+	if (c + 1 < p->cost[yyand_NT]) {
+		p->cost[yyand_NT] = c + 1;
+		p->rule.yyand = 1;
+	}
 	yytrace(a, 61, c + 1, p->cost[yycond_NT]);
 	if (c + 1 < p->cost[yycond_NT]) {
 		p->cost[yycond_NT] = c + 1;
@@ -947,6 +981,8 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	p->cost[31] =
 	p->cost[32] =
 	p->cost[33] =
+	p->cost[34] =
+	p->cost[35] =
 		0x7fff;
 	switch (OP_LABEL(a)) {
 	case 33: /* PRINT */
@@ -985,8 +1021,8 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	case 38: /* AND */
 		yylabel(LEFT_CHILD(a),a);
 		yylabel(RIGHT_CHILD(a),a);
-		/* expr: AND(expr,expr) */
-		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
+		/* expr: AND(and,expr) */
+		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyand_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
 		yytrace(a, 86, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
@@ -1001,7 +1037,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(LEFT_CHILD(a)) == 259 /* ID */
 		) {
 			c = ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexprs_NT] + 1;
-			yytrace(a, 91, c + 0, p->cost[yyexpr_NT]);
+			yytrace(a, 93, c + 0, p->cost[yyexpr_NT]);
 			if (c + 0 < p->cost[yyexpr_NT]) {
 				p->cost[yyexpr_NT] = c + 0;
 				p->rule.yyexpr = 24;
@@ -1040,7 +1076,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(RIGHT_CHILD(a)) == 293 /* NIL */
 		) {
 			c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-			yytrace(a, 92, c + 0, p->cost[yyexprs_NT]);
+			yytrace(a, 94, c + 0, p->cost[yyexprs_NT]);
 			if (c + 0 < p->cost[yyexprs_NT]) {
 				p->cost[yyexprs_NT] = c + 0;
 				p->rule.yyexprs = 1;
@@ -1048,7 +1084,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		}
 		/* exprs: COMMA(expr,exprs) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexprs_NT] + 1;
-		yytrace(a, 93, c + 0, p->cost[yyexprs_NT]);
+		yytrace(a, 95, c + 0, p->cost[yyexprs_NT]);
 		if (c + 0 < p->cost[yyexprs_NT]) {
 			p->cost[yyexprs_NT] = c + 0;
 			p->rule.yyexprs = 2;
@@ -1163,9 +1199,9 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	case 124: /* OR */
 		yylabel(LEFT_CHILD(a),a);
 		yylabel(RIGHT_CHILD(a),a);
-		/* expr: OR(expr,expr) */
-		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 87, c + 0, p->cost[yyexpr_NT]);
+		/* expr: OR(or,expr) */
+		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyor_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
+		yytrace(a, 88, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 20;
@@ -1176,7 +1212,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(LEFT_CHILD(a),a);
 		/* expr: NOT(expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 88, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 90, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 21;
@@ -1790,7 +1826,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: EQ(expr,lval) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yylval_NT] + 1;
-		yytrace(a, 90, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 92, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 23;
@@ -1837,7 +1873,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(LEFT_CHILD(a),a);
 		/* expr: UMINUS(expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 89, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 91, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 22;
@@ -1859,9 +1895,9 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 		kids[0] = LEFT_CHILD(p);
 		kids[1] = RIGHT_CHILD(RIGHT_CHILD(RIGHT_CHILD(p)));
 		break;
-	case 92: /* exprs: COMMA(expr,NIL) */
-	case 89: /* expr: UMINUS(expr) */
-	case 88: /* expr: NOT(expr) */
+	case 94: /* exprs: COMMA(expr,NIL) */
+	case 91: /* expr: UMINUS(expr) */
+	case 90: /* expr: NOT(expr) */
 	case 73: /* expr: ADDR(lval) */
 	case 67: /* lval: INDEX(expr,ID) */
 	case 55: /* instr: PRINT(expr) */
@@ -1900,6 +1936,8 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 	case 10: /* fvar: NUMBER(ID,NIL) */
 	case 3: /* decls: NIL */
 		break;
+	case 89: /* or: expr */
+	case 87: /* and: expr */
 	case 72: /* expr: lval */
 	case 71: /* expr: chars */
 	case 65: /* else: block */
@@ -1913,10 +1951,10 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 	case 4: /* decls: gdecls */
 		kids[0] = p;
 		break;
-	case 93: /* exprs: COMMA(expr,exprs) */
-	case 90: /* expr: EQ(expr,lval) */
-	case 87: /* expr: OR(expr,expr) */
-	case 86: /* expr: AND(expr,expr) */
+	case 95: /* exprs: COMMA(expr,exprs) */
+	case 92: /* expr: EQ(expr,lval) */
+	case 88: /* expr: OR(or,expr) */
+	case 86: /* expr: AND(and,expr) */
 	case 85: /* expr: GT(expr,expr) */
 	case 84: /* expr: LT(expr,expr) */
 	case 83: /* expr: LE(expr,expr) */
@@ -1943,7 +1981,7 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 		kids[0] = LEFT_CHILD(p);
 		kids[1] = RIGHT_CHILD(p);
 		break;
-	case 91: /* expr: IDARGS(ID,exprs) */
+	case 93: /* expr: IDARGS(ID,exprs) */
 	case 41: /* main: START(NIL,instrs) */
 	case 29: /* chars: CHARS(NIL,char) */
 	case 24: /* eqchars: CHARS(NIL,eqchar) */
@@ -2422,44 +2460,54 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 #line 187 "minor.brg"
 { fprintf(yyout, pfGT); }
 		break;
-	case 86: /* expr: AND(expr,expr) */
-		fprintf(stderr, "0x%lx: line 188: expr: AND(expr,expr)\n",(long)p);
+	case 86: /* expr: AND(and,expr) */
+		fprintf(stderr, "0x%lx: line 188: expr: AND(and,expr)\n",(long)p);
 #line 188 "minor.brg"
-{}
+{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 		break;
-	case 87: /* expr: OR(expr,expr) */
-		fprintf(stderr, "0x%lx: line 189: expr: OR(expr,expr)\n",(long)p);
+	case 87: /* and: expr */
+		fprintf(stderr, "0x%lx: line 189: and: expr\n",(long)p);
 #line 189 "minor.brg"
-{}
+{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
 		break;
-	case 88: /* expr: NOT(expr) */
-		fprintf(stderr, "0x%lx: line 190: expr: NOT(expr)\n",(long)p);
+	case 88: /* expr: OR(or,expr) */
+		fprintf(stderr, "0x%lx: line 190: expr: OR(or,expr)\n",(long)p);
 #line 190 "minor.brg"
+{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+		break;
+	case 89: /* or: expr */
+		fprintf(stderr, "0x%lx: line 191: or: expr\n",(long)p);
+#line 191 "minor.brg"
+{ p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
+		break;
+	case 90: /* expr: NOT(expr) */
+		fprintf(stderr, "0x%lx: line 192: expr: NOT(expr)\n",(long)p);
+#line 192 "minor.brg"
 { fprintf(yyout, pfIMM pfEQ, 0); }
 		break;
-	case 89: /* expr: UMINUS(expr) */
-		fprintf(stderr, "0x%lx: line 191: expr: UMINUS(expr)\n",(long)p);
-#line 191 "minor.brg"
+	case 91: /* expr: UMINUS(expr) */
+		fprintf(stderr, "0x%lx: line 193: expr: UMINUS(expr)\n",(long)p);
+#line 193 "minor.brg"
 { fprintf(yyout, pfNEG); }
 		break;
-	case 90: /* expr: EQ(expr,lval) */
-		fprintf(stderr, "0x%lx: line 192: expr: EQ(expr,lval)\n",(long)p);
-#line 192 "minor.brg"
+	case 92: /* expr: EQ(expr,lval) */
+		fprintf(stderr, "0x%lx: line 194: expr: EQ(expr,lval)\n",(long)p);
+#line 194 "minor.brg"
 {}
 		break;
-	case 91: /* expr: IDARGS(ID,exprs) */
-		fprintf(stderr, "0x%lx: line 193: expr: IDARGS(ID,exprs)\n",(long)p);
-#line 193 "minor.brg"
-{}
-		break;
-	case 92: /* exprs: COMMA(expr,NIL) */
-		fprintf(stderr, "0x%lx: line 195: exprs: COMMA(expr,NIL)\n",(long)p);
+	case 93: /* expr: IDARGS(ID,exprs) */
+		fprintf(stderr, "0x%lx: line 195: expr: IDARGS(ID,exprs)\n",(long)p);
 #line 195 "minor.brg"
 {}
 		break;
-	case 93: /* exprs: COMMA(expr,exprs) */
-		fprintf(stderr, "0x%lx: line 196: exprs: COMMA(expr,exprs)\n",(long)p);
-#line 196 "minor.brg"
+	case 94: /* exprs: COMMA(expr,NIL) */
+		fprintf(stderr, "0x%lx: line 197: exprs: COMMA(expr,NIL)\n",(long)p);
+#line 197 "minor.brg"
+{}
+		break;
+	case 95: /* exprs: COMMA(expr,exprs) */
+		fprintf(stderr, "0x%lx: line 198: exprs: COMMA(expr,exprs)\n",(long)p);
+#line 198 "minor.brg"
 {}
 		break;
 	default: break;
@@ -2478,7 +2526,7 @@ int yyselect(NODEPTR_TYPE p)
 }
 
 
-#line 198 "minor.brg"
+#line 200 "minor.brg"
 
 extern char **yynames;
 extern int trace, errors, debugNode;
