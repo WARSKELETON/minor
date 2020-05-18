@@ -65,7 +65,7 @@ static void pfPrint(int info) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_prints", "_println", 4);
 	}
 }
-static void test(Node* nm) {
+static void getId(Node* nm) {
 	int typ = 2, pos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
 		fprintf(yyout, pfADDRV, nm->value.s);
@@ -75,7 +75,7 @@ static void test(Node* nm) {
 		fprintf(yyout, pfLOCV, pos);
 	}
 }
-static void test1(Node* nm) {
+static void assignment(Node* nm) {
 	int typ = 2, pos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
 		fprintf(yyout, pfDUP pfADDRA, nm->value.s);
@@ -97,7 +97,7 @@ static void test1(Node* nm) {
 program: PROGRAM(decls, FUNCTION(END(ID, INT), FARGS(NIL, main)))	1 {}
 program: MODULE(decls)		1 {}
 
-decls: NIL					1 {}
+decls: NIL					1 { IDpush(); pos = 0; }
 decls: gdecls 				1 { IDpush(); pos = 0; }
 
 gdecls: DECL(gdecls, decl)	1 {}
@@ -170,7 +170,7 @@ instrs: NIL	1 {}
 instrs: STMT(instrs, instr)	1 {}
 
 instr: FI(THEN(if, elifs), else)					1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(LEFT_CHILD(p))->place)); }
-instr: FOR(UNTIL(init, cond), STEP(block, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
+instr: FOR(UNTIL(init, forcond), STEP(block, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 instr: PRINT(expr)									3 { pfPrint(p->info); }
 instr: expr											1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 instr: ALLOC(alloc,lval)							1 { fprintf(yyout, pfSTORE); }
@@ -179,9 +179,12 @@ alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
 ifelse: IF(cond, block)
 
-init: expr				1 { p->place = forlbl[++forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }		
+init: test				1 { p->place = forlbl[++forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
+forcond: expr			1 { p->place = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
+postexpr: test			1 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 cond: expr				1 { p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
-postexpr: expr			1 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
+
+test: expr				1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 
 elifs: NIL
 elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(RIGHT_CHILD(p))->place)); }
@@ -189,9 +192,10 @@ elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL,
 else: NIL
 else: block
 
-lval: ID				1 { test(p); }
+lval: ID				1 { getId(p); }
 lval: INDEX(expr, ID)	1 {}
 assign: ID
+assign: INDEX(expr, ID)
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
@@ -217,7 +221,7 @@ expr: OR(or,expr)		1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 or: expr				1 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: NOT(expr)			1 { fprintf(yyout, pfIMM pfEQ, 0); }
 expr: UMINUS(expr)		1 { fprintf(yyout, pfNEG); }
-expr: EQ(expr, assign)	1 { test1(RIGHT_CHILD(p)); }
+expr: EQ(expr, assign)	1 { assignment(RIGHT_CHILD(p)); }
 expr: IDARGS(ID, exprs)	1 {}
 
 exprs: COMMA(expr, NIL)		1 {}

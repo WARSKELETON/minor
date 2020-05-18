@@ -1,11 +1,7 @@
 program
-	number x := 2
 start
-	number y;
-	number z;
-	y := 1;
-	z := 3;
-	y !
-	z !
-	x !
+    number x;
+    for x := 0 until x = 10 step x := x + 1 do
+        x!
+    done
 end
