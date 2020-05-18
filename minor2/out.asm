@@ -7,17 +7,7 @@ align	4
 ; LABEL
 $x:
 ; INTEGER
-	dd	0
-; GLOBL
-global	$y:object
-; DATA
-segment	.data
-; ALIGN
-align	4
-; LABEL
-$y:
-; INTEGER
-	dd	0
+	dd	2
 ; TEXT
 segment	.text
 ; ALIGN
@@ -27,45 +17,39 @@ global	$_main:function
 ; LABEL
 $_main:
 ; IMM
-	push	dword 0
-; ADDRV
-	push	dword [$x]
-; LABEL
-$_L1:
-; ADDRV
-	push	dword [$x]
+	push	dword 1
+; COPY
+	push	dword [esp]
+; LOCA
+	pop	eax
+	mov	[ebp+0], eax
+; TRASH
+	add	esp, 4
 ; IMM
-	push	dword 2
-; EQ
+	push	dword 3
+; COPY
+	push	dword [esp]
+; LOCA
 	pop	eax
-	xor	ecx, ecx
-	cmp	[esp], eax
-	sete	cl
-	mov	[esp], ecx
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L2
-; IMM
-	push	dword 0
-; ADDRV
-	push	dword [$y]
-; LABEL
-$_L3:
-; ADDRV
-	push	dword [$y]
-; IMM
-	push	dword 2
-; EQ
-	pop	eax
-	xor	ecx, ecx
-	cmp	[esp], eax
-	sete	cl
-	mov	[esp], ecx
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L4
+	mov	[ebp+4], eax
+; TRASH
+	add	esp, 4
+; LOCV
+	push	dword [ebp+0]
+; CALL
+	call	$_printi
+; CALL
+	call	$_println
+; TRASH
+	add	esp, 4
+; LOCV
+	push	dword [ebp+4]
+; CALL
+	call	$_printi
+; CALL
+	call	$_println
+; TRASH
+	add	esp, 4
 ; ADDRV
 	push	dword [$x]
 ; CALL
@@ -74,40 +58,6 @@ $_L3:
 	call	$_println
 ; TRASH
 	add	esp, 4
-; ADDRV
-	push	dword [$y]
-; CALL
-	call	$_printi
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; ADDRV
-	push	dword [$y]
-; IMM
-	push	dword 1
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; ADDRV
-	push	dword [$y]
-; JMP
-	jmp	dword $_L3
-; LABEL
-$_L4:
-; ADDRV
-	push	dword [$x]
-; IMM
-	push	dword 1
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; ADDRV
-	push	dword [$x]
-; JMP
-	jmp	dword $_L1
-; LABEL
-$_L2:
 ; IMM
 	push	dword 0
 ; POP

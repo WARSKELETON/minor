@@ -10,6 +10,7 @@
 #include "postfix.h"
 #include "y.tab.h"
 #include "minor.h"
+#include "tabid.h"
 
 #ifndef U_
 #define U_ "_"
@@ -22,6 +23,7 @@ extern FILE *yyout;
 static int forlbl[20], forcnt; /* for labels */
 int lbl;
 int eliflbl;
+static int pos;
 static char *mklbl(int n) {
 	static char buf[20];
 	sprintf(buf, "%cL%d", n < 0 ? '.' : '_', n);
@@ -63,6 +65,26 @@ static void pfPrint(int info) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_prints", "_println", 4);
 	}
 }
+static void test(Node* nm) {
+	int typ = 2, pos = 0;
+	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
+		fprintf(yyout, pfADDRV, nm->value.s);
+	}
+	else {
+		typ = IDfind(nm->value.s, (long*)&pos);
+		fprintf(yyout, pfLOCV, pos);
+	}
+}
+static void test1(Node* nm) {
+	int typ = 2, pos = 0;
+	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
+		fprintf(yyout, pfDUP pfADDRA, nm->value.s);
+	}
+	else {
+		typ = IDfind(nm->value.s, (long*)&pos);
+		fprintf(yyout, pfDUP pfLOCA, pos * (pfWORD/4));
+	}
+}
 /* expr: falta '?', falta const type ftype */
 /* expr: expr */
 /* println ? 255 truncar */
@@ -73,10 +95,10 @@ static void pfPrint(int info) {
 %include "y.tab.h"
 %%
 program: PROGRAM(decls, FUNCTION(END(ID, INT), FARGS(NIL, main)))	1 {}
-program: MODULE(decls)	1 {}
+program: MODULE(decls)		1 {}
 
-decls: NIL	1 {}
-decls: gdecls 1 {}
+decls: NIL					1 {}
+decls: gdecls 				1 { IDpush(); pos = 0; }
 
 gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
@@ -85,7 +107,7 @@ decl: VAR(vardecl)			1 {}
 decl: FUNCTION(END(ID, INT), FARGS(fvars, eqbody))	1 {}
 decl: FUNCTION(END(ID, INT), FARGS(NIL, eqbody))		1 {}
 
-fvar: NUMBER(ID, NIL)	1 {}
+fvar: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 fvar: STRING(ID, NIL)	1 {}
 fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 
@@ -128,8 +150,8 @@ ints: INTS(ints, INT)	1 {}
 eqbody: NIL	1 {}
 eqbody: body	1 {}
 
-main: START(fvars, instrs)	1 {}
-main: START(NIL, instrs)	1 {}
+main: START(fvars, instrs)	1 { IDpop(); }
+main: START(NIL, instrs)	1 { IDpop(); }
 
 body: START(fvars, STMT(instrs, ret))	1 {}
 body: START(NIL, STMT(instrs, ret))	1 {}
@@ -167,8 +189,9 @@ elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL,
 else: NIL
 else: block
 
-lval: ID				1 { fprintf(yyout, pfADDRV, p->value.s); }
+lval: ID				1 { test(p); }
 lval: INDEX(expr, ID)	1 {}
+assign: ID
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
@@ -194,7 +217,7 @@ expr: OR(or,expr)		1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 or: expr				1 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: NOT(expr)			1 { fprintf(yyout, pfIMM pfEQ, 0); }
 expr: UMINUS(expr)		1 { fprintf(yyout, pfNEG); }
-expr: EQ(expr, lval)	1 {}
+expr: EQ(expr, assign)	1 { test1(RIGHT_CHILD(p)); }
 expr: IDARGS(ID, exprs)	1 {}
 
 exprs: COMMA(expr, NIL)		1 {}

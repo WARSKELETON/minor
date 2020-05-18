@@ -13,6 +13,7 @@ static int isAssign(Node *n), isCall(char*,Node*,Node*);
 static void isFunc(char*,int), isAlloc(Node*,Node*), isRet(Node*), isStr(Node*);
 static void isCte(Node*), isFwd(char*,int,Node*), isDim(char*,int,Node*);
 static void isPrint(Node*), isCycle();
+static Node *name(Node *nm);
 static char *func;
 static int ret, cycle;
 void variable(Node*);
