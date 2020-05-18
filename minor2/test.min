@@ -1,8 +1,10 @@
 program
+	number x := 0;
+	number y := 0
 start
-    if 0 | 0 then
-        "yes"!
-    else
-        "no"!
-    fi
+    for x := 0 until x = 2 step x := x + 1 do
+        for y := 0 until y = 2 step y := y + 1 do
+            x! y!
+        done
+    done
 end
