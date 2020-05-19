@@ -30,7 +30,49 @@ $_L1:
 ; JNZ
 	pop	eax
 	cmp	eax, byte 0
-	jne	near $_L2
+	jne	near $_L3
+; LOCV
+	push	dword [ebp+0]
+; IMM
+	push	dword 2
+; EQ
+	pop	eax
+	xor	ecx, ecx
+	cmp	[esp], eax
+	sete	cl
+	mov	[esp], ecx
+; JZ
+	pop	eax
+	cmp	eax, byte 0
+	je	near $_L4
+; JMP
+	jmp	dword $_L2
+; JMP
+	jmp	dword $_L5
+; LABEL
+$_L4:
+; LOCV
+	push	dword [ebp+0]
+; IMM
+	push	dword 0
+; EQ
+	pop	eax
+	xor	ecx, ecx
+	cmp	[esp], eax
+	sete	cl
+	mov	[esp], ecx
+; JZ
+	pop	eax
+	cmp	eax, byte 0
+	je	near $_L6
+; JMP
+	jmp	dword $_L2
+; JMP
+	jmp	dword $_L5
+; LABEL
+$_L6:
+; LABEL
+$_L5:
 ; LOCV
 	push	dword [ebp+0]
 ; CALL
@@ -39,6 +81,8 @@ $_L1:
 	call	$_println
 ; TRASH
 	add	esp, 4
+; LABEL
+$_L2:
 ; LOCV
 	push	dword [ebp+0]
 ; IMM
@@ -56,7 +100,7 @@ $_L1:
 ; JMP
 	jmp	dword $_L1
 ; LABEL
-$_L2:
+$_L3:
 ; IMM
 	push	dword 0
 ; POP

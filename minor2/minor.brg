@@ -20,7 +20,7 @@
 static void yytrace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost);
 
 extern FILE *yyout;
-static int forlbl[20], forcnt; /* for labels */
+static int forlbl[20], repeatlbl[20], stoplbl[20], forcnt; /* for labels */
 int lbl;
 int eliflbl;
 static int pos;
@@ -160,17 +160,18 @@ ret: RETURN(NIL)	1 {}
 ret: RETURN(expr)	1 {}
 ret: NIL	1 {}
 
-loop: ret	1 {}
-loop: REPEAT	1 {}
-loop: STOP	1 {}
+loop: ret		1 {}
+loop: REPEAT	1 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
+loop: STOP		1 { p->place = stoplbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 
-block: STMT(instrs, loop)	1 {}
+block: STMT(instrs, loop)		1 {}
+forblock: STMT(instrs, loop)	1 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 
 instrs: NIL	1 {}
 instrs: STMT(instrs, instr)	1 {}
 
 instr: FI(THEN(if, elifs), else)					1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(LEFT_CHILD(p))->place)); }
-instr: FOR(UNTIL(init, forcond), STEP(block, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
+instr: FOR(UNTIL(init, forcond), STEP(forblock, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 instr: PRINT(expr)									3 { pfPrint(p->info); }
 instr: expr											1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 instr: ALLOC(alloc,lval)							1 { fprintf(yyout, pfSTORE); }
@@ -179,8 +180,8 @@ alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
 ifelse: IF(cond, block)
 
-init: test				1 { p->place = forlbl[++forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
-forcond: expr			1 { p->place = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
+init: test				1 { p->place = forlbl[++forcnt] = ++lbl; repeatlbl[forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
+forcond: expr			1 { p->place = stoplbl[forcnt] = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
 postexpr: test			1 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 cond: expr				1 { p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
 
