@@ -16,7 +16,6 @@ static void isPrint(Node*), isCycle();
 static Node *name(Node *nm);
 static char *func;
 static int ret, cycle;
-void variable(Node*);
 %}
 
 %union { int i; char *s; Node *n; }
@@ -52,7 +51,7 @@ file	: PROGRAM decls START { func="main"; ret=tPUB + tINT + tFUNC; IDpush(); } m
 	;
 
 decls	:			{ $$ = nilNode(NIL); }
-	| gdecls		{ $$ = $1; } /* TODO */
+	| gdecls		{ $$ = $1; }
 	;
 
 gdecls	: gdecls ';' decl	{ $$ = binNode(DECL, $1, $3); }
@@ -78,8 +77,8 @@ fvars	: fvar			{ $$ = binNode(ARGS, nilNode(NIL), $1);
 					IDnew($3->info, $3->SUB(0)->value.s, $3->SUB(1)); }
 	;
 
-vardecl	: NUMBER ID eqint	{ $$ = binNode(NUMBER, TID($2), $3); $$->info = tINT; variable($$); }
-	| STRING ID eqstr	{ $$ = binNode(STRING, TID($2), $3); $$->info = tSTR; variable($$); }
+vardecl	: NUMBER ID eqint	{ $$ = binNode(NUMBER, TID($2), $3); $$->info = tINT; }
+	| STRING ID eqstr	{ $$ = binNode(STRING, TID($2), $3); $$->info = tSTR; }
 	| ARRAY ID vdim eqvec	{ $$ = binNode(ARRAY, TID($2), binNode(INTS, TINT($3), $4)); $$->info = tVEC; isDim($2, $3, $4); }
 	;
 

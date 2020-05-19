@@ -1,12 +1,16 @@
 program
 start
     number x;
-    for x := 0 until x = 10 step x := x + 1 do
-        if x = 2 then
-            repeat
-        elif x = 0 then
+    number y;
+    for x := 0 until x = 2 step x := x + 1 do
+        if x = 0 then
             repeat
         fi
-        x!
+        for y := 0 until y = 100 step y := y + 1 do
+            x! y!
+            if y = 1 then
+                stop
+            fi
+        done
     done
 end

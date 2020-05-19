@@ -85,6 +85,24 @@ static void assignment(Node* nm) {
 		fprintf(yyout, pfDUP pfLOCA, pos * (pfWORD/4));
 	}
 }
+static void variable(Node *p) {
+	fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+	if (p->info == tINT)
+		fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
+	if (p->info == tSTR) {
+		char *l = mklbl(++lbl);
+		fprintf(yyout, pfRODATA pfALIGN pfLABEL, l);
+		outchars(RIGHT_CHILD(p));
+		fprintf(yyout, pfDATA pfID, l);
+	}
+}
+static void function(char *name, int enter) {
+  fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
+}
+static void final() {
+    fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
+}
 /* expr: falta '?', falta const type ftype */
 /* expr: expr */
 /* println ? 255 truncar */
@@ -94,7 +112,7 @@ static void assignment(Node* nm) {
 %term AND='&' OR='|' NOT='~'
 %include "y.tab.h"
 %%
-program: PROGRAM(decls, FUNCTION(END(ID, INT), FARGS(NIL, main)))	1 {}
+program: PROGRAM(decls, FUNCTION(END(ID, INT), FARGS(NIL, main)))	1 { final(); }
 program: MODULE(decls)		1 {}
 
 decls: NIL					1 { IDpush(); pos = 0; }
@@ -107,15 +125,15 @@ decl: VAR(vardecl)			1 {}
 decl: FUNCTION(END(ID, INT), FARGS(fvars, eqbody))	1 {}
 decl: FUNCTION(END(ID, INT), FARGS(NIL, eqbody))		1 {}
 
-fvar: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+fvar: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos -= 4); }
 fvar: STRING(ID, NIL)	1 {}
 fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 
 fvars: ARGS(NIL, fvar)		1 {}
 fvars: ARGS(fvars, fvar)	1 {}
 
-vardecl: NUMBER(ID, eqint)				1 {}
-vardecl: STRING(ID, eqstr)				1 {}
+vardecl: NUMBER(ID, eqint)				1 { variable(p); }
+vardecl: STRING(ID, eqstr)				1 { variable(p); }
 vardecl: ARRAY(ID, INTS(vdim, eqvec))	1 {}
 
 vdim: NIL	1 {}
@@ -150,8 +168,10 @@ ints: INTS(ints, INT)	1 {}
 eqbody: NIL	1 {}
 eqbody: body	1 {}
 
-main: START(fvars, instrs)	1 { IDpop(); }
-main: START(NIL, instrs)	1 { IDpop(); }
+main: START(mainfvars, instrs)	1 { IDpop(); }
+
+mainfvars: NIL				1 { function("main", 0); }
+mainfvars: fvars			1 { function("main", -pos); }
 
 body: START(fvars, STMT(instrs, ret))	1 {}
 body: START(NIL, STMT(instrs, ret))	1 {}
@@ -233,23 +253,8 @@ extern char **yynames;
 extern int trace, errors, debugNode;
 void evaluate(Node *p) {
 	if (errors) return;
-    if (trace) printNode(p, stdout, yynames);
-    fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL, "_main", pfFUNC, "_main");
+	/* if (trace) */ printNode(p, stdout, yynames);
 	if (!yyselect(p) && trace) printf("selection successful\n");
-    fprintf(yyout, pfIMM pfPOP pfRET pfDATA, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
-}
-
-void variable(Node *p) {
-	fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-	if (p->info == tINT)
-		fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
-	if (p->info == tSTR) {
-		char *l = mklbl(++lbl);
-		fprintf(yyout, pfRODATA pfALIGN pfLABEL, l);
-		outchars(RIGHT_CHILD(p));
-		fprintf(yyout, pfDATA pfID, l);
-	}
 }
 
 #ifndef NOTRACE
