@@ -24,6 +24,7 @@ static int forlbl[20], repeatlbl[20], stoplbl[20], forcnt; /* for labels */
 int lbl;
 int eliflbl;
 static int pos;
+static char* currentfunc;
 static char *mklbl(int n) {
 	static char buf[20];
 	sprintf(buf, "%cL%d", n < 0 ? '.' : '_', n);
@@ -66,23 +67,23 @@ static void pfPrint(int info) {
 	}
 }
 static void getId(Node* nm) {
-	int typ = 2, pos = 0;
+	int typ = 2, nmpos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
 		fprintf(yyout, pfADDRV, nm->value.s);
 	}
 	else {
-		typ = IDfind(nm->value.s, (long*)&pos);
-		fprintf(yyout, pfLOCV, pos);
+		typ = IDfind(nm->value.s, (long*)&nmpos);
+		fprintf(yyout, pfLOCV, nmpos);
 	}
 }
 static void assignment(Node* nm) {
-	int typ = 2, pos = 0;
+	int typ = 2, nmpos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
 		fprintf(yyout, pfDUP pfADDRA, nm->value.s);
 	}
 	else {
-		typ = IDfind(nm->value.s, (long*)&pos);
-		fprintf(yyout, pfDUP pfLOCA, pos * (pfWORD/4));
+		typ = IDfind(nm->value.s, (long*)&nmpos);
+		fprintf(yyout, pfDUP pfLOCA, nmpos * (pfWORD/4));
 	}
 }
 static void variable(Node *p) {
@@ -112,18 +113,28 @@ static void final() {
 %term AND='&' OR='|' NOT='~'
 %include "y.tab.h"
 %%
-program: PROGRAM(decls, FUNCTION(END(ID, INT), FARGS(NIL, main)))	1 { final(); }
+program: PROGRAM(decls, FUNCTION(funcmain, FARGS(NIL, main)))	1 { final(); }
 program: MODULE(decls)		1 {}
 
-decls: NIL					1 { IDpush(); pos = 0; }
-decls: gdecls 				1 { IDpush(); pos = 0; }
+decls: NIL					1 {}
+decls: gdecls 				1 {}
 
 gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
 
 decl: VAR(vardecl)			1 {}
-decl: FUNCTION(END(ID, INT), FARGS(fvars, eqbody))	1 {}
-decl: FUNCTION(END(ID, INT), FARGS(NIL, eqbody))		1 {}
+decl: FUNCTION(funcname, FARGS(fargs, eqbody))		1 {}
+
+farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+farg: STRING(ID, NIL)	1 {}
+farg: ARRAY(ID, INTS(vdim, NIL))	1 {}
+
+fargs: NIL					1 { pos = 0; }
+fargs: ARGS(NIL, farg)		1 { pos = 0; }
+fargs: ARGS(fargs, farg)	1 {}
+
+funcname: END(ID, INT)	1 { IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
+funcmain: END(ID, INT)	1 { IDpush(); pos = 0; }
 
 fvar: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos -= 4); }
 fvar: STRING(ID, NIL)	1 {}
@@ -173,8 +184,10 @@ main: START(mainfvars, instrs)	1 { IDpop(); }
 mainfvars: NIL				1 { function("main", 0); }
 mainfvars: fvars			1 { function("main", -pos); }
 
-body: START(fvars, STMT(instrs, ret))	1 {}
-body: START(NIL, STMT(instrs, ret))	1 {}
+body: START(bodyfvars, STMT(instrs, ret))	1 {}
+
+bodyfvars: NIL				1 { function(currentfunc, 0); }
+bodyfvars: fvars			1 { function(currentfunc, -pos); }
 
 ret: RETURN(NIL)	1 {}
 ret: RETURN(expr)	1 {}

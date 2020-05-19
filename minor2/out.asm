@@ -3,13 +3,39 @@ segment	.text
 ; ALIGN
 align	4
 ; GLOBL
+global	$_double:function
+; LABEL
+$_double:
+; ENTER
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 4
+; LOCV
+	push	dword [ebp+-4]
+; LOCV
+	push	dword [ebp+8]
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; IMM
+	push	dword 2
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; TEXT
+segment	.text
+; ALIGN
+align	4
+; GLOBL
 global	$_main:function
 ; LABEL
 $_main:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 8
+	sub	esp, 4
 ; IMM
 	push	dword 0
 ; COPY
@@ -24,7 +50,7 @@ $_L1:
 ; LOCV
 	push	dword [ebp+-4]
 ; IMM
-	push	dword 2
+	push	dword 10
 ; EQ
 	pop	eax
 	xor	ecx, ecx
@@ -38,13 +64,13 @@ $_L1:
 ; LOCV
 	push	dword [ebp+-4]
 ; IMM
-	push	dword 0
-; EQ
+	push	dword 2
+; MOD
+	pop	ecx
 	pop	eax
-	xor	ecx, ecx
-	cmp	[esp], eax
-	sete	cl
-	mov	[esp], ecx
+	cdq
+	idiv	ecx
+	push	edx
 ; JZ
 	pop	eax
 	cmp	eax, byte 0
@@ -55,33 +81,28 @@ $_L1:
 	jmp	dword $_L5
 ; LABEL
 $_L4:
-; LABEL
-$_L5:
-; IMM
-	push	dword 0
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-8], eax
-; TRASH
-	add	esp, 4
-; LABEL
-$_L6:
 ; LOCV
-	push	dword [ebp+-8]
+	push	dword [ebp+-4]
 ; IMM
-	push	dword 100
-; EQ
+	push	dword 5
+; GE
 	pop	eax
 	xor	ecx, ecx
 	cmp	[esp], eax
-	sete	cl
+	setge	cl
 	mov	[esp], ecx
-; JNZ
+; JZ
 	pop	eax
 	cmp	eax, byte 0
-	jne	near $_L8
+	je	near $_L6
+; JMP
+	jmp	dword $_L3
+; JMP
+	jmp	dword $_L5
+; LABEL
+$_L6:
+; LABEL
+$_L5:
 ; LOCV
 	push	dword [ebp+-4]
 ; CALL
@@ -90,56 +111,6 @@ $_L6:
 	call	$_println
 ; TRASH
 	add	esp, 4
-; LOCV
-	push	dword [ebp+-8]
-; CALL
-	call	$_printi
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; LOCV
-	push	dword [ebp+-8]
-; IMM
-	push	dword 1
-; EQ
-	pop	eax
-	xor	ecx, ecx
-	cmp	[esp], eax
-	sete	cl
-	mov	[esp], ecx
-; JZ
-	pop	eax
-	cmp	eax, byte 0
-	je	near $_L9
-; JMP
-	jmp	dword $_L8
-; JMP
-	jmp	dword $_L10
-; LABEL
-$_L9:
-; LABEL
-$_L10:
-; LABEL
-$_L7:
-; LOCV
-	push	dword [ebp+-8]
-; IMM
-	push	dword 1
-; ADD
-	pop	eax
-	add	dword [esp], eax
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-8], eax
-; TRASH
-	add	esp, 4
-; JMP
-	jmp	dword $_L6
-; LABEL
-$_L8:
 ; LABEL
 $_L2:
 ; LOCV
