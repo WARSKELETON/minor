@@ -1455,7 +1455,7 @@ case 76:
 break;
 case 77:
 #line 187 "minor.y"
-	{ yyval.n = binNode('[', yystack.l_mark[-1].n, TID(yystack.l_mark[-3].s)); yyval.n->info = isId(yystack.l_mark[-3].s, yystack.l_mark[-1].n, &yyval.n->SUB(1)->info); }
+	{ yyval.n = binNode('[', TID(yystack.l_mark[-3].s), yystack.l_mark[-1].n); yyval.n->info = isId(yystack.l_mark[-3].s, yystack.l_mark[-1].n, &yyval.n->SUB(1)->info); }
 break;
 case 78:
 #line 190 "minor.y"

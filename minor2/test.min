@@ -1,7 +1,6 @@
 program
-    string y := 65 'B'
+    array x[3] := 1, 2, 3
 start
-    y!
-    65 'B'!
-    'a'!
+    x[0]!
+    x[2]!
 end

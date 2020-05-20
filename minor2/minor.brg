@@ -36,24 +36,6 @@ static char *mkfunc(char *s) {
 	strcat(buf, s);
 	return buf;
 }
-static void outchars(Node *chars) {
-	int first = 1;
-
-	while (LEFT_CHILD(chars) || first) {
-		first = 0;
-		
-		if (RIGHT_CHILD(chars)->info == tSTR) {
-			char* s = RIGHT_CHILD(chars)->value.s;
-			while (*s) fprintf(yyout, pfCHAR, (unsigned char)*s++);
-		}
-		if (RIGHT_CHILD(chars)->info == tINT) {
-			fprintf(yyout, pfCHAR, RIGHT_CHILD(chars)->value.i);
-		}
-		
-		chars = LEFT_CHILD(chars);
-	}
-	fprintf(yyout, pfCHAR, 0);
-}
 static void outstr(char *s) {
   while (*s) fprintf(yyout, pfCHAR, (unsigned char)*s++);
   fprintf(yyout, pfCHAR, 0);
@@ -91,22 +73,6 @@ static void assignment(Node* nm) {
 		fprintf(yyout, pfDUP pfLOCA, nmpos * (pfWORD/4));
 	}
 }
-static void variable(Node *var) {
-	Node* p = var->SUB(0);
-	if (RIGHT_CHILD(p) == NIL) {
-		fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-	}
-	else {
-		if (var->info & tCNST) {
-			fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-		}
-		else {
-			fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-		}
-		if (p->info == tINT)
-			fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
-	}
-}
 static int varCost(Node *var) {
 	Node* p = var->SUB(0);
 	if (RIGHT_CHILD(p) == NIL) {
@@ -119,8 +85,6 @@ static int varCost(Node *var) {
 		else {
 			fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
 		}
-		if (p->info == tINT)
-			fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
 	}
 	return 1;
 }
@@ -170,12 +134,20 @@ fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 fvars: ARGS(NIL, fvar)		1 {}
 fvars: ARGS(fvars, fvar)	1 {}
 
-vardecl: NUMBER(ID, eqint)				1 {}
-vardecl: STRING(ID, eqstr)		1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
-vardecl: ARRAY(ID, INTS(vdim, eqvec))	1 {}
+vardecl: NUMBER(ID, eqint)					1 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); }
+vardecl: STRING(ID, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
+vardecl: ARRAY(arrayid, INTS(vdim, eqvec))	1 {}
+
+arrayid: ID 1 { ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 
 vdim: NIL	1 {}
 vdim: INT	1 {}
+
+eqvec: NIL	1 {}
+eqvec: ints	1 {}
+
+ints: INT				1 { fprintf(yyout, pfINTEGER, p->value.i); }
+ints: INTS(ints, INT)	1 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); }
 
 eqint: NIL	1 {}
 eqint: INT	1 {}
@@ -184,21 +156,15 @@ eqstr: NIL		1 {}
 eqstr: chars	1 {}
 
 chars: CHARS(NIL, firstchar)		1 { p->place = RIGHT_CHILD(p)->place; }
-chars: CHARS(chars, char)	1 { p->place = LEFT_CHILD(p)->place; }
+chars: CHARS(chars, char)			1 { p->place = LEFT_CHILD(p)->place; }
 
 firstchar: INT		1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 firstchar: CHAR	    1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 firstchar: STR		1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
 
 char: INT		1 { fprintf(yyout, pfCHAR, p->value.i); }
-char: CHAR	1 { fprintf(yyout, pfCHAR, p->value.i); }
+char: CHAR		1 { fprintf(yyout, pfCHAR, p->value.i); }
 char: STR		1 { outstr(p->value.s); }
-
-eqvec: NIL	1 {}
-eqvec: ints	1 {}
-
-ints: INT	1 {}
-ints: INTS(ints, INT)	1 {}
 
 eqbody: NIL	1 {}
 eqbody: body	1 {}
@@ -251,9 +217,10 @@ else: NIL
 else: block
 
 lval: ID				1 { getId(p); }
-lval: INDEX(expr, ID)	1 {}
+lval: INDEX(lvec, expr)	1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
+lvec: ID				1 { getId(p); }
 assign: ID
-assign: INDEX(expr, ID)
+assign: INDEX(ID, expr)
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }

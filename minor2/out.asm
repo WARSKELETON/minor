@@ -1,27 +1,21 @@
 ; GLOBL
-global	$y:object
+global	$x:object
 ; DATA
 segment	.data
 ; ALIGN
 align	4
 ; LABEL
-$y:
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L0:
-; CHAR
-	db	0x41
-; CHAR
-	db	0x42
-; CHAR
-	db	0x00
-; DATA
-segment	.data
+$x:
 ; ID
-	dd	$_L0
+	dd	$_L1
+; LABEL
+$_L1:
+; INTEGER
+	dd	1
+; INTEGER
+	dd	2
+; INTEGER
+	dd	3
 ; TEXT
 segment	.text
 ; ALIGN
@@ -35,35 +29,43 @@ $_main:
 	mov	ebp, esp
 	sub	esp, 0
 ; ADDRV
-	push	dword [$y]
-; CALL
-	call	$_prints
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L1:
-; CHAR
-	db	0x41
-; CHAR
-	db	0x42
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L1
-; CALL
-	call	$_prints
-; CALL
-	call	$_println
-; TRASH
-	add	esp, 4
+	push	dword [$x]
 ; IMM
-	push	dword 97
+	push	dword 0
+; IMM
+	push	dword 4
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; ADD
+	pop	eax
+	add	dword [esp], eax
+; LOAD
+	pop	eax
+	push	dword [eax]
+; CALL
+	call	$_printi
+; CALL
+	call	$_println
+; TRASH
+	add	esp, 4
+; ADDRV
+	push	dword [$x]
+; IMM
+	push	dword 2
+; IMM
+	push	dword 4
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; ADD
+	pop	eax
+	add	dword [esp], eax
+; LOAD
+	pop	eax
+	push	dword [eax]
 ; CALL
 	call	$_printi
 ; CALL

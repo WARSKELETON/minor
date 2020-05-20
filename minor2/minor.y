@@ -184,7 +184,7 @@ else	:			{ $$ = nilNode(NIL); }
 	;
 
 lval	: ID			{ $$ = TID($1); $$->info = isId($1, 0, 0); }
-	| ID '[' expr ']'	{ $$ = binNode('[', $3, TID($1)); $$->info = isId($1, $3, &$$->SUB(1)->info); }
+	| ID '[' expr ']'	{ $$ = binNode('[', TID($1), $3); $$->info = isId($1, $3, &$$->SUB(1)->info); }
 	;
 
 expr	: chars			{ $$ = $1; }
