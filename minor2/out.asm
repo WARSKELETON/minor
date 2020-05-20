@@ -9,9 +9,30 @@ $_double:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 0
+	sub	esp, 4
 ; IMM
 	push	dword 2
+; COPY
+	push	dword [esp]
+; LOCA
+	pop	eax
+	mov	[ebp+-4], eax
+; TRASH
+	add	esp, 4
+; LOCV
+	push	dword [ebp+-4]
+; LOCV
+	push	dword [ebp+8]
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; IMM
+	push	dword 2
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
 ; POP
 	pop	eax
 ; LEAVE
@@ -33,9 +54,22 @@ $_main:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
+	sub	esp, 8
+; IMM
+	push	dword 2
+; COPY
+	push	dword [esp]
+; LOCA
+	pop	eax
+	mov	[ebp+-8], eax
+; TRASH
+	add	esp, 4
+; LOCV
+	push	dword [ebp+-8]
 ; CALL
 	call	$_double
+; TRASH
+	add	esp, 4
 ; PUSH
 	push	eax
 ; COPY

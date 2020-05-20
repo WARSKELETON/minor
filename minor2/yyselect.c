@@ -1,5 +1,5 @@
 /*
-generated at Wed May 20 12:13:56 2020
+generated at Wed May 20 12:19:01 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -2920,12 +2920,12 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 110: /* exprs: COMMA(expr,NIL) */
 		fprintf(stderr, "0x%lx: line 269: exprs: COMMA(expr,NIL)\n",(long)p);
 #line 269 "minor.brg"
-{}
+{ p->place = 1; }
 		break;
 	case 111: /* exprs: COMMA(expr,exprs) */
 		fprintf(stderr, "0x%lx: line 270: exprs: COMMA(expr,exprs)\n",(long)p);
 #line 270 "minor.brg"
-{}
+{ p->place =  ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
 		break;
 	default: break;
   }

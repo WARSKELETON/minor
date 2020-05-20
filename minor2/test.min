@@ -1,8 +1,12 @@
 program
-    function number double do
-        return 2
+    function number double number y do
+        number z;
+        z := 2;
+        return z * y * 2
 start
     number x;
-    x := double;
+    number c;
+    c := 2;
+    x := double(c);
     x!
 end

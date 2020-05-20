@@ -266,8 +266,8 @@ expr: UMINUS(expr)		1 { fprintf(yyout, pfNEG); }
 expr: EQ(expr, assign)	1 { assignment(RIGHT_CHILD(p)); }
 expr: IDARGS(ID, exprs)	1 { fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 
-exprs: COMMA(expr, NIL)		1 {}
-exprs: COMMA(expr, exprs)	1 {}
+exprs: COMMA(expr, NIL)		1 { p->place = 1; }
+exprs: COMMA(expr, exprs)	1 { p->place =  ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
 
 %%
 extern char **yynames;
