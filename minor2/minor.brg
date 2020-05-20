@@ -109,9 +109,6 @@ static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
     fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
 }
-static void final2() {
-	fprintf(yyout, pfPOP pfLEAVE pfRET pfLEAVE pfRET);
-}
 /* expr: falta '?', falta const type ftype */
 /* expr: expr */
 /* println ? 255 truncar */
@@ -131,7 +128,7 @@ gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
 
 decl: VAR(vardecl)			1 {}
-decl: FUNCTION(funcname, FARGS(fargs, eqbody))		1 { final2(); }
+decl: FUNCTION(funcname, FARGS(fargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
 farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 farg: STRING(ID, NIL)	1 {}
@@ -197,8 +194,8 @@ body: START(bodyfvars, STMT(instrs, ret))	1 {}
 bodyfvars: NIL				1 { function(currentfunc, 0); }
 bodyfvars: fvars			1 { function(currentfunc, -pos); }
 
-ret: RETURN(NIL)	1 {}
-ret: RETURN(expr)	1 {  }
+ret: RETURN(NIL)	1 { fprintf(yyout, pfPOP pfLEAVE pfRET); }
+ret: RETURN(expr)	1 { fprintf(yyout, pfPOP pfLEAVE pfRET); }
 ret: NIL	1 {}
 
 loop: ret		1 {}

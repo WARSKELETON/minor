@@ -1,9 +1,9 @@
 program
     function number fatorial number x do
-        if x then
-            return x * fatorial(x - 1)
-        else
+        if ~x then
             return 1
+        else
+            return x * fatorial(x - 1)
         fi
 start
     fatorial(4)!

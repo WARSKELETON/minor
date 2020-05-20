@@ -12,10 +12,30 @@ $_fatorial:
 	sub	esp, 0
 ; LOCV
 	push	dword [ebp+8]
+; IMM
+	push	dword 0
+; EQ
+	pop	eax
+	xor	ecx, ecx
+	cmp	[esp], eax
+	sete	cl
+	mov	[esp], ecx
 ; JZ
 	pop	eax
 	cmp	eax, byte 0
 	je	near $_L1
+; IMM
+	push	dword 1
+; POP
+	pop	eax
+; LEAVE
+	leave
+; RET
+	ret
+; JMP
+	jmp	dword $_L2
+; LABEL
+$_L1:
 ; LOCV
 	push	dword [ebp+8]
 ; LOCV
@@ -35,20 +55,14 @@ $_fatorial:
 	pop	eax
 	imul	dword eax, [esp]
 	mov	[esp], eax
-; JMP
-	jmp	dword $_L2
-; LABEL
-$_L1:
-; IMM
-	push	dword 1
-; LABEL
-$_L2:
 ; POP
 	pop	eax
 ; LEAVE
 	leave
 ; RET
 	ret
+; LABEL
+$_L2:
 ; LEAVE
 	leave
 ; RET
