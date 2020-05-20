@@ -1,3 +1,13 @@
+; GLOBL
+global	$x:object
+; DATA
+segment	.data
+; ALIGN
+align	4
+; LABEL
+$x:
+; INTEGER
+	dd	0
 ; TEXT
 segment	.text
 ; ALIGN
@@ -9,20 +19,9 @@ $_main:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
-; CALL
-	call	$_readi
-; PUSH
-	push	eax
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-4], eax
-; TRASH
-	add	esp, 4
-; LOCV
-	push	dword [ebp+-4]
+	sub	esp, 0
+; ADDRV
+	push	dword [$x]
 ; CALL
 	call	$_printi
 ; CALL

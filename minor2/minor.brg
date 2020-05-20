@@ -92,14 +92,19 @@ static void assignment(Node* nm) {
 	}
 }
 static void variable(Node *p) {
-	fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-	if (p->info == tINT)
-		fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
-	if (p->info == tSTR) {
-		char *l = mklbl(++lbl);
-		fprintf(yyout, pfRODATA pfALIGN pfLABEL, l);
-		outchars(RIGHT_CHILD(p));
-		fprintf(yyout, pfDATA pfID, l);
+	if (RIGHT_CHILD(p) == NIL) {
+		fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+	}
+	else {
+		fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+		if (p->info == tINT)
+			fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
+		if (p->info == tSTR) {
+			char *l = mklbl(++lbl);
+			fprintf(yyout, pfRODATA pfALIGN pfLABEL, l);
+			outchars(RIGHT_CHILD(p));
+			fprintf(yyout, pfDATA pfID, l);
+		}
 	}
 }
 static void function(char *name, int enter) {
