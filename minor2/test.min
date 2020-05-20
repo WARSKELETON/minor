@@ -1,8 +1,11 @@
 program
-    array x := 1, 2, 3
+function void movedisk number from; number to do from! " -> "! to! "\n"! ;
+function void movetower number height; number from; number to; number using do
+	if height > 0 then
+		movetower(height - 1, from, using, to);
+		movedisk(from, to);
+		movetower(height - 1, using, to, from);
+	fi
 start
-    x[0]!
-    x[0] := 2 + 4;
-    x[0]!
-    x[2]!
+	movetower(3, 1, 3, 2);
 end

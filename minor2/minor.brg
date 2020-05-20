@@ -21,6 +21,8 @@ static void yytrace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost);
 
 extern FILE *yyout;
 static int forlbl[20], repeatlbl[20], stoplbl[20], forcnt; /* for labels */
+static char *extrns[100]; /* emit externs at the end only */
+static int extcnt;
 int lbl;
 int eliflbl;
 static int pos;
@@ -42,10 +44,10 @@ static void outstr(char *s) {
 }
 static void pfPrint(int info) {
 	if (tTYPE(info) == tINT) {
-  		fprintf(yyout, pfCALL pfCALL pfTRASH, "_printi", "_println", 4);
+  		fprintf(yyout, pfCALL pfTRASH, "_printi", 4);
 	}
 	if (tTYPE(info) == tSTR) {
-  		fprintf(yyout, pfCALL pfCALL pfTRASH, "_prints", "_println", 4);
+  		fprintf(yyout, pfCALL pfTRASH, "_prints", 4);
 	}
 }
 static void getId(Node* nm) {
@@ -95,6 +97,13 @@ static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
     fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
 }
+void externs() {
+  int i;
+  
+  for (i = 0; i < extcnt; i++)
+    if (extrns[i])
+      fprintf(yyout, pfEXTRN, extrns[i]);
+}
 /* falta const type ftype */
 /* expr: expr */
 /* println ? 255 truncar */
@@ -114,15 +123,17 @@ gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
 
 decl: VAR(vardecl)			varCost {}
-decl: FUNCTION(funcname, FARGS(fargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
+decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
 farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 farg: STRING(ID, NIL)	1 {}
 farg: ARRAY(ID, INTS(vdim, NIL))	1 {}
 
-fargs: NIL					1 { pos = 0; }
-fargs: ARGS(NIL, farg)		1 { pos = 0; }
+fargs: NIL					1 {}
+fargs: ARGS(NIL, farg)		1 {}
 fargs: ARGS(fargs, farg)	1 {}
+
+funcargs: fargs				1 { pos = 0; }
 
 funcname: END(ID, INT)	1 { IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
 funcmain: END(ID, INT)	1 { IDpush(); pos = 0; }
