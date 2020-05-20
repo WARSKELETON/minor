@@ -1,5 +1,5 @@
 /*
-generated at Wed May 20 12:19:01 2020
+generated at Wed May 20 12:39:38 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -76,10 +76,10 @@ static void outstr(char *s) {
   fprintf(yyout, pfCHAR, 0);
 }
 static void pfPrint(int info) {
-	if (info == tINT) {
+	if (tTYPE(info) == tINT) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_printi", "_println", 4);
 	}
-	if (info == tSTR) {
+	if (tTYPE(info) == tSTR) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_prints", "_println", 4);
 	}
 }
@@ -2640,7 +2640,7 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 54: /* ret: RETURN(expr) */
 		fprintf(stderr, "0x%lx: line 201: ret: RETURN(expr)\n",(long)p);
 #line 201 "minor.brg"
-{}
+{  }
 		break;
 	case 55: /* ret: NIL */
 		fprintf(stderr, "0x%lx: line 202: ret: NIL\n",(long)p);

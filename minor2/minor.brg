@@ -59,10 +59,10 @@ static void outstr(char *s) {
   fprintf(yyout, pfCHAR, 0);
 }
 static void pfPrint(int info) {
-	if (info == tINT) {
+	if (tTYPE(info) == tINT) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_printi", "_println", 4);
 	}
-	if (info == tSTR) {
+	if (tTYPE(info) == tSTR) {
   		fprintf(yyout, pfCALL pfCALL pfTRASH, "_prints", "_println", 4);
 	}
 }
@@ -198,7 +198,7 @@ bodyfvars: NIL				1 { function(currentfunc, 0); }
 bodyfvars: fvars			1 { function(currentfunc, -pos); }
 
 ret: RETURN(NIL)	1 {}
-ret: RETURN(expr)	1 {}
+ret: RETURN(expr)	1 {  }
 ret: NIL	1 {}
 
 loop: ret		1 {}

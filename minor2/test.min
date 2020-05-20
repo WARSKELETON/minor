@@ -1,12 +1,10 @@
 program
-    function number double number y do
-        number z;
-        z := 2;
-        return z * y * 2
+    function number fatorial number x do
+        if x then
+            return x * fatorial(x - 1)
+        else
+            return 1
+        fi
 start
-    number x;
-    number c;
-    c := 2;
-    x := double(c);
-    x!
+    fatorial(4)!
 end

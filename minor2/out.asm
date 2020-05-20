@@ -3,36 +3,46 @@ segment	.text
 ; ALIGN
 align	4
 ; GLOBL
-global	$_double:function
+global	$_fatorial:function
 ; LABEL
-$_double:
+$_fatorial:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 4
-; IMM
-	push	dword 2
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-4], eax
-; TRASH
-	add	esp, 4
-; LOCV
-	push	dword [ebp+-4]
+	sub	esp, 0
 ; LOCV
 	push	dword [ebp+8]
-; MUL
+; JZ
 	pop	eax
-	imul	dword eax, [esp]
-	mov	[esp], eax
+	cmp	eax, byte 0
+	je	near $_L1
+; LOCV
+	push	dword [ebp+8]
+; LOCV
+	push	dword [ebp+8]
 ; IMM
-	push	dword 2
+	push	dword 1
+; SUB
+	pop	eax
+	sub	dword [esp], eax
+; CALL
+	call	$_fatorial
+; TRASH
+	add	esp, 4
+; PUSH
+	push	eax
 ; MUL
 	pop	eax
 	imul	dword eax, [esp]
 	mov	[esp], eax
+; JMP
+	jmp	dword $_L2
+; LABEL
+$_L1:
+; IMM
+	push	dword 1
+; LABEL
+$_L2:
 ; POP
 	pop	eax
 ; LEAVE
@@ -54,33 +64,15 @@ $_main:
 ; ENTER
 	push	ebp
 	mov	ebp, esp
-	sub	esp, 8
+	sub	esp, 0
 ; IMM
-	push	dword 2
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-8], eax
-; TRASH
-	add	esp, 4
-; LOCV
-	push	dword [ebp+-8]
+	push	dword 4
 ; CALL
-	call	$_double
+	call	$_fatorial
 ; TRASH
 	add	esp, 4
 ; PUSH
 	push	eax
-; COPY
-	push	dword [esp]
-; LOCA
-	pop	eax
-	mov	[ebp+-4], eax
-; TRASH
-	add	esp, 4
-; LOCV
-	push	dword [ebp+-4]
 ; CALL
 	call	$_printi
 ; CALL
