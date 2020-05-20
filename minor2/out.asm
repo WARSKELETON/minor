@@ -50,6 +50,54 @@ $_main:
 	call	$_println
 ; TRASH
 	add	esp, 4
+; IMM
+	push	dword 2
+; IMM
+	push	dword 4
+; ADD
+	pop	eax
+	add	dword [esp], eax
+; ADDRV
+	push	dword [$x]
+; IMM
+	push	dword 0
+; IMM
+	push	dword 4
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; ADD
+	pop	eax
+	add	dword [esp], eax
+; STORE
+	pop	ecx
+	pop	eax
+	mov	[ecx], eax
+; TRASH
+	add	esp, 4
+; ADDRV
+	push	dword [$x]
+; IMM
+	push	dword 0
+; IMM
+	push	dword 4
+; MUL
+	pop	eax
+	imul	dword eax, [esp]
+	mov	[esp], eax
+; ADD
+	pop	eax
+	add	dword [esp], eax
+; LOAD
+	pop	eax
+	push	dword [eax]
+; CALL
+	call	$_printi
+; CALL
+	call	$_println
+; TRASH
+	add	esp, 4
 ; ADDRV
 	push	dword [$x]
 ; IMM

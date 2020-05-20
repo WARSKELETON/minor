@@ -1,6 +1,8 @@
 program
-    array x[3] := 1, 2, 3
+    array x := 1, 2, 3
 start
+    x[0]!
+    x[0] := 2 + 4;
     x[0]!
     x[2]!
 end

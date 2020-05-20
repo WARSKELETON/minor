@@ -203,12 +203,12 @@ alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
 ifelse: IF(cond, block)
 
-init: test				1 { p->place = forlbl[++forcnt] = ++lbl; repeatlbl[forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
+init: trashexpr				1 { p->place = forlbl[++forcnt] = ++lbl; repeatlbl[forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 forcond: expr			1 { p->place = stoplbl[forcnt] = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
-postexpr: test			1 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
+postexpr: trashexpr			1 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 cond: expr				1 { p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
 
-test: expr				1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
+trashexpr: expr				1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 
 elifs: NIL
 elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(RIGHT_CHILD(p))->place)); }
@@ -216,11 +216,11 @@ elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL,
 else: NIL
 else: block
 
-lval: ID				1 { getId(p); }
-lval: INDEX(lvec, expr)	1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
-lvec: ID				1 { getId(p); }
-assign: ID
-assign: INDEX(ID, expr)
+lval: ID					1 { getId(p); }
+lval: INDEX(lvec, expr)		1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
+lvec: ID					1 { getId(p); }
+assign: ID					1 { assignment(RIGHT_CHILD(p)); }
+assign: INDEX(lvec, expr) 	1 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
@@ -247,7 +247,7 @@ expr: OR(or,expr)		1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 or: expr				1 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 expr: NOT(expr)			1 { fprintf(yyout, pfIMM pfEQ, 0); }
 expr: UMINUS(expr)		1 { fprintf(yyout, pfNEG); }
-expr: EQ(expr, assign)	1 { assignment(RIGHT_CHILD(p)); }
+expr: EQ(expr, assign)	1 {}
 expr: IDARGS(ID, exprs)	1 { fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 
 exprs: COMMA(expr, NIL)		1 { p->place = 1; }
