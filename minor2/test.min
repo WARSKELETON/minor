@@ -1,6 +1,7 @@
 program
+    const number y := 1
 start
     number x;
-    x := ?;
     x!
+    y!
 end

@@ -91,12 +91,18 @@ static void assignment(Node* nm) {
 		fprintf(yyout, pfDUP pfLOCA, nmpos * (pfWORD/4));
 	}
 }
-static void variable(Node *p) {
+static void variable(Node *var) {
+	Node* p = var->SUB(0);
 	if (RIGHT_CHILD(p) == NIL) {
 		fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
 	}
 	else {
-		fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+		if (var->info & tCNST) {
+			fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+		}
+		else {
+			fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
+		}
 		if (p->info == tINT)
 			fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i);
 		if (p->info == tSTR) {
@@ -114,7 +120,7 @@ static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
     fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
 }
-/* expr: falta '?', falta const type ftype */
+/* falta const type ftype */
 /* expr: expr */
 /* println ? 255 truncar */
 %}
@@ -132,7 +138,7 @@ decls: gdecls 				1 {}
 gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
 
-decl: VAR(vardecl)			1 {}
+decl: VAR(vardecl)			1 { variable(p); }
 decl: FUNCTION(funcname, FARGS(fargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
 farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
@@ -153,8 +159,8 @@ fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 fvars: ARGS(NIL, fvar)		1 {}
 fvars: ARGS(fvars, fvar)	1 {}
 
-vardecl: NUMBER(ID, eqint)				1 { variable(p); }
-vardecl: STRING(ID, eqstr)				1 { variable(p); }
+vardecl: NUMBER(ID, eqint)				1 {}
+vardecl: STRING(ID, eqstr)				1 {}
 vardecl: ARRAY(ID, INTS(vdim, eqvec))	1 {}
 
 vdim: NIL	1 {}
@@ -270,7 +276,7 @@ expr: EQ(expr, assign)	1 { assignment(RIGHT_CHILD(p)); }
 expr: IDARGS(ID, exprs)	1 { fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 
 exprs: COMMA(expr, NIL)		1 { p->place = 1; }
-exprs: COMMA(expr, exprs)	1 { p->place =  ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
+exprs: COMMA(expr, exprs)	1 { p->place = ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
 
 %%
 extern char **yynames;
