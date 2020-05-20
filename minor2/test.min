@@ -1,15 +1,8 @@
 program
-    function number double number y do
-        number z;
-        return z * y * 2
+    function number double do
+        return 2
 start
     number x;
-    for x := 0 until x = 10 step x := x + 1 do
-        if x % 2 then
-            repeat
-        elif x >= 5 then
-            stop
-        fi
-        x!
-    done
+    x := double;
+    x!
 end
