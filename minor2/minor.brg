@@ -115,7 +115,7 @@ static void final() {
 %}
 %term STMT=';' PRINT='!' ALLOC='#' INDEX='[' IDARGS='(' COMMA=','
 %term ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' POW='^' EQU='=' LT='<' GT='>'
-%term AND='&' OR='|' NOT='~'
+%term AND='&' OR='|' NOT='~' READ='?'
 %include "y.tab.h"
 %%
 program: PROGRAM(decls, FUNCTION(funcmain, FARGS(NIL, main)))	1 { final(); }
@@ -194,7 +194,7 @@ body: START(bodyfvars, STMT(instrs, ret))	1 {}
 bodyfvars: NIL				1 { function(currentfunc, 0); }
 bodyfvars: fvars			1 { function(currentfunc, -pos); }
 
-ret: RETURN(NIL)	1 { fprintf(yyout, pfPOP pfLEAVE pfRET); }
+ret: RETURN(NIL)	1 { fprintf(yyout, pfLEAVE pfRET); }
 ret: RETURN(expr)	1 { fprintf(yyout, pfPOP pfLEAVE pfRET); }
 ret: NIL	1 {}
 
@@ -241,6 +241,7 @@ expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, STR)	1 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(RIGHT_CHILD(p)->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: chars				1 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outchars(p); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 expr: lval
+expr: READ				1 { fprintf(yyout, pfCALL pfPUSH, "_readi"); }
 expr: ADDR(lval)		1 {}
 expr: ADD(expr, expr)	1 { fprintf(yyout, pfADD); }
 expr: SUB(expr, expr)	1 { fprintf(yyout, pfSUB); }

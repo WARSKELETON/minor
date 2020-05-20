@@ -1,10 +1,5 @@
-program
-    function number fatorial number x do
-        if ~x then
-            return 1
-        else
-            return x * fatorial(x - 1)
-        fi
-start
-    fatorial(4)!
+program start
+    number x;
+    x := ?;
+    x!
 end
