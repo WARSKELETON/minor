@@ -1,7 +1,7 @@
 program
-    const number y := 1
+    string y := 65 'B'
 start
-    number x;
-    x!
     y!
+    65 'B'!
+    'a'!
 end
