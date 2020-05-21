@@ -1,9 +1,7 @@
 program
-    number x;
-    const number y := 10;
-    number z := 0
+    function forward number z done;
+    function number x do z!;
+    function number z do return 123
 start
-    "x: "! x! "\n"!
-    "y: "! y! "\n"!
-    "z: "! z! "\n"!
+   x; "\n"!
 end

@@ -93,11 +93,13 @@ static void assignment(Node* nm) {
 		fprintf(yyout, pfDUP pfLOCA, nmpos * (pfWORD/4));
 	}
 }
-static int varCost(Node *var) {
-	return var->info & tCNST ? 0x7fff : 1;
-}
-static int cnstCost(Node *var) {
-	return var->info & tCNST ? 1 : 0x7fff;
+static void checkForward(char* name) {
+	int i;
+  
+	for (i = 0; i < extcnt; i++) {
+		if (!strcmp(extrns[i], name))
+			extrns[i] = NULL;
+	}
 }
 static void function(char *name, int enter) {
   fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
@@ -153,7 +155,7 @@ gdecls: DECL(NIL, decl)		1 {}
 
 decl: VAR(vardecl)										1 {}
 decl: FUNCTION(funcname, FARGS(funcargs, NIL))			1 { extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
-decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
+decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { checkForward(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); fprintf(yyout, pfLEAVE pfRET); }
 
 farg: NUMBER(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 farg: STRING(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
@@ -171,7 +173,7 @@ funcmain: END(ID, INT)	1 { IDpush(); pos = 0; }
 
 fvar: NUMBER(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 fvar: STRING(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
-fvar: ARRAY(ID, INTS(vdim, NIL))	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= LEFT_CHILD(RIGHT_CHILD(p))->value.i * 4); }
+fvar: ARRAY(ID, INTS(vdim, NIL))	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); pos -= LEFT_CHILD(RIGHT_CHILD(p))->value.i * 4; }
 fvar: ARRAY(ID, INTS(NIL, NIL))		1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 
 fvars: ARGS(NIL, fvar)		1 {}
@@ -186,9 +188,9 @@ vardecl: STRING(ID, NIL)						1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt+
 vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 vardecl: ARRAY(ID, INTS(NIL, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 
-varid: ID										1 { variable(p); }
+varid: ID										1 { checkForward(p->value.s); variable(p); }
 
-arrayid: ID 									1 { variable(p); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
+arrayid: ID 									1 { checkForward(p->value.s); variable(p); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 
 vdim: INT	1 {}
 

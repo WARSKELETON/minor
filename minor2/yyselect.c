@@ -1,5 +1,5 @@
 /*
-generated at Thu May 21 20:20:02 2020
+generated at Thu May 21 23:30:17 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -110,11 +110,13 @@ static void assignment(Node* nm) {
 		fprintf(yyout, pfDUP pfLOCA, nmpos * (pfWORD/4));
 	}
 }
-static int varCost(Node *var) {
-	return var->info & tCNST ? 0x7fff : 1;
-}
-static int cnstCost(Node *var) {
-	return var->info & tCNST ? 1 : 0x7fff;
+static void checkForward(char* name) {
+	int i;
+  
+	for (i = 0; i < extcnt; i++) {
+		if (!strcmp(extrns[i], name))
+			extrns[i] = NULL;
+	}
 }
 static void function(char *name, int enter) {
   fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
@@ -146,7 +148,7 @@ static void variable(Node* var) {
 		fprintf(yyout, pfRODATA);
 	}
 	else {
-		fprintf(yyout, pfRODATA);
+		fprintf(yyout, pfDATA);
 	}
 
 	fprintf(yyout, pfALIGN pfLABEL, var->value.s);
@@ -2569,603 +2571,603 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 
   switch(eruleno) {
 	case 1: /* program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main))) */
-		fprintf(stderr, "0x%lx: line 145: program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main)))\n",(long)p);
-#line 145 "minor.brg"
+		fprintf(stderr, "0x%lx: line 147: program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main)))\n",(long)p);
+#line 147 "minor.brg"
 { final(); }
 		break;
 	case 2: /* program: MODULE(decls) */
-		fprintf(stderr, "0x%lx: line 146: program: MODULE(decls)\n",(long)p);
-#line 146 "minor.brg"
-{}
-		break;
-	case 3: /* decls: NIL */
-		fprintf(stderr, "0x%lx: line 148: decls: NIL\n",(long)p);
+		fprintf(stderr, "0x%lx: line 148: program: MODULE(decls)\n",(long)p);
 #line 148 "minor.brg"
 {}
 		break;
-	case 4: /* decls: gdecls */
-		fprintf(stderr, "0x%lx: line 149: decls: gdecls\n",(long)p);
-#line 149 "minor.brg"
+	case 3: /* decls: NIL */
+		fprintf(stderr, "0x%lx: line 150: decls: NIL\n",(long)p);
+#line 150 "minor.brg"
 {}
 		break;
-	case 5: /* gdecls: DECL(gdecls,decl) */
-		fprintf(stderr, "0x%lx: line 151: gdecls: DECL(gdecls,decl)\n",(long)p);
+	case 4: /* decls: gdecls */
+		fprintf(stderr, "0x%lx: line 151: decls: gdecls\n",(long)p);
 #line 151 "minor.brg"
 {}
 		break;
-	case 6: /* gdecls: DECL(NIL,decl) */
-		fprintf(stderr, "0x%lx: line 152: gdecls: DECL(NIL,decl)\n",(long)p);
-#line 152 "minor.brg"
+	case 5: /* gdecls: DECL(gdecls,decl) */
+		fprintf(stderr, "0x%lx: line 153: gdecls: DECL(gdecls,decl)\n",(long)p);
+#line 153 "minor.brg"
 {}
 		break;
-	case 7: /* decl: VAR(vardecl) */
-		fprintf(stderr, "0x%lx: line 154: decl: VAR(vardecl)\n",(long)p);
+	case 6: /* gdecls: DECL(NIL,decl) */
+		fprintf(stderr, "0x%lx: line 154: gdecls: DECL(NIL,decl)\n",(long)p);
 #line 154 "minor.brg"
 {}
 		break;
+	case 7: /* decl: VAR(vardecl) */
+		fprintf(stderr, "0x%lx: line 156: decl: VAR(vardecl)\n",(long)p);
+#line 156 "minor.brg"
+{}
+		break;
 	case 8: /* decl: FUNCTION(funcname,FARGS(funcargs,NIL)) */
-		fprintf(stderr, "0x%lx: line 155: decl: FUNCTION(funcname,FARGS(funcargs,NIL))\n",(long)p);
-#line 155 "minor.brg"
+		fprintf(stderr, "0x%lx: line 157: decl: FUNCTION(funcname,FARGS(funcargs,NIL))\n",(long)p);
+#line 157 "minor.brg"
 { extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
 		break;
 	case 9: /* decl: FUNCTION(funcname,FARGS(funcargs,eqbody)) */
-		fprintf(stderr, "0x%lx: line 156: decl: FUNCTION(funcname,FARGS(funcargs,eqbody))\n",(long)p);
-#line 156 "minor.brg"
-{ fprintf(yyout, pfLEAVE pfRET); }
+		fprintf(stderr, "0x%lx: line 158: decl: FUNCTION(funcname,FARGS(funcargs,eqbody))\n",(long)p);
+#line 158 "minor.brg"
+{ checkForward(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); fprintf(yyout, pfLEAVE pfRET); }
 		break;
 	case 10: /* farg: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 158: farg: NUMBER(ID,NIL)\n",(long)p);
-#line 158 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
-		break;
-	case 11: /* farg: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 159: farg: STRING(ID,NIL)\n",(long)p);
-#line 159 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
-		break;
-	case 12: /* farg: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 160: farg: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+		fprintf(stderr, "0x%lx: line 160: farg: NUMBER(ID,NIL)\n",(long)p);
 #line 160 "minor.brg"
 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 13: /* farg: ARRAY(ID,INTS(NIL,NIL)) */
-		fprintf(stderr, "0x%lx: line 161: farg: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
+	case 11: /* farg: STRING(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 161: farg: STRING(ID,NIL)\n",(long)p);
 #line 161 "minor.brg"
 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 14: /* fargs: NIL */
-		fprintf(stderr, "0x%lx: line 163: fargs: NIL\n",(long)p);
+	case 12: /* farg: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 162: farg: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+#line 162 "minor.brg"
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+		break;
+	case 13: /* farg: ARRAY(ID,INTS(NIL,NIL)) */
+		fprintf(stderr, "0x%lx: line 163: farg: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
 #line 163 "minor.brg"
-{}
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 15: /* fargs: ARGS(NIL,farg) */
-		fprintf(stderr, "0x%lx: line 164: fargs: ARGS(NIL,farg)\n",(long)p);
-#line 164 "minor.brg"
-{}
-		break;
-	case 16: /* fargs: ARGS(fargs,farg) */
-		fprintf(stderr, "0x%lx: line 165: fargs: ARGS(fargs,farg)\n",(long)p);
+	case 14: /* fargs: NIL */
+		fprintf(stderr, "0x%lx: line 165: fargs: NIL\n",(long)p);
 #line 165 "minor.brg"
 {}
 		break;
-	case 17: /* funcargs: fargs */
-		fprintf(stderr, "0x%lx: line 167: funcargs: fargs\n",(long)p);
+	case 15: /* fargs: ARGS(NIL,farg) */
+		fprintf(stderr, "0x%lx: line 166: fargs: ARGS(NIL,farg)\n",(long)p);
+#line 166 "minor.brg"
+{}
+		break;
+	case 16: /* fargs: ARGS(fargs,farg) */
+		fprintf(stderr, "0x%lx: line 167: fargs: ARGS(fargs,farg)\n",(long)p);
 #line 167 "minor.brg"
+{}
+		break;
+	case 17: /* funcargs: fargs */
+		fprintf(stderr, "0x%lx: line 169: funcargs: fargs\n",(long)p);
+#line 169 "minor.brg"
 { pos = 0; }
 		break;
 	case 18: /* funcname: END(ID,INT) */
-		fprintf(stderr, "0x%lx: line 169: funcname: END(ID,INT)\n",(long)p);
-#line 169 "minor.brg"
+		fprintf(stderr, "0x%lx: line 171: funcname: END(ID,INT)\n",(long)p);
+#line 171 "minor.brg"
 { IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
 		break;
 	case 19: /* funcmain: END(ID,INT) */
-		fprintf(stderr, "0x%lx: line 170: funcmain: END(ID,INT)\n",(long)p);
-#line 170 "minor.brg"
+		fprintf(stderr, "0x%lx: line 172: funcmain: END(ID,INT)\n",(long)p);
+#line 172 "minor.brg"
 { IDpush(); pos = 0; }
 		break;
 	case 20: /* fvar: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 172: fvar: NUMBER(ID,NIL)\n",(long)p);
-#line 172 "minor.brg"
+		fprintf(stderr, "0x%lx: line 174: fvar: NUMBER(ID,NIL)\n",(long)p);
+#line 174 "minor.brg"
 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 		break;
 	case 21: /* fvar: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 173: fvar: STRING(ID,NIL)\n",(long)p);
-#line 173 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
-		break;
-	case 22: /* fvar: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 174: fvar: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
-#line 174 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= LEFT_CHILD(RIGHT_CHILD(p))->value.i * 4); }
-		break;
-	case 23: /* fvar: ARRAY(ID,INTS(NIL,NIL)) */
-		fprintf(stderr, "0x%lx: line 175: fvar: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
+		fprintf(stderr, "0x%lx: line 175: fvar: STRING(ID,NIL)\n",(long)p);
 #line 175 "minor.brg"
 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 		break;
-	case 24: /* fvars: ARGS(NIL,fvar) */
-		fprintf(stderr, "0x%lx: line 177: fvars: ARGS(NIL,fvar)\n",(long)p);
+	case 22: /* fvar: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 176: fvar: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+#line 176 "minor.brg"
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); pos -= LEFT_CHILD(RIGHT_CHILD(p))->value.i * 4; }
+		break;
+	case 23: /* fvar: ARRAY(ID,INTS(NIL,NIL)) */
+		fprintf(stderr, "0x%lx: line 177: fvar: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
 #line 177 "minor.brg"
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
+		break;
+	case 24: /* fvars: ARGS(NIL,fvar) */
+		fprintf(stderr, "0x%lx: line 179: fvars: ARGS(NIL,fvar)\n",(long)p);
+#line 179 "minor.brg"
 {}
 		break;
 	case 25: /* fvars: ARGS(fvars,fvar) */
-		fprintf(stderr, "0x%lx: line 178: fvars: ARGS(fvars,fvar)\n",(long)p);
-#line 178 "minor.brg"
-{}
-		break;
-	case 26: /* vardecl: NUMBER(varid,eqint) */
-		fprintf(stderr, "0x%lx: line 180: vardecl: NUMBER(varid,eqint)\n",(long)p);
+		fprintf(stderr, "0x%lx: line 180: fvars: ARGS(fvars,fvar)\n",(long)p);
 #line 180 "minor.brg"
 {}
 		break;
+	case 26: /* vardecl: NUMBER(varid,eqint) */
+		fprintf(stderr, "0x%lx: line 182: vardecl: NUMBER(varid,eqint)\n",(long)p);
+#line 182 "minor.brg"
+{}
+		break;
 	case 27: /* vardecl: STRING(varid,eqstr) */
-		fprintf(stderr, "0x%lx: line 181: vardecl: STRING(varid,eqstr)\n",(long)p);
-#line 181 "minor.brg"
+		fprintf(stderr, "0x%lx: line 183: vardecl: STRING(varid,eqstr)\n",(long)p);
+#line 183 "minor.brg"
 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
 		break;
 	case 28: /* vardecl: ARRAY(arrayid,INTS(vdim,eqvec)) */
-		fprintf(stderr, "0x%lx: line 182: vardecl: ARRAY(arrayid,INTS(vdim,eqvec))\n",(long)p);
-#line 182 "minor.brg"
+		fprintf(stderr, "0x%lx: line 184: vardecl: ARRAY(arrayid,INTS(vdim,eqvec))\n",(long)p);
+#line 184 "minor.brg"
 { initRemaining(LEFT_CHILD(RIGHT_CHILD(p))->value.i); }
 		break;
 	case 29: /* vardecl: ARRAY(arrayid,INTS(NIL,eqvec)) */
-		fprintf(stderr, "0x%lx: line 183: vardecl: ARRAY(arrayid,INTS(NIL,eqvec))\n",(long)p);
-#line 183 "minor.brg"
+		fprintf(stderr, "0x%lx: line 185: vardecl: ARRAY(arrayid,INTS(NIL,eqvec))\n",(long)p);
+#line 185 "minor.brg"
 {}
 		break;
 	case 30: /* vardecl: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 184: vardecl: NUMBER(ID,NIL)\n",(long)p);
-#line 184 "minor.brg"
+		fprintf(stderr, "0x%lx: line 186: vardecl: NUMBER(ID,NIL)\n",(long)p);
+#line 186 "minor.brg"
 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
 		break;
 	case 31: /* vardecl: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 185: vardecl: STRING(ID,NIL)\n",(long)p);
-#line 185 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
-		break;
-	case 32: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 186: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
-#line 186 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
-		break;
-	case 33: /* vardecl: ARRAY(ID,INTS(NIL,NIL)) */
-		fprintf(stderr, "0x%lx: line 187: vardecl: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
+		fprintf(stderr, "0x%lx: line 187: vardecl: STRING(ID,NIL)\n",(long)p);
 #line 187 "minor.brg"
 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 		break;
-	case 34: /* varid: ID */
-		fprintf(stderr, "0x%lx: line 189: varid: ID\n",(long)p);
+	case 32: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 188: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+#line 188 "minor.brg"
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+		break;
+	case 33: /* vardecl: ARRAY(ID,INTS(NIL,NIL)) */
+		fprintf(stderr, "0x%lx: line 189: vardecl: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
 #line 189 "minor.brg"
-{ variable(p); }
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+		break;
+	case 34: /* varid: ID */
+		fprintf(stderr, "0x%lx: line 191: varid: ID\n",(long)p);
+#line 191 "minor.brg"
+{ checkForward(p->value.s); variable(p); }
 		break;
 	case 35: /* arrayid: ID */
-		fprintf(stderr, "0x%lx: line 191: arrayid: ID\n",(long)p);
-#line 191 "minor.brg"
-{ variable(p); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
+		fprintf(stderr, "0x%lx: line 193: arrayid: ID\n",(long)p);
+#line 193 "minor.brg"
+{ checkForward(p->value.s); variable(p); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 		break;
 	case 36: /* vdim: INT */
-		fprintf(stderr, "0x%lx: line 193: vdim: INT\n",(long)p);
-#line 193 "minor.brg"
-{}
-		break;
-	case 37: /* eqvec: ints */
-		fprintf(stderr, "0x%lx: line 195: eqvec: ints\n",(long)p);
+		fprintf(stderr, "0x%lx: line 195: vdim: INT\n",(long)p);
 #line 195 "minor.brg"
 {}
 		break;
-	case 38: /* ints: INT */
-		fprintf(stderr, "0x%lx: line 197: ints: INT\n",(long)p);
+	case 37: /* eqvec: ints */
+		fprintf(stderr, "0x%lx: line 197: eqvec: ints\n",(long)p);
 #line 197 "minor.brg"
+{}
+		break;
+	case 38: /* ints: INT */
+		fprintf(stderr, "0x%lx: line 199: ints: INT\n",(long)p);
+#line 199 "minor.brg"
 { fprintf(yyout, pfINTEGER, p->value.i); initints = 1; }
 		break;
 	case 39: /* ints: INTS(ints,INT) */
-		fprintf(stderr, "0x%lx: line 198: ints: INTS(ints,INT)\n",(long)p);
-#line 198 "minor.brg"
+		fprintf(stderr, "0x%lx: line 200: ints: INTS(ints,INT)\n",(long)p);
+#line 200 "minor.brg"
 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); initints++; }
 		break;
 	case 40: /* eqint: INT */
-		fprintf(stderr, "0x%lx: line 200: eqint: INT\n",(long)p);
-#line 200 "minor.brg"
+		fprintf(stderr, "0x%lx: line 202: eqint: INT\n",(long)p);
+#line 202 "minor.brg"
 { fprintf(yyout, pfINTEGER, p->value.i); }
 		break;
 	case 41: /* eqstr: chars */
-		fprintf(stderr, "0x%lx: line 202: eqstr: chars\n",(long)p);
-#line 202 "minor.brg"
+		fprintf(stderr, "0x%lx: line 204: eqstr: chars\n",(long)p);
+#line 204 "minor.brg"
 {}
 		break;
 	case 42: /* chars: CHARS(NIL,firstchar) */
-		fprintf(stderr, "0x%lx: line 204: chars: CHARS(NIL,firstchar)\n",(long)p);
-#line 204 "minor.brg"
+		fprintf(stderr, "0x%lx: line 206: chars: CHARS(NIL,firstchar)\n",(long)p);
+#line 206 "minor.brg"
 { p->place = RIGHT_CHILD(p)->place; }
 		break;
 	case 43: /* chars: CHARS(chars,char) */
-		fprintf(stderr, "0x%lx: line 205: chars: CHARS(chars,char)\n",(long)p);
-#line 205 "minor.brg"
+		fprintf(stderr, "0x%lx: line 207: chars: CHARS(chars,char)\n",(long)p);
+#line 207 "minor.brg"
 { p->place = LEFT_CHILD(p)->place; }
 		break;
 	case 44: /* firstchar: INT */
-		fprintf(stderr, "0x%lx: line 207: firstchar: INT\n",(long)p);
-#line 207 "minor.brg"
+		fprintf(stderr, "0x%lx: line 209: firstchar: INT\n",(long)p);
+#line 209 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 45: /* firstchar: CHAR */
-		fprintf(stderr, "0x%lx: line 208: firstchar: CHAR\n",(long)p);
-#line 208 "minor.brg"
+		fprintf(stderr, "0x%lx: line 210: firstchar: CHAR\n",(long)p);
+#line 210 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 46: /* firstchar: STR */
-		fprintf(stderr, "0x%lx: line 209: firstchar: STR\n",(long)p);
-#line 209 "minor.brg"
+		fprintf(stderr, "0x%lx: line 211: firstchar: STR\n",(long)p);
+#line 211 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
 		break;
 	case 47: /* char: INT */
-		fprintf(stderr, "0x%lx: line 211: char: INT\n",(long)p);
-#line 211 "minor.brg"
+		fprintf(stderr, "0x%lx: line 213: char: INT\n",(long)p);
+#line 213 "minor.brg"
 { fprintf(yyout, pfCHAR, p->value.i); }
 		break;
 	case 48: /* char: CHAR */
-		fprintf(stderr, "0x%lx: line 212: char: CHAR\n",(long)p);
-#line 212 "minor.brg"
+		fprintf(stderr, "0x%lx: line 214: char: CHAR\n",(long)p);
+#line 214 "minor.brg"
 { fprintf(yyout, pfCHAR, p->value.i); }
 		break;
 	case 49: /* char: STR */
-		fprintf(stderr, "0x%lx: line 213: char: STR\n",(long)p);
-#line 213 "minor.brg"
+		fprintf(stderr, "0x%lx: line 215: char: STR\n",(long)p);
+#line 215 "minor.brg"
 { outstr(p->value.s); }
 		break;
 	case 50: /* eqbody: body */
-		fprintf(stderr, "0x%lx: line 215: eqbody: body\n",(long)p);
-#line 215 "minor.brg"
+		fprintf(stderr, "0x%lx: line 217: eqbody: body\n",(long)p);
+#line 217 "minor.brg"
 {}
 		break;
 	case 51: /* main: START(mainfvars,instrs) */
-		fprintf(stderr, "0x%lx: line 217: main: START(mainfvars,instrs)\n",(long)p);
-#line 217 "minor.brg"
+		fprintf(stderr, "0x%lx: line 219: main: START(mainfvars,instrs)\n",(long)p);
+#line 219 "minor.brg"
 { IDpop(); }
 		break;
 	case 52: /* mainfvars: NIL */
-		fprintf(stderr, "0x%lx: line 219: mainfvars: NIL\n",(long)p);
-#line 219 "minor.brg"
+		fprintf(stderr, "0x%lx: line 221: mainfvars: NIL\n",(long)p);
+#line 221 "minor.brg"
 { function("main", 0); }
 		break;
 	case 53: /* mainfvars: fvars */
-		fprintf(stderr, "0x%lx: line 220: mainfvars: fvars\n",(long)p);
-#line 220 "minor.brg"
+		fprintf(stderr, "0x%lx: line 222: mainfvars: fvars\n",(long)p);
+#line 222 "minor.brg"
 { function("main", -pos); }
 		break;
 	case 54: /* body: START(bodyfvars,STMT(instrs,ret)) */
-		fprintf(stderr, "0x%lx: line 222: body: START(bodyfvars,STMT(instrs,ret))\n",(long)p);
-#line 222 "minor.brg"
+		fprintf(stderr, "0x%lx: line 224: body: START(bodyfvars,STMT(instrs,ret))\n",(long)p);
+#line 224 "minor.brg"
 {}
 		break;
 	case 55: /* bodyfvars: NIL */
-		fprintf(stderr, "0x%lx: line 224: bodyfvars: NIL\n",(long)p);
-#line 224 "minor.brg"
+		fprintf(stderr, "0x%lx: line 226: bodyfvars: NIL\n",(long)p);
+#line 226 "minor.brg"
 { function(currentfunc, 0); }
 		break;
 	case 56: /* bodyfvars: fvars */
-		fprintf(stderr, "0x%lx: line 225: bodyfvars: fvars\n",(long)p);
-#line 225 "minor.brg"
+		fprintf(stderr, "0x%lx: line 227: bodyfvars: fvars\n",(long)p);
+#line 227 "minor.brg"
 { function(currentfunc, -pos); }
 		break;
 	case 57: /* ret: RETURN(NIL) */
-		fprintf(stderr, "0x%lx: line 227: ret: RETURN(NIL)\n",(long)p);
-#line 227 "minor.brg"
+		fprintf(stderr, "0x%lx: line 229: ret: RETURN(NIL)\n",(long)p);
+#line 229 "minor.brg"
 { fprintf(yyout, pfLEAVE pfRET); }
 		break;
 	case 58: /* ret: RETURN(expr) */
-		fprintf(stderr, "0x%lx: line 228: ret: RETURN(expr)\n",(long)p);
-#line 228 "minor.brg"
+		fprintf(stderr, "0x%lx: line 230: ret: RETURN(expr)\n",(long)p);
+#line 230 "minor.brg"
 { fprintf(yyout, pfPOP pfLEAVE pfRET); }
 		break;
 	case 59: /* ret: NIL */
-		fprintf(stderr, "0x%lx: line 229: ret: NIL\n",(long)p);
-#line 229 "minor.brg"
-{}
-		break;
-	case 60: /* loop: ret */
-		fprintf(stderr, "0x%lx: line 231: loop: ret\n",(long)p);
+		fprintf(stderr, "0x%lx: line 231: ret: NIL\n",(long)p);
 #line 231 "minor.brg"
 {}
 		break;
+	case 60: /* loop: ret */
+		fprintf(stderr, "0x%lx: line 233: loop: ret\n",(long)p);
+#line 233 "minor.brg"
+{}
+		break;
 	case 61: /* loop: REPEAT */
-		fprintf(stderr, "0x%lx: line 232: loop: REPEAT\n",(long)p);
-#line 232 "minor.brg"
+		fprintf(stderr, "0x%lx: line 234: loop: REPEAT\n",(long)p);
+#line 234 "minor.brg"
 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 62: /* loop: STOP */
-		fprintf(stderr, "0x%lx: line 233: loop: STOP\n",(long)p);
-#line 233 "minor.brg"
+		fprintf(stderr, "0x%lx: line 235: loop: STOP\n",(long)p);
+#line 235 "minor.brg"
 { p->place = stoplbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 63: /* block: STMT(instrs,loop) */
-		fprintf(stderr, "0x%lx: line 235: block: STMT(instrs,loop)\n",(long)p);
-#line 235 "minor.brg"
+		fprintf(stderr, "0x%lx: line 237: block: STMT(instrs,loop)\n",(long)p);
+#line 237 "minor.brg"
 {}
 		break;
 	case 64: /* forblock: STMT(instrs,loop) */
-		fprintf(stderr, "0x%lx: line 236: forblock: STMT(instrs,loop)\n",(long)p);
-#line 236 "minor.brg"
+		fprintf(stderr, "0x%lx: line 238: forblock: STMT(instrs,loop)\n",(long)p);
+#line 238 "minor.brg"
 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 		break;
 	case 65: /* instrs: NIL */
-		fprintf(stderr, "0x%lx: line 238: instrs: NIL\n",(long)p);
-#line 238 "minor.brg"
+		fprintf(stderr, "0x%lx: line 240: instrs: NIL\n",(long)p);
+#line 240 "minor.brg"
 {}
 		break;
 	case 66: /* instrs: STMT(instrs,instr) */
-		fprintf(stderr, "0x%lx: line 239: instrs: STMT(instrs,instr)\n",(long)p);
-#line 239 "minor.brg"
+		fprintf(stderr, "0x%lx: line 241: instrs: STMT(instrs,instr)\n",(long)p);
+#line 241 "minor.brg"
 {}
 		break;
 	case 67: /* instr: FI(THEN(if,elifs),else) */
-		fprintf(stderr, "0x%lx: line 241: instr: FI(THEN(if,elifs),else)\n",(long)p);
-#line 241 "minor.brg"
+		fprintf(stderr, "0x%lx: line 243: instr: FI(THEN(if,elifs),else)\n",(long)p);
+#line 243 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(LEFT_CHILD(p))->place)); }
 		break;
 	case 68: /* instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr)) */
-		fprintf(stderr, "0x%lx: line 242: instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr))\n",(long)p);
-#line 242 "minor.brg"
+		fprintf(stderr, "0x%lx: line 244: instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr))\n",(long)p);
+#line 244 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 		break;
 	case 69: /* instr: PRINT(expr) */
-		fprintf(stderr, "0x%lx: line 243: instr: PRINT(expr)\n",(long)p);
-#line 243 "minor.brg"
+		fprintf(stderr, "0x%lx: line 245: instr: PRINT(expr)\n",(long)p);
+#line 245 "minor.brg"
 { pfPrint(p->info); }
 		break;
 	case 70: /* instr: expr */
-		fprintf(stderr, "0x%lx: line 244: instr: expr\n",(long)p);
-#line 244 "minor.brg"
+		fprintf(stderr, "0x%lx: line 246: instr: expr\n",(long)p);
+#line 246 "minor.brg"
 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 		break;
 	case 71: /* instr: ALLOC(alloc,alloclval) */
-		fprintf(stderr, "0x%lx: line 245: instr: ALLOC(alloc,alloclval)\n",(long)p);
-#line 245 "minor.brg"
+		fprintf(stderr, "0x%lx: line 247: instr: ALLOC(alloc,alloclval)\n",(long)p);
+#line 247 "minor.brg"
 { fprintf(yyout, pfSTORE); }
 		break;
 	case 72: /* alloc: expr */
-		fprintf(stderr, "0x%lx: line 246: alloc: expr\n",(long)p);
-#line 246 "minor.brg"
+		fprintf(stderr, "0x%lx: line 248: alloc: expr\n",(long)p);
+#line 248 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 		break;
 	case 73: /* if: IF(cond,block) */
-		fprintf(stderr, "0x%lx: line 248: if: IF(cond,block)\n",(long)p);
-#line 248 "minor.brg"
+		fprintf(stderr, "0x%lx: line 250: if: IF(cond,block)\n",(long)p);
+#line 250 "minor.brg"
 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
 		break;
 	case 74: /* ifelse: IF(cond,block) */
-		fprintf(stderr, "0x%lx: line 249: ifelse: IF(cond,block)\n",(long)p);
-#line 249 "minor.brg"
+		fprintf(stderr, "0x%lx: line 251: ifelse: IF(cond,block)\n",(long)p);
+#line 251 "minor.brg"
 
 		break;
 	case 75: /* init: trashexpr */
-		fprintf(stderr, "0x%lx: line 251: init: trashexpr\n",(long)p);
-#line 251 "minor.brg"
+		fprintf(stderr, "0x%lx: line 253: init: trashexpr\n",(long)p);
+#line 253 "minor.brg"
 { p->place = forlbl[++forcnt] = ++lbl; repeatlbl[forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 		break;
 	case 76: /* forcond: expr */
-		fprintf(stderr, "0x%lx: line 252: forcond: expr\n",(long)p);
-#line 252 "minor.brg"
+		fprintf(stderr, "0x%lx: line 254: forcond: expr\n",(long)p);
+#line 254 "minor.brg"
 { p->place = stoplbl[forcnt] = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
 		break;
 	case 77: /* postexpr: trashexpr */
-		fprintf(stderr, "0x%lx: line 253: postexpr: trashexpr\n",(long)p);
-#line 253 "minor.brg"
+		fprintf(stderr, "0x%lx: line 255: postexpr: trashexpr\n",(long)p);
+#line 255 "minor.brg"
 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 78: /* cond: expr */
-		fprintf(stderr, "0x%lx: line 254: cond: expr\n",(long)p);
-#line 254 "minor.brg"
+		fprintf(stderr, "0x%lx: line 256: cond: expr\n",(long)p);
+#line 256 "minor.brg"
 { p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
 		break;
 	case 79: /* trashexpr: expr */
-		fprintf(stderr, "0x%lx: line 256: trashexpr: expr\n",(long)p);
-#line 256 "minor.brg"
+		fprintf(stderr, "0x%lx: line 258: trashexpr: expr\n",(long)p);
+#line 258 "minor.brg"
 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 		break;
 	case 80: /* elifs: NIL */
-		fprintf(stderr, "0x%lx: line 258: elifs: NIL\n",(long)p);
-#line 258 "minor.brg"
+		fprintf(stderr, "0x%lx: line 260: elifs: NIL\n",(long)p);
+#line 260 "minor.brg"
 
 		break;
 	case 81: /* elifs: ELIF(elifs,ifelse) */
-		fprintf(stderr, "0x%lx: line 259: elifs: ELIF(elifs,ifelse)\n",(long)p);
-#line 259 "minor.brg"
+		fprintf(stderr, "0x%lx: line 261: elifs: ELIF(elifs,ifelse)\n",(long)p);
+#line 261 "minor.brg"
 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(RIGHT_CHILD(p))->place)); }
 		break;
 	case 82: /* else: NIL */
-		fprintf(stderr, "0x%lx: line 261: else: NIL\n",(long)p);
-#line 261 "minor.brg"
+		fprintf(stderr, "0x%lx: line 263: else: NIL\n",(long)p);
+#line 263 "minor.brg"
 
 		break;
 	case 83: /* else: block */
-		fprintf(stderr, "0x%lx: line 262: else: block\n",(long)p);
-#line 262 "minor.brg"
+		fprintf(stderr, "0x%lx: line 264: else: block\n",(long)p);
+#line 264 "minor.brg"
 
 		break;
 	case 84: /* alloclval: ID */
-		fprintf(stderr, "0x%lx: line 264: alloclval: ID\n",(long)p);
-#line 264 "minor.brg"
+		fprintf(stderr, "0x%lx: line 266: alloclval: ID\n",(long)p);
+#line 266 "minor.brg"
 { getAllocId(p); }
 		break;
 	case 85: /* alloclval: INDEX(alloclval,expr) */
-		fprintf(stderr, "0x%lx: line 265: alloclval: INDEX(alloclval,expr)\n",(long)p);
-#line 265 "minor.brg"
+		fprintf(stderr, "0x%lx: line 267: alloclval: INDEX(alloclval,expr)\n",(long)p);
+#line 267 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
 		break;
 	case 86: /* lval: ID */
-		fprintf(stderr, "0x%lx: line 267: lval: ID\n",(long)p);
-#line 267 "minor.brg"
-{ getId(p); }
-		break;
-	case 87: /* lval: INDEX(lvec,expr) */
-		fprintf(stderr, "0x%lx: line 268: lval: INDEX(lvec,expr)\n",(long)p);
-#line 268 "minor.brg"
-{ fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
-		break;
-	case 88: /* lvec: ID */
-		fprintf(stderr, "0x%lx: line 269: lvec: ID\n",(long)p);
+		fprintf(stderr, "0x%lx: line 269: lval: ID\n",(long)p);
 #line 269 "minor.brg"
 { getId(p); }
 		break;
-	case 89: /* lvecassign: ID */
-		fprintf(stderr, "0x%lx: line 270: lvecassign: ID\n",(long)p);
+	case 87: /* lval: INDEX(lvec,expr) */
+		fprintf(stderr, "0x%lx: line 270: lval: INDEX(lvec,expr)\n",(long)p);
 #line 270 "minor.brg"
+{ fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
+		break;
+	case 88: /* lvec: ID */
+		fprintf(stderr, "0x%lx: line 271: lvec: ID\n",(long)p);
+#line 271 "minor.brg"
+{ getId(p); }
+		break;
+	case 89: /* lvecassign: ID */
+		fprintf(stderr, "0x%lx: line 272: lvecassign: ID\n",(long)p);
+#line 272 "minor.brg"
 { fprintf(yyout, pfDUP); getId(p); }
 		break;
 	case 90: /* assign: ID */
-		fprintf(stderr, "0x%lx: line 271: assign: ID\n",(long)p);
-#line 271 "minor.brg"
+		fprintf(stderr, "0x%lx: line 273: assign: ID\n",(long)p);
+#line 273 "minor.brg"
 { assignment(p); }
 		break;
 	case 91: /* assign: INDEX(lvecassign,expr) */
-		fprintf(stderr, "0x%lx: line 272: assign: INDEX(lvecassign,expr)\n",(long)p);
-#line 272 "minor.brg"
+		fprintf(stderr, "0x%lx: line 274: assign: INDEX(lvecassign,expr)\n",(long)p);
+#line 274 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
 		break;
 	case 92: /* expr: CHARS(NIL,INT) */
-		fprintf(stderr, "0x%lx: line 274: expr: CHARS(NIL,INT)\n",(long)p);
-#line 274 "minor.brg"
+		fprintf(stderr, "0x%lx: line 276: expr: CHARS(NIL,INT)\n",(long)p);
+#line 276 "minor.brg"
 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 		break;
 	case 93: /* expr: CHARS(NIL,CHAR) */
-		fprintf(stderr, "0x%lx: line 275: expr: CHARS(NIL,CHAR)\n",(long)p);
-#line 275 "minor.brg"
+		fprintf(stderr, "0x%lx: line 277: expr: CHARS(NIL,CHAR)\n",(long)p);
+#line 277 "minor.brg"
 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 		break;
 	case 94: /* expr: CHARS(NIL,STR) */
-		fprintf(stderr, "0x%lx: line 276: expr: CHARS(NIL,STR)\n",(long)p);
-#line 276 "minor.brg"
+		fprintf(stderr, "0x%lx: line 278: expr: CHARS(NIL,STR)\n",(long)p);
+#line 278 "minor.brg"
 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(RIGHT_CHILD(p)->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 		break;
 	case 95: /* expr: chars */
-		fprintf(stderr, "0x%lx: line 277: expr: chars\n",(long)p);
-#line 277 "minor.brg"
+		fprintf(stderr, "0x%lx: line 279: expr: chars\n",(long)p);
+#line 279 "minor.brg"
 { fprintf(yyout, pfCHAR pfTEXT pfADDR, 0, mklbl(p->place)); }
 		break;
 	case 96: /* expr: lval */
-		fprintf(stderr, "0x%lx: line 278: expr: lval\n",(long)p);
-#line 278 "minor.brg"
+		fprintf(stderr, "0x%lx: line 280: expr: lval\n",(long)p);
+#line 280 "minor.brg"
 
 		break;
 	case 97: /* expr: READ */
-		fprintf(stderr, "0x%lx: line 279: expr: READ\n",(long)p);
-#line 279 "minor.brg"
+		fprintf(stderr, "0x%lx: line 281: expr: READ\n",(long)p);
+#line 281 "minor.brg"
 { fprintf(yyout, pfCALL pfPUSH, "_readi"); }
 		break;
 	case 98: /* expr: ADDR(lval) */
-		fprintf(stderr, "0x%lx: line 280: expr: ADDR(lval)\n",(long)p);
-#line 280 "minor.brg"
+		fprintf(stderr, "0x%lx: line 282: expr: ADDR(lval)\n",(long)p);
+#line 282 "minor.brg"
 {  }
 		break;
 	case 99: /* expr: ADD(expr,expr) */
-		fprintf(stderr, "0x%lx: line 281: expr: ADD(expr,expr)\n",(long)p);
-#line 281 "minor.brg"
+		fprintf(stderr, "0x%lx: line 283: expr: ADD(expr,expr)\n",(long)p);
+#line 283 "minor.brg"
 { fprintf(yyout, pfADD); }
 		break;
 	case 100: /* expr: SUB(expr,expr) */
-		fprintf(stderr, "0x%lx: line 282: expr: SUB(expr,expr)\n",(long)p);
-#line 282 "minor.brg"
+		fprintf(stderr, "0x%lx: line 284: expr: SUB(expr,expr)\n",(long)p);
+#line 284 "minor.brg"
 { fprintf(yyout, pfSUB); }
 		break;
 	case 101: /* expr: MUL(expr,expr) */
-		fprintf(stderr, "0x%lx: line 283: expr: MUL(expr,expr)\n",(long)p);
-#line 283 "minor.brg"
+		fprintf(stderr, "0x%lx: line 285: expr: MUL(expr,expr)\n",(long)p);
+#line 285 "minor.brg"
 { fprintf(yyout, pfMUL); }
 		break;
 	case 102: /* expr: DIV(expr,expr) */
-		fprintf(stderr, "0x%lx: line 284: expr: DIV(expr,expr)\n",(long)p);
-#line 284 "minor.brg"
+		fprintf(stderr, "0x%lx: line 286: expr: DIV(expr,expr)\n",(long)p);
+#line 286 "minor.brg"
 { fprintf(yyout, pfDIV); }
 		break;
 	case 103: /* expr: MOD(expr,expr) */
-		fprintf(stderr, "0x%lx: line 285: expr: MOD(expr,expr)\n",(long)p);
-#line 285 "minor.brg"
+		fprintf(stderr, "0x%lx: line 287: expr: MOD(expr,expr)\n",(long)p);
+#line 287 "minor.brg"
 { fprintf(yyout, pfMOD); }
 		break;
 	case 104: /* expr: POW(expr,expr) */
-		fprintf(stderr, "0x%lx: line 286: expr: POW(expr,expr)\n",(long)p);
-#line 286 "minor.brg"
+		fprintf(stderr, "0x%lx: line 288: expr: POW(expr,expr)\n",(long)p);
+#line 288 "minor.brg"
 {}
 		break;
 	case 105: /* expr: EQU(expr,expr) */
-		fprintf(stderr, "0x%lx: line 287: expr: EQU(expr,expr)\n",(long)p);
-#line 287 "minor.brg"
+		fprintf(stderr, "0x%lx: line 289: expr: EQU(expr,expr)\n",(long)p);
+#line 289 "minor.brg"
 { fprintf(yyout, pfEQ); }
 		break;
 	case 106: /* expr: NE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 288: expr: NE(expr,expr)\n",(long)p);
-#line 288 "minor.brg"
+		fprintf(stderr, "0x%lx: line 290: expr: NE(expr,expr)\n",(long)p);
+#line 290 "minor.brg"
 { fprintf(yyout, pfNE); }
 		break;
 	case 107: /* expr: GE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 289: expr: GE(expr,expr)\n",(long)p);
-#line 289 "minor.brg"
+		fprintf(stderr, "0x%lx: line 291: expr: GE(expr,expr)\n",(long)p);
+#line 291 "minor.brg"
 { fprintf(yyout, pfGE); }
 		break;
 	case 108: /* expr: LE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 290: expr: LE(expr,expr)\n",(long)p);
-#line 290 "minor.brg"
+		fprintf(stderr, "0x%lx: line 292: expr: LE(expr,expr)\n",(long)p);
+#line 292 "minor.brg"
 { fprintf(yyout, pfLE); }
 		break;
 	case 109: /* expr: LT(expr,expr) */
-		fprintf(stderr, "0x%lx: line 291: expr: LT(expr,expr)\n",(long)p);
-#line 291 "minor.brg"
+		fprintf(stderr, "0x%lx: line 293: expr: LT(expr,expr)\n",(long)p);
+#line 293 "minor.brg"
 { fprintf(yyout, pfLT); }
 		break;
 	case 110: /* expr: GT(expr,expr) */
-		fprintf(stderr, "0x%lx: line 292: expr: GT(expr,expr)\n",(long)p);
-#line 292 "minor.brg"
+		fprintf(stderr, "0x%lx: line 294: expr: GT(expr,expr)\n",(long)p);
+#line 294 "minor.brg"
 { fprintf(yyout, pfGT); }
 		break;
 	case 111: /* expr: AND(and,expr) */
-		fprintf(stderr, "0x%lx: line 293: expr: AND(and,expr)\n",(long)p);
-#line 293 "minor.brg"
-{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
-		break;
-	case 112: /* and: expr */
-		fprintf(stderr, "0x%lx: line 294: and: expr\n",(long)p);
-#line 294 "minor.brg"
-{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
-		break;
-	case 113: /* expr: OR(or,expr) */
-		fprintf(stderr, "0x%lx: line 295: expr: OR(or,expr)\n",(long)p);
+		fprintf(stderr, "0x%lx: line 295: expr: AND(and,expr)\n",(long)p);
 #line 295 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 		break;
-	case 114: /* or: expr */
-		fprintf(stderr, "0x%lx: line 296: or: expr\n",(long)p);
+	case 112: /* and: expr */
+		fprintf(stderr, "0x%lx: line 296: and: expr\n",(long)p);
 #line 296 "minor.brg"
+{ p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
+		break;
+	case 113: /* expr: OR(or,expr) */
+		fprintf(stderr, "0x%lx: line 297: expr: OR(or,expr)\n",(long)p);
+#line 297 "minor.brg"
+{ fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
+		break;
+	case 114: /* or: expr */
+		fprintf(stderr, "0x%lx: line 298: or: expr\n",(long)p);
+#line 298 "minor.brg"
 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 		break;
 	case 115: /* expr: NOT(expr) */
-		fprintf(stderr, "0x%lx: line 297: expr: NOT(expr)\n",(long)p);
-#line 297 "minor.brg"
+		fprintf(stderr, "0x%lx: line 299: expr: NOT(expr)\n",(long)p);
+#line 299 "minor.brg"
 { fprintf(yyout, pfIMM pfEQ, 0); }
 		break;
 	case 116: /* expr: UMINUS(expr) */
-		fprintf(stderr, "0x%lx: line 298: expr: UMINUS(expr)\n",(long)p);
-#line 298 "minor.brg"
+		fprintf(stderr, "0x%lx: line 300: expr: UMINUS(expr)\n",(long)p);
+#line 300 "minor.brg"
 { fprintf(yyout, pfNEG); }
 		break;
 	case 117: /* expr: EQ(expr,assign) */
-		fprintf(stderr, "0x%lx: line 299: expr: EQ(expr,assign)\n",(long)p);
-#line 299 "minor.brg"
+		fprintf(stderr, "0x%lx: line 301: expr: EQ(expr,assign)\n",(long)p);
+#line 301 "minor.brg"
 {}
 		break;
 	case 118: /* expr: IDARGS(ID,exprs) */
-		fprintf(stderr, "0x%lx: line 300: expr: IDARGS(ID,exprs)\n",(long)p);
-#line 300 "minor.brg"
+		fprintf(stderr, "0x%lx: line 302: expr: IDARGS(ID,exprs)\n",(long)p);
+#line 302 "minor.brg"
 { fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 		break;
 	case 119: /* exprs: COMMA(expr,NIL) */
-		fprintf(stderr, "0x%lx: line 302: exprs: COMMA(expr,NIL)\n",(long)p);
-#line 302 "minor.brg"
+		fprintf(stderr, "0x%lx: line 304: exprs: COMMA(expr,NIL)\n",(long)p);
+#line 304 "minor.brg"
 { p->place = 1; }
 		break;
 	case 120: /* exprs: COMMA(expr,exprs) */
-		fprintf(stderr, "0x%lx: line 303: exprs: COMMA(expr,exprs)\n",(long)p);
-#line 303 "minor.brg"
+		fprintf(stderr, "0x%lx: line 305: exprs: COMMA(expr,exprs)\n",(long)p);
+#line 305 "minor.brg"
 { p->place = ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
 		break;
 	default: break;
@@ -3184,7 +3186,7 @@ int yyselect(NODEPTR_TYPE p)
 }
 
 
-#line 305 "minor.brg"
+#line 307 "minor.brg"
 
 extern char **yynames;
 extern int trace, errors, debugNode;

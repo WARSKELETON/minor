@@ -1,27 +1,51 @@
-; BSS
-segment	.bss
+; TEXT
+segment	.text
 ; ALIGN
 align	4
+; GLOBL
+global	$_x:function
 ; LABEL
-$x:
-; BYTE
-	resb	4
-; RODATA
-segment	.rodata
+$_x:
+; ENTER
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 0
+; CALL
+	call	$_z
+; PUSH
+	push	eax
+; CALL
+	call	$_printi
+; TRASH
+	add	esp, 4
+; LEAVE
+	leave
+; RET
+	ret
+; TEXT
+segment	.text
 ; ALIGN
 align	4
+; GLOBL
+global	$_z:function
 ; LABEL
-$y:
-; INTEGER
-	dd	10
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$z:
-; INTEGER
-	dd	0
+$_z:
+; ENTER
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 0
+; IMM
+	push	dword 123
+; POP
+	pop	eax
+; LEAVE
+	leave
+; RET
+	ret
+; LEAVE
+	leave
+; RET
+	ret
 ; TEXT
 segment	.text
 ; ALIGN
@@ -34,6 +58,12 @@ $_main:
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 0
+; CALL
+	call	$_x
+; PUSH
+	push	eax
+; TRASH
+	add	esp, 4
 ; RODATA
 segment	.rodata
 ; ALIGN
@@ -41,133 +71,13 @@ align	4
 ; LABEL
 $_L1:
 ; CHAR
-	db	0x78
-; CHAR
-	db	0x3A
-; CHAR
-	db	0x20
+	db	0x0A
 ; CHAR
 	db	0x00
 ; TEXT
 segment	.text
 ; ADDR
 	push	dword $_L1
-; CALL
-	call	$_prints
-; TRASH
-	add	esp, 4
-; ADDRV
-	push	dword [$x]
-; CALL
-	call	$_printi
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L2:
-; CHAR
-	db	0x0A
-; CHAR
-	db	0x00
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L2
-; CALL
-	call	$_prints
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L3:
-; CHAR
-	db	0x79
-; CHAR
-	db	0x3A
-; CHAR
-	db	0x20
-; CHAR
-	db	0x00
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L3
-; CALL
-	call	$_prints
-; TRASH
-	add	esp, 4
-; ADDRV
-	push	dword [$y]
-; CALL
-	call	$_printi
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L4:
-; CHAR
-	db	0x0A
-; CHAR
-	db	0x00
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L4
-; CALL
-	call	$_prints
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L5:
-; CHAR
-	db	0x7A
-; CHAR
-	db	0x3A
-; CHAR
-	db	0x20
-; CHAR
-	db	0x00
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L5
-; CALL
-	call	$_prints
-; TRASH
-	add	esp, 4
-; ADDRV
-	push	dword [$z]
-; CALL
-	call	$_printi
-; TRASH
-	add	esp, 4
-; RODATA
-segment	.rodata
-; ALIGN
-align	4
-; LABEL
-$_L6:
-; CHAR
-	db	0x0A
-; CHAR
-	db	0x00
-; TEXT
-segment	.text
-; ADDR
-	push	dword $_L6
 ; CALL
 	call	$_prints
 ; TRASH
