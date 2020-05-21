@@ -68,6 +68,21 @@ static void getId(Node* nm) {
 		fprintf(yyout, pfLOCV, nmpos);
 	}
 }
+static void getAllocId(Node* nm) {
+	int typ = 2, nmpos = 0;
+	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
+		if (nm->info >= tFUNC) {
+			fprintf(yyout, pfCALL pfPUSH, mkfunc(nm->value.s));
+		}
+		else {
+			fprintf(yyout, pfADDR, nm->value.s);
+		}
+	}
+	else {
+		typ = IDfind(nm->value.s, (long*)&nmpos);
+		fprintf(yyout, pfLOCAL, nmpos);
+	}
+}
 static void assignment(Node* nm) {
 	int typ = 2, nmpos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
@@ -105,7 +120,6 @@ static void initRemaining(int dim) {
 		initints++;
 	}
 }
-/* falta const type ftype */
 /* expr: expr */
 /* 255 truncar */
 %}
@@ -128,9 +142,9 @@ decl: VAR(constvardecl)			cnstCost {}
 decl: FUNCTION(funcname, FARGS(funcargs, NIL))			1 { extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
 decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
-farg: NUMBER(ID, NIL)	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
-farg: STRING(ID, NIL)	1 {}
-farg: ARRAY(ID, INTS(vdim, NIL))	1 {}
+farg: NUMBER(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+farg: STRING(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+farg: ARRAY(ID, INTS(vdim, NIL))	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 
 fargs: NIL					1 {}
 fargs: ARGS(NIL, farg)		1 {}
@@ -141,9 +155,9 @@ funcargs: fargs				1 { pos = 0; }
 funcname: END(ID, INT)	1 { IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
 funcmain: END(ID, INT)	1 { IDpush(); pos = 0; }
 
-fvar: NUMBER(ID, NIL)	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
-fvar: STRING(ID, NIL)	1 {}
-fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
+fvar: NUMBER(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
+fvar: STRING(ID, NIL)				1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
+fvar: ARRAY(ID, INTS(vdim, NIL))	1 { IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 
 fvars: ARGS(NIL, fvar)		1 {}
 fvars: ARGS(fvars, fvar)	1 {}
@@ -220,7 +234,7 @@ instr: FI(THEN(if, elifs), else)					1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHIL
 instr: FOR(UNTIL(init, forcond), STEP(forblock, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 instr: PRINT(expr)									3 { pfPrint(p->info); }
 instr: expr											1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
-instr: ALLOC(alloc,lval)							1 { fprintf(yyout, pfSTORE); }
+instr: ALLOC(alloc,alloclval)							1 { fprintf(yyout, pfSTORE); }
 alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
@@ -239,11 +253,15 @@ elifs: ELIF(elifs, ifelse)	1 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL,
 else: NIL
 else: block
 
+alloclval: ID						1 { getAllocId(p); }
+alloclval: INDEX(alloclval, expr)	1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
+
 lval: ID					1 { getId(p); }
 lval: INDEX(lvec, expr)		1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
 lvec: ID					1 { getId(p); }
+lvecassign: ID				1 { fprintf(yyout, pfDUP); getId(p); }
 assign: ID					1 { assignment(p); }
-assign: INDEX(lvec, expr) 	1 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
+assign: INDEX(lvecassign, expr) 	1 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 expr: CHARS(NIL, CHAR)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }

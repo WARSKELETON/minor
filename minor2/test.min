@@ -1,10 +1,8 @@
-program
-    array x[3] := 1, 2
-start
-    x[0]!
-    x[1]!
-    x[2]!
-    x[2] := 3;
-    x[2]!
-    "\n"!
+program start
+    array x;
+    x # 2;
+    x[0] := 123;
+    x[1] := 456;
+    x[0]! "\n"!
+    x[1]! "\n"!
 end

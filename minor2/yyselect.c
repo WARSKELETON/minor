@@ -1,5 +1,5 @@
 /*
-generated at Thu May 21 16:32:33 2020
+generated at Thu May 21 17:08:49 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -85,6 +85,21 @@ static void getId(Node* nm) {
 		fprintf(yyout, pfLOCV, nmpos);
 	}
 }
+static void getAllocId(Node* nm) {
+	int typ = 2, nmpos = 0;
+	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
+		if (nm->info >= tFUNC) {
+			fprintf(yyout, pfCALL pfPUSH, mkfunc(nm->value.s));
+		}
+		else {
+			fprintf(yyout, pfADDR, nm->value.s);
+		}
+	}
+	else {
+		typ = IDfind(nm->value.s, (long*)&nmpos);
+		fprintf(yyout, pfLOCAL, nmpos);
+	}
+}
 static void assignment(Node* nm) {
 	int typ = 2, nmpos = 0;
 	if (IDfind(nm->value.s, (void**)IDtest) >= 0) {
@@ -122,7 +137,6 @@ static void initRemaining(int dim) {
 		initints++;
 	}
 }
-/* falta const type ftype */
 /* expr: expr */
 /* 255 truncar */
 #ifndef PANIC
@@ -178,15 +192,17 @@ static void yykids(NODEPTR_TYPE, int, NODEPTR_TYPE[]);
 #define yyforcond_NT 42
 #define yypostexpr_NT 43
 #define yyalloc_NT 44
-#define yylval_NT 45
+#define yyalloclval_NT 45
 #define yycond_NT 46
 #define yyifelse_NT 47
 #define yytrashexpr_NT 48
-#define yylvec_NT 49
-#define yyassign_NT 50
-#define yyand_NT 51
-#define yyor_NT 52
-#define yyexprs_NT 53
+#define yylval_NT 49
+#define yylvec_NT 50
+#define yylvecassign_NT 51
+#define yyassign_NT 52
+#define yyand_NT 53
+#define yyor_NT 54
+#define yyexprs_NT 55
 
 static YYCONST char *yyntname[] = {
 	0,
@@ -234,11 +250,13 @@ static YYCONST char *yyntname[] = {
 	"forcond",
 	"postexpr",
 	"alloc",
-	"lval",
+	"alloclval",
 	"cond",
 	"ifelse",
 	"trashexpr",
+	"lval",
 	"lvec",
+	"lvecassign",
 	"assign",
 	"and",
 	"or",
@@ -332,7 +350,7 @@ static YYCONST char *yytermname[] = {
 };
 
 struct yystate {
-	short cost[54];
+	short cost[56];
 	struct {
 		unsigned int yyprogram:2;
 		unsigned int yydecls:2;
@@ -378,11 +396,13 @@ struct yystate {
 		unsigned int yyforcond:1;
 		unsigned int yypostexpr:1;
 		unsigned int yyalloc:1;
-		unsigned int yylval:2;
+		unsigned int yyalloclval:2;
 		unsigned int yycond:1;
 		unsigned int yyifelse:1;
 		unsigned int yytrashexpr:1;
+		unsigned int yylval:2;
 		unsigned int yylvec:1;
+		unsigned int yylvecassign:1;
 		unsigned int yyassign:2;
 		unsigned int yyand:1;
 		unsigned int yyor:1;
@@ -427,19 +447,21 @@ static short yynts_33[] = { yyinstrs_NT, yyloop_NT, 0 };
 static short yynts_34[] = { yyinstrs_NT, yyinstr_NT, 0 };
 static short yynts_35[] = { yyif_NT, yyelifs_NT, yyelse_NT, 0 };
 static short yynts_36[] = { yyinit_NT, yyforcond_NT, yyforblock_NT, yypostexpr_NT, 0 };
-static short yynts_37[] = { yyalloc_NT, yylval_NT, 0 };
+static short yynts_37[] = { yyalloc_NT, yyalloclval_NT, 0 };
 static short yynts_38[] = { yycond_NT, yyblock_NT, 0 };
 static short yynts_39[] = { yytrashexpr_NT, 0 };
 static short yynts_40[] = { yyelifs_NT, yyifelse_NT, 0 };
 static short yynts_41[] = { yyblock_NT, 0 };
-static short yynts_42[] = { yylvec_NT, yyexpr_NT, 0 };
-static short yynts_43[] = { yylval_NT, 0 };
-static short yynts_44[] = { yyexpr_NT, yyexpr_NT, 0 };
-static short yynts_45[] = { yyand_NT, yyexpr_NT, 0 };
-static short yynts_46[] = { yyor_NT, yyexpr_NT, 0 };
-static short yynts_47[] = { yyexpr_NT, yyassign_NT, 0 };
-static short yynts_48[] = { yyexprs_NT, 0 };
-static short yynts_49[] = { yyexpr_NT, yyexprs_NT, 0 };
+static short yynts_42[] = { yyalloclval_NT, yyexpr_NT, 0 };
+static short yynts_43[] = { yylvec_NT, yyexpr_NT, 0 };
+static short yynts_44[] = { yylvecassign_NT, yyexpr_NT, 0 };
+static short yynts_45[] = { yylval_NT, 0 };
+static short yynts_46[] = { yyexpr_NT, yyexpr_NT, 0 };
+static short yynts_47[] = { yyand_NT, yyexpr_NT, 0 };
+static short yynts_48[] = { yyor_NT, yyexpr_NT, 0 };
+static short yynts_49[] = { yyexpr_NT, yyassign_NT, 0 };
+static short yynts_50[] = { yyexprs_NT, 0 };
+static short yynts_51[] = { yyexpr_NT, yyexprs_NT, 0 };
 
 static short *yynts[] = {
 	0,	/* 0 */
@@ -533,37 +555,40 @@ static short *yynts[] = {
 	yynts_2,	/* 88 */
 	yynts_42,	/* 89 */
 	yynts_2,	/* 90 */
-	yynts_2,	/* 91 */
-	yynts_42,	/* 92 */
+	yynts_43,	/* 91 */
+	yynts_2,	/* 92 */
 	yynts_2,	/* 93 */
 	yynts_2,	/* 94 */
-	yynts_2,	/* 95 */
-	yynts_24,	/* 96 */
-	yynts_43,	/* 97 */
+	yynts_44,	/* 95 */
+	yynts_2,	/* 96 */
+	yynts_2,	/* 97 */
 	yynts_2,	/* 98 */
-	yynts_43,	/* 99 */
-	yynts_44,	/* 100 */
-	yynts_44,	/* 101 */
-	yynts_44,	/* 102 */
-	yynts_44,	/* 103 */
-	yynts_44,	/* 104 */
-	yynts_44,	/* 105 */
-	yynts_44,	/* 106 */
-	yynts_44,	/* 107 */
-	yynts_44,	/* 108 */
-	yynts_44,	/* 109 */
-	yynts_44,	/* 110 */
-	yynts_44,	/* 111 */
-	yynts_45,	/* 112 */
-	yynts_31,	/* 113 */
+	yynts_24,	/* 99 */
+	yynts_45,	/* 100 */
+	yynts_2,	/* 101 */
+	yynts_45,	/* 102 */
+	yynts_46,	/* 103 */
+	yynts_46,	/* 104 */
+	yynts_46,	/* 105 */
+	yynts_46,	/* 106 */
+	yynts_46,	/* 107 */
+	yynts_46,	/* 108 */
+	yynts_46,	/* 109 */
+	yynts_46,	/* 110 */
+	yynts_46,	/* 111 */
+	yynts_46,	/* 112 */
+	yynts_46,	/* 113 */
 	yynts_46,	/* 114 */
-	yynts_31,	/* 115 */
+	yynts_47,	/* 115 */
 	yynts_31,	/* 116 */
-	yynts_31,	/* 117 */
-	yynts_47,	/* 118 */
-	yynts_48,	/* 119 */
+	yynts_48,	/* 117 */
+	yynts_31,	/* 118 */
+	yynts_31,	/* 119 */
 	yynts_31,	/* 120 */
 	yynts_49,	/* 121 */
+	yynts_50,	/* 122 */
+	yynts_31,	/* 123 */
+	yynts_51,	/* 124 */
 };
 
 
@@ -643,7 +668,7 @@ static YYCONST char *yystring[] = {
 /* 72 */	"instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr))",
 /* 73 */	"instr: PRINT(expr)",
 /* 74 */	"instr: expr",
-/* 75 */	"instr: ALLOC(alloc,lval)",
+/* 75 */	"instr: ALLOC(alloc,alloclval)",
 /* 76 */	"alloc: expr",
 /* 77 */	"if: IF(cond,block)",
 /* 78 */	"ifelse: IF(cond,block)",
@@ -656,40 +681,43 @@ static YYCONST char *yystring[] = {
 /* 85 */	"elifs: ELIF(elifs,ifelse)",
 /* 86 */	"else: NIL",
 /* 87 */	"else: block",
-/* 88 */	"lval: ID",
-/* 89 */	"lval: INDEX(lvec,expr)",
-/* 90 */	"lvec: ID",
-/* 91 */	"assign: ID",
-/* 92 */	"assign: INDEX(lvec,expr)",
-/* 93 */	"expr: CHARS(NIL,INT)",
-/* 94 */	"expr: CHARS(NIL,CHAR)",
-/* 95 */	"expr: CHARS(NIL,STR)",
-/* 96 */	"expr: chars",
-/* 97 */	"expr: lval",
-/* 98 */	"expr: READ",
-/* 99 */	"expr: ADDR(lval)",
-/* 100 */	"expr: ADD(expr,expr)",
-/* 101 */	"expr: SUB(expr,expr)",
-/* 102 */	"expr: MUL(expr,expr)",
-/* 103 */	"expr: DIV(expr,expr)",
-/* 104 */	"expr: MOD(expr,expr)",
-/* 105 */	"expr: POW(expr,expr)",
-/* 106 */	"expr: EQU(expr,expr)",
-/* 107 */	"expr: NE(expr,expr)",
-/* 108 */	"expr: GE(expr,expr)",
-/* 109 */	"expr: LE(expr,expr)",
-/* 110 */	"expr: LT(expr,expr)",
-/* 111 */	"expr: GT(expr,expr)",
-/* 112 */	"expr: AND(and,expr)",
-/* 113 */	"and: expr",
-/* 114 */	"expr: OR(or,expr)",
-/* 115 */	"or: expr",
-/* 116 */	"expr: NOT(expr)",
-/* 117 */	"expr: UMINUS(expr)",
-/* 118 */	"expr: EQ(expr,assign)",
-/* 119 */	"expr: IDARGS(ID,exprs)",
-/* 120 */	"exprs: COMMA(expr,NIL)",
-/* 121 */	"exprs: COMMA(expr,exprs)",
+/* 88 */	"alloclval: ID",
+/* 89 */	"alloclval: INDEX(alloclval,expr)",
+/* 90 */	"lval: ID",
+/* 91 */	"lval: INDEX(lvec,expr)",
+/* 92 */	"lvec: ID",
+/* 93 */	"lvecassign: ID",
+/* 94 */	"assign: ID",
+/* 95 */	"assign: INDEX(lvecassign,expr)",
+/* 96 */	"expr: CHARS(NIL,INT)",
+/* 97 */	"expr: CHARS(NIL,CHAR)",
+/* 98 */	"expr: CHARS(NIL,STR)",
+/* 99 */	"expr: chars",
+/* 100 */	"expr: lval",
+/* 101 */	"expr: READ",
+/* 102 */	"expr: ADDR(lval)",
+/* 103 */	"expr: ADD(expr,expr)",
+/* 104 */	"expr: SUB(expr,expr)",
+/* 105 */	"expr: MUL(expr,expr)",
+/* 106 */	"expr: DIV(expr,expr)",
+/* 107 */	"expr: MOD(expr,expr)",
+/* 108 */	"expr: POW(expr,expr)",
+/* 109 */	"expr: EQU(expr,expr)",
+/* 110 */	"expr: NE(expr,expr)",
+/* 111 */	"expr: GE(expr,expr)",
+/* 112 */	"expr: LE(expr,expr)",
+/* 113 */	"expr: LT(expr,expr)",
+/* 114 */	"expr: GT(expr,expr)",
+/* 115 */	"expr: AND(and,expr)",
+/* 116 */	"and: expr",
+/* 117 */	"expr: OR(or,expr)",
+/* 118 */	"or: expr",
+/* 119 */	"expr: NOT(expr)",
+/* 120 */	"expr: UMINUS(expr)",
+/* 121 */	"expr: EQ(expr,assign)",
+/* 122 */	"expr: IDARGS(ID,exprs)",
+/* 123 */	"exprs: COMMA(expr,NIL)",
+/* 124 */	"exprs: COMMA(expr,exprs)",
 };
 
 #ifndef TRACE
@@ -896,9 +924,6 @@ static short yydecode_ret[] = {
 
 static short yydecode_expr[] = {
 	0,
-	93,
-	94,
-	95,
 	96,
 	97,
 	98,
@@ -916,11 +941,14 @@ static short yydecode_expr[] = {
 	110,
 	111,
 	112,
+	113,
 	114,
-	116,
+	115,
 	117,
-	118,
 	119,
+	120,
+	121,
+	122,
 };
 
 static short yydecode_loop[] = {
@@ -986,7 +1014,7 @@ static short yydecode_alloc[] = {
 	76,
 };
 
-static short yydecode_lval[] = {
+static short yydecode_alloclval[] = {
 	0,
 	88,
 	89,
@@ -1007,35 +1035,46 @@ static short yydecode_trashexpr[] = {
 	83,
 };
 
-static short yydecode_lvec[] = {
+static short yydecode_lval[] = {
 	0,
 	90,
+	91,
+};
+
+static short yydecode_lvec[] = {
+	0,
+	92,
+};
+
+static short yydecode_lvecassign[] = {
+	0,
+	93,
 };
 
 static short yydecode_assign[] = {
 	0,
-	91,
-	92,
+	94,
+	95,
 };
 
 static short yydecode_and[] = {
 	0,
-	113,
+	116,
 };
 
 static short yydecode_or[] = {
 	0,
-	115,
+	118,
 };
 
 static short yydecode_exprs[] = {
 	0,
-	120,
-	121,
+	123,
+	124,
 };
 
 static int yyrule(void *state, int goalnt) {
-	if (goalnt < 1 || goalnt > 53)
+	if (goalnt < 1 || goalnt > 55)
 		PANIC("yyrule", "Bad goal nonterminal", goalnt);
 	if (!state)
 		return 0;
@@ -1084,11 +1123,13 @@ static int yyrule(void *state, int goalnt) {
 	case yyforcond_NT:	return yydecode_forcond[((struct yystate *)state)->rule.yyforcond];
 	case yypostexpr_NT:	return yydecode_postexpr[((struct yystate *)state)->rule.yypostexpr];
 	case yyalloc_NT:	return yydecode_alloc[((struct yystate *)state)->rule.yyalloc];
-	case yylval_NT:	return yydecode_lval[((struct yystate *)state)->rule.yylval];
+	case yyalloclval_NT:	return yydecode_alloclval[((struct yystate *)state)->rule.yyalloclval];
 	case yycond_NT:	return yydecode_cond[((struct yystate *)state)->rule.yycond];
 	case yyifelse_NT:	return yydecode_ifelse[((struct yystate *)state)->rule.yyifelse];
 	case yytrashexpr_NT:	return yydecode_trashexpr[((struct yystate *)state)->rule.yytrashexpr];
+	case yylval_NT:	return yydecode_lval[((struct yystate *)state)->rule.yylval];
 	case yylvec_NT:	return yydecode_lvec[((struct yystate *)state)->rule.yylvec];
+	case yylvecassign_NT:	return yydecode_lvecassign[((struct yystate *)state)->rule.yylvecassign];
 	case yyassign_NT:	return yydecode_assign[((struct yystate *)state)->rule.yyassign];
 	case yyand_NT:	return yydecode_and[((struct yystate *)state)->rule.yyand];
 	case yyor_NT:	return yydecode_or[((struct yystate *)state)->rule.yyor];
@@ -1108,8 +1149,8 @@ static void yyclosure_body(NODEPTR_TYPE, int);
 static void yyclosure_ret(NODEPTR_TYPE, int);
 static void yyclosure_expr(NODEPTR_TYPE, int);
 static void yyclosure_block(NODEPTR_TYPE, int);
-static void yyclosure_lval(NODEPTR_TYPE, int);
 static void yyclosure_trashexpr(NODEPTR_TYPE, int);
+static void yyclosure_lval(NODEPTR_TYPE, int);
 
 static void yyclosure_gdecls(NODEPTR_TYPE a, int c) {
 	struct yystate *p = (struct yystate *)STATE_LABEL(a);
@@ -1154,7 +1195,7 @@ static void yyclosure_ints(NODEPTR_TYPE a, int c) {
 
 static void yyclosure_chars(NODEPTR_TYPE a, int c) {
 	struct yystate *p = (struct yystate *)STATE_LABEL(a);
-	yytrace(a, 96, c + 1, p->cost[yyexpr_NT]);
+	yytrace(a, 99, c + 1, p->cost[yyexpr_NT]);
 	if (c + 1 < p->cost[yyexpr_NT]) {
 		p->cost[yyexpr_NT] = c + 1;
 		p->rule.yyexpr = 4;
@@ -1187,12 +1228,12 @@ static void yyclosure_ret(NODEPTR_TYPE a, int c) {
 
 static void yyclosure_expr(NODEPTR_TYPE a, int c) {
 	struct yystate *p = (struct yystate *)STATE_LABEL(a);
-	yytrace(a, 115, c + 1, p->cost[yyor_NT]);
+	yytrace(a, 118, c + 1, p->cost[yyor_NT]);
 	if (c + 1 < p->cost[yyor_NT]) {
 		p->cost[yyor_NT] = c + 1;
 		p->rule.yyor = 1;
 	}
-	yytrace(a, 113, c + 1, p->cost[yyand_NT]);
+	yytrace(a, 116, c + 1, p->cost[yyand_NT]);
 	if (c + 1 < p->cost[yyand_NT]) {
 		p->cost[yyand_NT] = c + 1;
 		p->rule.yyand = 1;
@@ -1234,16 +1275,6 @@ static void yyclosure_block(NODEPTR_TYPE a, int c) {
 	}
 }
 
-static void yyclosure_lval(NODEPTR_TYPE a, int c) {
-	struct yystate *p = (struct yystate *)STATE_LABEL(a);
-	yytrace(a, 97, c + 0, p->cost[yyexpr_NT]);
-	if (c + 0 < p->cost[yyexpr_NT]) {
-		p->cost[yyexpr_NT] = c + 0;
-		p->rule.yyexpr = 5;
-		yyclosure_expr(a, c + 0);
-	}
-}
-
 static void yyclosure_trashexpr(NODEPTR_TYPE a, int c) {
 	struct yystate *p = (struct yystate *)STATE_LABEL(a);
 	yytrace(a, 81, c + 1, p->cost[yypostexpr_NT]);
@@ -1255,6 +1286,16 @@ static void yyclosure_trashexpr(NODEPTR_TYPE a, int c) {
 	if (c + 1 < p->cost[yyinit_NT]) {
 		p->cost[yyinit_NT] = c + 1;
 		p->rule.yyinit = 1;
+	}
+}
+
+static void yyclosure_lval(NODEPTR_TYPE a, int c) {
+	struct yystate *p = (struct yystate *)STATE_LABEL(a);
+	yytrace(a, 100, c + 0, p->cost[yyexpr_NT]);
+	if (c + 0 < p->cost[yyexpr_NT]) {
+		p->cost[yyexpr_NT] = c + 0;
+		p->rule.yyexpr = 5;
+		yyclosure_expr(a, c + 0);
 	}
 }
 
@@ -1319,6 +1360,8 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	p->cost[51] =
 	p->cost[52] =
 	p->cost[53] =
+	p->cost[54] =
+	p->cost[55] =
 		0x7fff;
 	switch (OP_LABEL(a)) {
 	case 33: /* PRINT */
@@ -1334,8 +1377,8 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	case 35: /* ALLOC */
 		yylabel(LEFT_CHILD(a),a);
 		yylabel(RIGHT_CHILD(a),a);
-		/* instr: ALLOC(alloc,lval) */
-		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyalloc_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yylval_NT] + 1;
+		/* instr: ALLOC(alloc,alloclval) */
+		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyalloc_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyalloclval_NT] + 1;
 		yytrace(a, 75, c + 0, p->cost[yyinstr_NT]);
 		if (c + 0 < p->cost[yyinstr_NT]) {
 			p->cost[yyinstr_NT] = c + 0;
@@ -1347,7 +1390,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: MOD(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 104, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 107, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 12;
@@ -1359,7 +1402,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: AND(and,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyand_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 112, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 115, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 20;
@@ -1373,7 +1416,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(LEFT_CHILD(a)) == 259 /* ID */
 		) {
 			c = ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexprs_NT] + 1;
-			yytrace(a, 119, c + 0, p->cost[yyexpr_NT]);
+			yytrace(a, 122, c + 0, p->cost[yyexpr_NT]);
 			if (c + 0 < p->cost[yyexpr_NT]) {
 				p->cost[yyexpr_NT] = c + 0;
 				p->rule.yyexpr = 25;
@@ -1386,7 +1429,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: MUL(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 102, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 105, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 10;
@@ -1398,7 +1441,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: ADD(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 100, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 103, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 8;
@@ -1412,7 +1455,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(RIGHT_CHILD(a)) == 293 /* NIL */
 		) {
 			c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-			yytrace(a, 120, c + 0, p->cost[yyexprs_NT]);
+			yytrace(a, 123, c + 0, p->cost[yyexprs_NT]);
 			if (c + 0 < p->cost[yyexprs_NT]) {
 				p->cost[yyexprs_NT] = c + 0;
 				p->rule.yyexprs = 1;
@@ -1420,7 +1463,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		}
 		/* exprs: COMMA(expr,exprs) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexprs_NT] + 1;
-		yytrace(a, 121, c + 0, p->cost[yyexprs_NT]);
+		yytrace(a, 124, c + 0, p->cost[yyexprs_NT]);
 		if (c + 0 < p->cost[yyexprs_NT]) {
 			p->cost[yyexprs_NT] = c + 0;
 			p->rule.yyexprs = 2;
@@ -1431,7 +1474,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: SUB(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 101, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 104, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 9;
@@ -1443,7 +1486,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: DIV(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 103, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 106, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 11;
@@ -1481,7 +1524,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: LT(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 110, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 113, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 18;
@@ -1493,7 +1536,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: EQU(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 106, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 109, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 14;
@@ -1505,7 +1548,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: GT(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 111, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 114, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 19;
@@ -1514,7 +1557,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		break;
 	case 63: /* READ */
 		/* expr: READ */
-		yytrace(a, 98, 1 + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 101, 1 + 0, p->cost[yyexpr_NT]);
 		if (1 + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = 1 + 0;
 			p->rule.yyexpr = 6;
@@ -1524,17 +1567,24 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 	case 91: /* INDEX */
 		yylabel(LEFT_CHILD(a),a);
 		yylabel(RIGHT_CHILD(a),a);
+		/* alloclval: INDEX(alloclval,expr) */
+		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyalloclval_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
+		yytrace(a, 89, c + 0, p->cost[yyalloclval_NT]);
+		if (c + 0 < p->cost[yyalloclval_NT]) {
+			p->cost[yyalloclval_NT] = c + 0;
+			p->rule.yyalloclval = 2;
+		}
 		/* lval: INDEX(lvec,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yylvec_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 89, c + 0, p->cost[yylval_NT]);
+		yytrace(a, 91, c + 0, p->cost[yylval_NT]);
 		if (c + 0 < p->cost[yylval_NT]) {
 			p->cost[yylval_NT] = c + 0;
 			p->rule.yylval = 2;
 			yyclosure_lval(a, c + 0);
 		}
-		/* assign: INDEX(lvec,expr) */
-		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yylvec_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 92, c + 0, p->cost[yyassign_NT]);
+		/* assign: INDEX(lvecassign,expr) */
+		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yylvecassign_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
+		yytrace(a, 95, c + 0, p->cost[yyassign_NT]);
 		if (c + 0 < p->cost[yyassign_NT]) {
 			p->cost[yyassign_NT] = c + 0;
 			p->rule.yyassign = 2;
@@ -1545,7 +1595,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: POW(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 105, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 108, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 13;
@@ -1557,7 +1607,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: OR(or,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyor_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 114, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 117, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 21;
@@ -1568,7 +1618,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(LEFT_CHILD(a),a);
 		/* expr: NOT(expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 116, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 119, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 22;
@@ -1647,21 +1697,33 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			p->cost[yyarrayid_NT] = 1 + 0;
 			p->rule.yyarrayid = 1;
 		}
+		/* alloclval: ID */
+		yytrace(a, 88, 1 + 0, p->cost[yyalloclval_NT]);
+		if (1 + 0 < p->cost[yyalloclval_NT]) {
+			p->cost[yyalloclval_NT] = 1 + 0;
+			p->rule.yyalloclval = 1;
+		}
 		/* lval: ID */
-		yytrace(a, 88, 1 + 0, p->cost[yylval_NT]);
+		yytrace(a, 90, 1 + 0, p->cost[yylval_NT]);
 		if (1 + 0 < p->cost[yylval_NT]) {
 			p->cost[yylval_NT] = 1 + 0;
 			p->rule.yylval = 1;
 			yyclosure_lval(a, 1 + 0);
 		}
 		/* lvec: ID */
-		yytrace(a, 90, 1 + 0, p->cost[yylvec_NT]);
+		yytrace(a, 92, 1 + 0, p->cost[yylvec_NT]);
 		if (1 + 0 < p->cost[yylvec_NT]) {
 			p->cost[yylvec_NT] = 1 + 0;
 			p->rule.yylvec = 1;
 		}
+		/* lvecassign: ID */
+		yytrace(a, 93, 1 + 0, p->cost[yylvecassign_NT]);
+		if (1 + 0 < p->cost[yylvecassign_NT]) {
+			p->cost[yylvecassign_NT] = 1 + 0;
+			p->rule.yylvecassign = 1;
+		}
 		/* assign: ID */
-		yytrace(a, 91, 1 + 0, p->cost[yyassign_NT]);
+		yytrace(a, 94, 1 + 0, p->cost[yyassign_NT]);
 		if (1 + 0 < p->cost[yyassign_NT]) {
 			p->cost[yyassign_NT] = 1 + 0;
 			p->rule.yyassign = 1;
@@ -2119,7 +2181,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(RIGHT_CHILD(a)) == 257 /* INT */
 		) {
 			c = 1;
-			yytrace(a, 93, c + 0, p->cost[yyexpr_NT]);
+			yytrace(a, 96, c + 0, p->cost[yyexpr_NT]);
 			if (c + 0 < p->cost[yyexpr_NT]) {
 				p->cost[yyexpr_NT] = c + 0;
 				p->rule.yyexpr = 1;
@@ -2131,7 +2193,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(RIGHT_CHILD(a)) == 258 /* CHAR */
 		) {
 			c = 1;
-			yytrace(a, 94, c + 0, p->cost[yyexpr_NT]);
+			yytrace(a, 97, c + 0, p->cost[yyexpr_NT]);
 			if (c + 0 < p->cost[yyexpr_NT]) {
 				p->cost[yyexpr_NT] = c + 0;
 				p->rule.yyexpr = 2;
@@ -2143,7 +2205,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 			OP_LABEL(RIGHT_CHILD(a)) == 260 /* STR */
 		) {
 			c = 1;
-			yytrace(a, 95, c + 0, p->cost[yyexpr_NT]);
+			yytrace(a, 98, c + 0, p->cost[yyexpr_NT]);
 			if (c + 0 < p->cost[yyexpr_NT]) {
 				p->cost[yyexpr_NT] = c + 0;
 				p->rule.yyexpr = 3;
@@ -2170,7 +2232,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(LEFT_CHILD(a),a);
 		/* expr: ADDR(lval) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yylval_NT] + 1;
-		yytrace(a, 99, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 102, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 7;
@@ -2316,7 +2378,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: EQ(expr,assign) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyassign_NT] + 1;
-		yytrace(a, 118, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 121, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 24;
@@ -2328,7 +2390,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: NE(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 107, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 110, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 15;
@@ -2340,7 +2402,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: GE(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 108, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 111, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 16;
@@ -2352,7 +2414,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(RIGHT_CHILD(a),a);
 		/* expr: LE(expr,expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + ((struct yystate *)STATE_LABEL(RIGHT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 109, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 112, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 17;
@@ -2363,7 +2425,7 @@ static void yylabel(NODEPTR_TYPE a, NODEPTR_TYPE u) {
 		yylabel(LEFT_CHILD(a),a);
 		/* expr: UMINUS(expr) */
 		c = ((struct yystate *)STATE_LABEL(LEFT_CHILD(a)))->cost[yyexpr_NT] + 1;
-		yytrace(a, 117, c + 0, p->cost[yyexpr_NT]);
+		yytrace(a, 120, c + 0, p->cost[yyexpr_NT]);
 		if (c + 0 < p->cost[yyexpr_NT]) {
 			p->cost[yyexpr_NT] = c + 0;
 			p->rule.yyexpr = 23;
@@ -2386,10 +2448,10 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 		kids[1] = LEFT_CHILD(RIGHT_CHILD(p));
 		kids[2] = RIGHT_CHILD(RIGHT_CHILD(RIGHT_CHILD(p)));
 		break;
-	case 120: /* exprs: COMMA(expr,NIL) */
-	case 117: /* expr: UMINUS(expr) */
-	case 116: /* expr: NOT(expr) */
-	case 99: /* expr: ADDR(lval) */
+	case 123: /* exprs: COMMA(expr,NIL) */
+	case 120: /* expr: UMINUS(expr) */
+	case 119: /* expr: NOT(expr) */
+	case 102: /* expr: ADDR(lval) */
 	case 73: /* instr: PRINT(expr) */
 	case 62: /* ret: RETURN(expr) */
 	case 43: /* ints: INTS(ints,INT) */
@@ -2398,13 +2460,15 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 	case 2: /* program: MODULE(decls) */
 		kids[0] = LEFT_CHILD(p);
 		break;
-	case 98: /* expr: READ */
-	case 95: /* expr: CHARS(NIL,STR) */
-	case 94: /* expr: CHARS(NIL,CHAR) */
-	case 93: /* expr: CHARS(NIL,INT) */
-	case 91: /* assign: ID */
-	case 90: /* lvec: ID */
-	case 88: /* lval: ID */
+	case 101: /* expr: READ */
+	case 98: /* expr: CHARS(NIL,STR) */
+	case 97: /* expr: CHARS(NIL,CHAR) */
+	case 96: /* expr: CHARS(NIL,INT) */
+	case 94: /* assign: ID */
+	case 93: /* lvecassign: ID */
+	case 92: /* lvec: ID */
+	case 90: /* lval: ID */
+	case 88: /* alloclval: ID */
 	case 86: /* else: NIL */
 	case 84: /* elifs: NIL */
 	case 69: /* instrs: NIL */
@@ -2439,10 +2503,10 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 	case 11: /* farg: NUMBER(ID,NIL) */
 	case 3: /* decls: NIL */
 		break;
-	case 115: /* or: expr */
-	case 113: /* and: expr */
-	case 97: /* expr: lval */
-	case 96: /* expr: chars */
+	case 118: /* or: expr */
+	case 116: /* and: expr */
+	case 100: /* expr: lval */
+	case 99: /* expr: chars */
 	case 87: /* else: block */
 	case 83: /* trashexpr: expr */
 	case 82: /* cond: expr */
@@ -2461,28 +2525,29 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 	case 4: /* decls: gdecls */
 		kids[0] = p;
 		break;
-	case 121: /* exprs: COMMA(expr,exprs) */
-	case 118: /* expr: EQ(expr,assign) */
-	case 114: /* expr: OR(or,expr) */
-	case 112: /* expr: AND(and,expr) */
-	case 111: /* expr: GT(expr,expr) */
-	case 110: /* expr: LT(expr,expr) */
-	case 109: /* expr: LE(expr,expr) */
-	case 108: /* expr: GE(expr,expr) */
-	case 107: /* expr: NE(expr,expr) */
-	case 106: /* expr: EQU(expr,expr) */
-	case 105: /* expr: POW(expr,expr) */
-	case 104: /* expr: MOD(expr,expr) */
-	case 103: /* expr: DIV(expr,expr) */
-	case 102: /* expr: MUL(expr,expr) */
-	case 101: /* expr: SUB(expr,expr) */
-	case 100: /* expr: ADD(expr,expr) */
-	case 92: /* assign: INDEX(lvec,expr) */
-	case 89: /* lval: INDEX(lvec,expr) */
+	case 124: /* exprs: COMMA(expr,exprs) */
+	case 121: /* expr: EQ(expr,assign) */
+	case 117: /* expr: OR(or,expr) */
+	case 115: /* expr: AND(and,expr) */
+	case 114: /* expr: GT(expr,expr) */
+	case 113: /* expr: LT(expr,expr) */
+	case 112: /* expr: LE(expr,expr) */
+	case 111: /* expr: GE(expr,expr) */
+	case 110: /* expr: NE(expr,expr) */
+	case 109: /* expr: EQU(expr,expr) */
+	case 108: /* expr: POW(expr,expr) */
+	case 107: /* expr: MOD(expr,expr) */
+	case 106: /* expr: DIV(expr,expr) */
+	case 105: /* expr: MUL(expr,expr) */
+	case 104: /* expr: SUB(expr,expr) */
+	case 103: /* expr: ADD(expr,expr) */
+	case 95: /* assign: INDEX(lvecassign,expr) */
+	case 91: /* lval: INDEX(lvec,expr) */
+	case 89: /* alloclval: INDEX(alloclval,expr) */
 	case 85: /* elifs: ELIF(elifs,ifelse) */
 	case 78: /* ifelse: IF(cond,block) */
 	case 77: /* if: IF(cond,block) */
-	case 75: /* instr: ALLOC(alloc,lval) */
+	case 75: /* instr: ALLOC(alloc,alloclval) */
 	case 70: /* instrs: STMT(instrs,instr) */
 	case 68: /* forblock: STMT(instrs,loop) */
 	case 67: /* block: STMT(instrs,loop) */
@@ -2498,7 +2563,7 @@ static void yykids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]) {
 		kids[0] = LEFT_CHILD(p);
 		kids[1] = RIGHT_CHILD(p);
 		break;
-	case 119: /* expr: IDARGS(ID,exprs) */
+	case 122: /* expr: IDARGS(ID,exprs) */
 	case 46: /* chars: CHARS(NIL,firstchar) */
 	case 23: /* fvars: ARGS(NIL,fvar) */
 	case 15: /* fargs: ARGS(NIL,farg) */
@@ -2554,608 +2619,623 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 
   switch(eruleno) {
 	case 1: /* program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main))) */
-		fprintf(stderr, "0x%lx: line 117: program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main)))\n",(long)p);
-#line 117 "minor.brg"
+		fprintf(stderr, "0x%lx: line 131: program: PROGRAM(decls,FUNCTION(funcmain,FARGS(NIL,main)))\n",(long)p);
+#line 131 "minor.brg"
 { final(); }
 		break;
 	case 2: /* program: MODULE(decls) */
-		fprintf(stderr, "0x%lx: line 118: program: MODULE(decls)\n",(long)p);
-#line 118 "minor.brg"
-{}
-		break;
-	case 3: /* decls: NIL */
-		fprintf(stderr, "0x%lx: line 120: decls: NIL\n",(long)p);
-#line 120 "minor.brg"
-{}
-		break;
-	case 4: /* decls: gdecls */
-		fprintf(stderr, "0x%lx: line 121: decls: gdecls\n",(long)p);
-#line 121 "minor.brg"
-{}
-		break;
-	case 5: /* gdecls: DECL(gdecls,decl) */
-		fprintf(stderr, "0x%lx: line 123: gdecls: DECL(gdecls,decl)\n",(long)p);
-#line 123 "minor.brg"
-{}
-		break;
-	case 6: /* gdecls: DECL(NIL,decl) */
-		fprintf(stderr, "0x%lx: line 124: gdecls: DECL(NIL,decl)\n",(long)p);
-#line 124 "minor.brg"
-{}
-		break;
-	case 7: /* decl: VAR(vardecl) */
-		fprintf(stderr, "0x%lx: line 126: decl: VAR(vardecl)\n",(long)p);
-#line 126 "minor.brg"
-{}
-		break;
-	case 8: /* decl: VAR(constvardecl) */
-		fprintf(stderr, "0x%lx: line 127: decl: VAR(constvardecl)\n",(long)p);
-#line 127 "minor.brg"
-{}
-		break;
-	case 9: /* decl: FUNCTION(funcname,FARGS(funcargs,NIL)) */
-		fprintf(stderr, "0x%lx: line 128: decl: FUNCTION(funcname,FARGS(funcargs,NIL))\n",(long)p);
-#line 128 "minor.brg"
-{ extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
-		break;
-	case 10: /* decl: FUNCTION(funcname,FARGS(funcargs,eqbody)) */
-		fprintf(stderr, "0x%lx: line 129: decl: FUNCTION(funcname,FARGS(funcargs,eqbody))\n",(long)p);
-#line 129 "minor.brg"
-{ fprintf(yyout, pfLEAVE pfRET); }
-		break;
-	case 11: /* farg: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 131: farg: NUMBER(ID,NIL)\n",(long)p);
-#line 131 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
-		break;
-	case 12: /* farg: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 132: farg: STRING(ID,NIL)\n",(long)p);
+		fprintf(stderr, "0x%lx: line 132: program: MODULE(decls)\n",(long)p);
 #line 132 "minor.brg"
 {}
 		break;
-	case 13: /* farg: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 133: farg: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
-#line 133 "minor.brg"
+	case 3: /* decls: NIL */
+		fprintf(stderr, "0x%lx: line 134: decls: NIL\n",(long)p);
+#line 134 "minor.brg"
 {}
 		break;
-	case 14: /* fargs: NIL */
-		fprintf(stderr, "0x%lx: line 135: fargs: NIL\n",(long)p);
+	case 4: /* decls: gdecls */
+		fprintf(stderr, "0x%lx: line 135: decls: gdecls\n",(long)p);
 #line 135 "minor.brg"
 {}
 		break;
-	case 15: /* fargs: ARGS(NIL,farg) */
-		fprintf(stderr, "0x%lx: line 136: fargs: ARGS(NIL,farg)\n",(long)p);
-#line 136 "minor.brg"
-{}
-		break;
-	case 16: /* fargs: ARGS(fargs,farg) */
-		fprintf(stderr, "0x%lx: line 137: fargs: ARGS(fargs,farg)\n",(long)p);
+	case 5: /* gdecls: DECL(gdecls,decl) */
+		fprintf(stderr, "0x%lx: line 137: gdecls: DECL(gdecls,decl)\n",(long)p);
 #line 137 "minor.brg"
 {}
 		break;
-	case 17: /* funcargs: fargs */
-		fprintf(stderr, "0x%lx: line 139: funcargs: fargs\n",(long)p);
-#line 139 "minor.brg"
-{ pos = 0; }
+	case 6: /* gdecls: DECL(NIL,decl) */
+		fprintf(stderr, "0x%lx: line 138: gdecls: DECL(NIL,decl)\n",(long)p);
+#line 138 "minor.brg"
+{}
 		break;
-	case 18: /* funcname: END(ID,INT) */
-		fprintf(stderr, "0x%lx: line 141: funcname: END(ID,INT)\n",(long)p);
+	case 7: /* decl: VAR(vardecl) */
+		fprintf(stderr, "0x%lx: line 140: decl: VAR(vardecl)\n",(long)p);
+#line 140 "minor.brg"
+{}
+		break;
+	case 8: /* decl: VAR(constvardecl) */
+		fprintf(stderr, "0x%lx: line 141: decl: VAR(constvardecl)\n",(long)p);
 #line 141 "minor.brg"
-{ IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
+{}
 		break;
-	case 19: /* funcmain: END(ID,INT) */
-		fprintf(stderr, "0x%lx: line 142: funcmain: END(ID,INT)\n",(long)p);
+	case 9: /* decl: FUNCTION(funcname,FARGS(funcargs,NIL)) */
+		fprintf(stderr, "0x%lx: line 142: decl: FUNCTION(funcname,FARGS(funcargs,NIL))\n",(long)p);
 #line 142 "minor.brg"
-{ IDpush(); pos = 0; }
+{ extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
 		break;
-	case 20: /* fvar: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 144: fvar: NUMBER(ID,NIL)\n",(long)p);
-#line 144 "minor.brg"
-{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
+	case 10: /* decl: FUNCTION(funcname,FARGS(funcargs,eqbody)) */
+		fprintf(stderr, "0x%lx: line 143: decl: FUNCTION(funcname,FARGS(funcargs,eqbody))\n",(long)p);
+#line 143 "minor.brg"
+{ fprintf(yyout, pfLEAVE pfRET); }
 		break;
-	case 21: /* fvar: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 145: fvar: STRING(ID,NIL)\n",(long)p);
+	case 11: /* farg: NUMBER(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 145: farg: NUMBER(ID,NIL)\n",(long)p);
 #line 145 "minor.brg"
-{}
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 22: /* fvar: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 146: fvar: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+	case 12: /* farg: STRING(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 146: farg: STRING(ID,NIL)\n",(long)p);
 #line 146 "minor.brg"
-{}
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 23: /* fvars: ARGS(NIL,fvar) */
-		fprintf(stderr, "0x%lx: line 148: fvars: ARGS(NIL,fvar)\n",(long)p);
-#line 148 "minor.brg"
-{}
+	case 13: /* farg: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 147: farg: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+#line 147 "minor.brg"
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 		break;
-	case 24: /* fvars: ARGS(fvars,fvar) */
-		fprintf(stderr, "0x%lx: line 149: fvars: ARGS(fvars,fvar)\n",(long)p);
+	case 14: /* fargs: NIL */
+		fprintf(stderr, "0x%lx: line 149: fargs: NIL\n",(long)p);
 #line 149 "minor.brg"
 {}
 		break;
-	case 25: /* vardecl: NUMBER(varid,eqint) */
-		fprintf(stderr, "0x%lx: line 151: vardecl: NUMBER(varid,eqint)\n",(long)p);
+	case 15: /* fargs: ARGS(NIL,farg) */
+		fprintf(stderr, "0x%lx: line 150: fargs: ARGS(NIL,farg)\n",(long)p);
+#line 150 "minor.brg"
+{}
+		break;
+	case 16: /* fargs: ARGS(fargs,farg) */
+		fprintf(stderr, "0x%lx: line 151: fargs: ARGS(fargs,farg)\n",(long)p);
 #line 151 "minor.brg"
 {}
 		break;
-	case 26: /* vardecl: STRING(varid,eqstr) */
-		fprintf(stderr, "0x%lx: line 152: vardecl: STRING(varid,eqstr)\n",(long)p);
-#line 152 "minor.brg"
-{ fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
-		break;
-	case 27: /* vardecl: ARRAY(arrayid,INTS(vdim,eqvec)) */
-		fprintf(stderr, "0x%lx: line 153: vardecl: ARRAY(arrayid,INTS(vdim,eqvec))\n",(long)p);
+	case 17: /* funcargs: fargs */
+		fprintf(stderr, "0x%lx: line 153: funcargs: fargs\n",(long)p);
 #line 153 "minor.brg"
-{ initRemaining(LEFT_CHILD(RIGHT_CHILD(p))->value.i); }
+{ pos = 0; }
 		break;
-	case 28: /* vardecl: ARRAY(arrayid,INTS(NIL,eqvec)) */
-		fprintf(stderr, "0x%lx: line 154: vardecl: ARRAY(arrayid,INTS(NIL,eqvec))\n",(long)p);
-#line 154 "minor.brg"
-{}
-		break;
-	case 29: /* vardecl: NUMBER(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 155: vardecl: NUMBER(ID,NIL)\n",(long)p);
+	case 18: /* funcname: END(ID,INT) */
+		fprintf(stderr, "0x%lx: line 155: funcname: END(ID,INT)\n",(long)p);
 #line 155 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
+{ IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
 		break;
-	case 30: /* vardecl: STRING(ID,NIL) */
-		fprintf(stderr, "0x%lx: line 156: vardecl: STRING(ID,NIL)\n",(long)p);
+	case 19: /* funcmain: END(ID,INT) */
+		fprintf(stderr, "0x%lx: line 156: funcmain: END(ID,INT)\n",(long)p);
 #line 156 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+{ IDpush(); pos = 0; }
 		break;
-	case 31: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
-		fprintf(stderr, "0x%lx: line 157: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
-#line 157 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
-		break;
-	case 32: /* vardecl: ARRAY(ID,INTS(NIL,NIL)) */
-		fprintf(stderr, "0x%lx: line 158: vardecl: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
+	case 20: /* fvar: NUMBER(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 158: fvar: NUMBER(ID,NIL)\n",(long)p);
 #line 158 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 		break;
-	case 33: /* varid: ID */
-		fprintf(stderr, "0x%lx: line 160: varid: ID\n",(long)p);
+	case 21: /* fvar: STRING(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 159: fvar: STRING(ID,NIL)\n",(long)p);
+#line 159 "minor.brg"
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
+		break;
+	case 22: /* fvar: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 160: fvar: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
 #line 160 "minor.brg"
-{ fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
+{ IDnew(-1, LEFT_CHILD(p)->value.s, pos -= 4); }
 		break;
-	case 34: /* constvardecl: NUMBER(constid,eqint) */
-		fprintf(stderr, "0x%lx: line 162: constvardecl: NUMBER(constid,eqint)\n",(long)p);
+	case 23: /* fvars: ARGS(NIL,fvar) */
+		fprintf(stderr, "0x%lx: line 162: fvars: ARGS(NIL,fvar)\n",(long)p);
 #line 162 "minor.brg"
 {}
 		break;
-	case 35: /* constvardecl: STRING(constid,eqstr) */
-		fprintf(stderr, "0x%lx: line 163: constvardecl: STRING(constid,eqstr)\n",(long)p);
+	case 24: /* fvars: ARGS(fvars,fvar) */
+		fprintf(stderr, "0x%lx: line 163: fvars: ARGS(fvars,fvar)\n",(long)p);
 #line 163 "minor.brg"
+{}
+		break;
+	case 25: /* vardecl: NUMBER(varid,eqint) */
+		fprintf(stderr, "0x%lx: line 165: vardecl: NUMBER(varid,eqint)\n",(long)p);
+#line 165 "minor.brg"
+{}
+		break;
+	case 26: /* vardecl: STRING(varid,eqstr) */
+		fprintf(stderr, "0x%lx: line 166: vardecl: STRING(varid,eqstr)\n",(long)p);
+#line 166 "minor.brg"
+{ fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
+		break;
+	case 27: /* vardecl: ARRAY(arrayid,INTS(vdim,eqvec)) */
+		fprintf(stderr, "0x%lx: line 167: vardecl: ARRAY(arrayid,INTS(vdim,eqvec))\n",(long)p);
+#line 167 "minor.brg"
+{ initRemaining(LEFT_CHILD(RIGHT_CHILD(p))->value.i); }
+		break;
+	case 28: /* vardecl: ARRAY(arrayid,INTS(NIL,eqvec)) */
+		fprintf(stderr, "0x%lx: line 168: vardecl: ARRAY(arrayid,INTS(NIL,eqvec))\n",(long)p);
+#line 168 "minor.brg"
+{}
+		break;
+	case 29: /* vardecl: NUMBER(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 169: vardecl: NUMBER(ID,NIL)\n",(long)p);
+#line 169 "minor.brg"
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
+		break;
+	case 30: /* vardecl: STRING(ID,NIL) */
+		fprintf(stderr, "0x%lx: line 170: vardecl: STRING(ID,NIL)\n",(long)p);
+#line 170 "minor.brg"
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+		break;
+	case 31: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
+		fprintf(stderr, "0x%lx: line 171: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
+#line 171 "minor.brg"
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+		break;
+	case 32: /* vardecl: ARRAY(ID,INTS(NIL,NIL)) */
+		fprintf(stderr, "0x%lx: line 172: vardecl: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
+#line 172 "minor.brg"
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+		break;
+	case 33: /* varid: ID */
+		fprintf(stderr, "0x%lx: line 174: varid: ID\n",(long)p);
+#line 174 "minor.brg"
+{ fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
+		break;
+	case 34: /* constvardecl: NUMBER(constid,eqint) */
+		fprintf(stderr, "0x%lx: line 176: constvardecl: NUMBER(constid,eqint)\n",(long)p);
+#line 176 "minor.brg"
+{}
+		break;
+	case 35: /* constvardecl: STRING(constid,eqstr) */
+		fprintf(stderr, "0x%lx: line 177: constvardecl: STRING(constid,eqstr)\n",(long)p);
+#line 177 "minor.brg"
 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
 		break;
 	case 36: /* constvardecl: ARRAY(constarrayid,INTS(vdim,eqvec)) */
-		fprintf(stderr, "0x%lx: line 164: constvardecl: ARRAY(constarrayid,INTS(vdim,eqvec))\n",(long)p);
-#line 164 "minor.brg"
+		fprintf(stderr, "0x%lx: line 178: constvardecl: ARRAY(constarrayid,INTS(vdim,eqvec))\n",(long)p);
+#line 178 "minor.brg"
 {}
 		break;
 	case 37: /* constid: ID */
-		fprintf(stderr, "0x%lx: line 166: constid: ID\n",(long)p);
-#line 166 "minor.brg"
+		fprintf(stderr, "0x%lx: line 180: constid: ID\n",(long)p);
+#line 180 "minor.brg"
 { fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
 		break;
 	case 38: /* constarrayid: ID */
-		fprintf(stderr, "0x%lx: line 167: constarrayid: ID\n",(long)p);
-#line 167 "minor.brg"
+		fprintf(stderr, "0x%lx: line 181: constarrayid: ID\n",(long)p);
+#line 181 "minor.brg"
 { fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 		break;
 	case 39: /* arrayid: ID */
-		fprintf(stderr, "0x%lx: line 169: arrayid: ID\n",(long)p);
-#line 169 "minor.brg"
+		fprintf(stderr, "0x%lx: line 183: arrayid: ID\n",(long)p);
+#line 183 "minor.brg"
 { fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 		break;
 	case 40: /* vdim: INT */
-		fprintf(stderr, "0x%lx: line 171: vdim: INT\n",(long)p);
-#line 171 "minor.brg"
+		fprintf(stderr, "0x%lx: line 185: vdim: INT\n",(long)p);
+#line 185 "minor.brg"
 {}
 		break;
 	case 41: /* eqvec: ints */
-		fprintf(stderr, "0x%lx: line 173: eqvec: ints\n",(long)p);
-#line 173 "minor.brg"
+		fprintf(stderr, "0x%lx: line 187: eqvec: ints\n",(long)p);
+#line 187 "minor.brg"
 {}
 		break;
 	case 42: /* ints: INT */
-		fprintf(stderr, "0x%lx: line 175: ints: INT\n",(long)p);
-#line 175 "minor.brg"
+		fprintf(stderr, "0x%lx: line 189: ints: INT\n",(long)p);
+#line 189 "minor.brg"
 { fprintf(yyout, pfINTEGER, p->value.i); initints = 1; }
 		break;
 	case 43: /* ints: INTS(ints,INT) */
-		fprintf(stderr, "0x%lx: line 176: ints: INTS(ints,INT)\n",(long)p);
-#line 176 "minor.brg"
+		fprintf(stderr, "0x%lx: line 190: ints: INTS(ints,INT)\n",(long)p);
+#line 190 "minor.brg"
 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); initints++; }
 		break;
 	case 44: /* eqint: INT */
-		fprintf(stderr, "0x%lx: line 178: eqint: INT\n",(long)p);
-#line 178 "minor.brg"
+		fprintf(stderr, "0x%lx: line 192: eqint: INT\n",(long)p);
+#line 192 "minor.brg"
 { fprintf(yyout, pfINTEGER, p->value.i); }
 		break;
 	case 45: /* eqstr: chars */
-		fprintf(stderr, "0x%lx: line 180: eqstr: chars\n",(long)p);
-#line 180 "minor.brg"
+		fprintf(stderr, "0x%lx: line 194: eqstr: chars\n",(long)p);
+#line 194 "minor.brg"
 {}
 		break;
 	case 46: /* chars: CHARS(NIL,firstchar) */
-		fprintf(stderr, "0x%lx: line 182: chars: CHARS(NIL,firstchar)\n",(long)p);
-#line 182 "minor.brg"
+		fprintf(stderr, "0x%lx: line 196: chars: CHARS(NIL,firstchar)\n",(long)p);
+#line 196 "minor.brg"
 { p->place = RIGHT_CHILD(p)->place; }
 		break;
 	case 47: /* chars: CHARS(chars,char) */
-		fprintf(stderr, "0x%lx: line 183: chars: CHARS(chars,char)\n",(long)p);
-#line 183 "minor.brg"
+		fprintf(stderr, "0x%lx: line 197: chars: CHARS(chars,char)\n",(long)p);
+#line 197 "minor.brg"
 { p->place = LEFT_CHILD(p)->place; }
 		break;
 	case 48: /* firstchar: INT */
-		fprintf(stderr, "0x%lx: line 185: firstchar: INT\n",(long)p);
-#line 185 "minor.brg"
+		fprintf(stderr, "0x%lx: line 199: firstchar: INT\n",(long)p);
+#line 199 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 49: /* firstchar: CHAR */
-		fprintf(stderr, "0x%lx: line 186: firstchar: CHAR\n",(long)p);
-#line 186 "minor.brg"
+		fprintf(stderr, "0x%lx: line 200: firstchar: CHAR\n",(long)p);
+#line 200 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 50: /* firstchar: STR */
-		fprintf(stderr, "0x%lx: line 187: firstchar: STR\n",(long)p);
-#line 187 "minor.brg"
+		fprintf(stderr, "0x%lx: line 201: firstchar: STR\n",(long)p);
+#line 201 "minor.brg"
 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
 		break;
 	case 51: /* char: INT */
-		fprintf(stderr, "0x%lx: line 189: char: INT\n",(long)p);
-#line 189 "minor.brg"
+		fprintf(stderr, "0x%lx: line 203: char: INT\n",(long)p);
+#line 203 "minor.brg"
 { fprintf(yyout, pfCHAR, p->value.i); }
 		break;
 	case 52: /* char: CHAR */
-		fprintf(stderr, "0x%lx: line 190: char: CHAR\n",(long)p);
-#line 190 "minor.brg"
+		fprintf(stderr, "0x%lx: line 204: char: CHAR\n",(long)p);
+#line 204 "minor.brg"
 { fprintf(yyout, pfCHAR, p->value.i); }
 		break;
 	case 53: /* char: STR */
-		fprintf(stderr, "0x%lx: line 191: char: STR\n",(long)p);
-#line 191 "minor.brg"
+		fprintf(stderr, "0x%lx: line 205: char: STR\n",(long)p);
+#line 205 "minor.brg"
 { outstr(p->value.s); }
 		break;
 	case 54: /* eqbody: body */
-		fprintf(stderr, "0x%lx: line 193: eqbody: body\n",(long)p);
-#line 193 "minor.brg"
-{}
-		break;
-	case 55: /* main: START(mainfvars,instrs) */
-		fprintf(stderr, "0x%lx: line 195: main: START(mainfvars,instrs)\n",(long)p);
-#line 195 "minor.brg"
-{ IDpop(); }
-		break;
-	case 56: /* mainfvars: NIL */
-		fprintf(stderr, "0x%lx: line 197: mainfvars: NIL\n",(long)p);
-#line 197 "minor.brg"
-{ function("main", 0); }
-		break;
-	case 57: /* mainfvars: fvars */
-		fprintf(stderr, "0x%lx: line 198: mainfvars: fvars\n",(long)p);
-#line 198 "minor.brg"
-{ function("main", -pos); }
-		break;
-	case 58: /* body: START(bodyfvars,STMT(instrs,ret)) */
-		fprintf(stderr, "0x%lx: line 200: body: START(bodyfvars,STMT(instrs,ret))\n",(long)p);
-#line 200 "minor.brg"
-{}
-		break;
-	case 59: /* bodyfvars: NIL */
-		fprintf(stderr, "0x%lx: line 202: bodyfvars: NIL\n",(long)p);
-#line 202 "minor.brg"
-{ function(currentfunc, 0); }
-		break;
-	case 60: /* bodyfvars: fvars */
-		fprintf(stderr, "0x%lx: line 203: bodyfvars: fvars\n",(long)p);
-#line 203 "minor.brg"
-{ function(currentfunc, -pos); }
-		break;
-	case 61: /* ret: RETURN(NIL) */
-		fprintf(stderr, "0x%lx: line 205: ret: RETURN(NIL)\n",(long)p);
-#line 205 "minor.brg"
-{ fprintf(yyout, pfLEAVE pfRET); }
-		break;
-	case 62: /* ret: RETURN(expr) */
-		fprintf(stderr, "0x%lx: line 206: ret: RETURN(expr)\n",(long)p);
-#line 206 "minor.brg"
-{ fprintf(yyout, pfPOP pfLEAVE pfRET); }
-		break;
-	case 63: /* ret: NIL */
-		fprintf(stderr, "0x%lx: line 207: ret: NIL\n",(long)p);
+		fprintf(stderr, "0x%lx: line 207: eqbody: body\n",(long)p);
 #line 207 "minor.brg"
 {}
 		break;
-	case 64: /* loop: ret */
-		fprintf(stderr, "0x%lx: line 209: loop: ret\n",(long)p);
+	case 55: /* main: START(mainfvars,instrs) */
+		fprintf(stderr, "0x%lx: line 209: main: START(mainfvars,instrs)\n",(long)p);
 #line 209 "minor.brg"
+{ IDpop(); }
+		break;
+	case 56: /* mainfvars: NIL */
+		fprintf(stderr, "0x%lx: line 211: mainfvars: NIL\n",(long)p);
+#line 211 "minor.brg"
+{ function("main", 0); }
+		break;
+	case 57: /* mainfvars: fvars */
+		fprintf(stderr, "0x%lx: line 212: mainfvars: fvars\n",(long)p);
+#line 212 "minor.brg"
+{ function("main", -pos); }
+		break;
+	case 58: /* body: START(bodyfvars,STMT(instrs,ret)) */
+		fprintf(stderr, "0x%lx: line 214: body: START(bodyfvars,STMT(instrs,ret))\n",(long)p);
+#line 214 "minor.brg"
+{}
+		break;
+	case 59: /* bodyfvars: NIL */
+		fprintf(stderr, "0x%lx: line 216: bodyfvars: NIL\n",(long)p);
+#line 216 "minor.brg"
+{ function(currentfunc, 0); }
+		break;
+	case 60: /* bodyfvars: fvars */
+		fprintf(stderr, "0x%lx: line 217: bodyfvars: fvars\n",(long)p);
+#line 217 "minor.brg"
+{ function(currentfunc, -pos); }
+		break;
+	case 61: /* ret: RETURN(NIL) */
+		fprintf(stderr, "0x%lx: line 219: ret: RETURN(NIL)\n",(long)p);
+#line 219 "minor.brg"
+{ fprintf(yyout, pfLEAVE pfRET); }
+		break;
+	case 62: /* ret: RETURN(expr) */
+		fprintf(stderr, "0x%lx: line 220: ret: RETURN(expr)\n",(long)p);
+#line 220 "minor.brg"
+{ fprintf(yyout, pfPOP pfLEAVE pfRET); }
+		break;
+	case 63: /* ret: NIL */
+		fprintf(stderr, "0x%lx: line 221: ret: NIL\n",(long)p);
+#line 221 "minor.brg"
+{}
+		break;
+	case 64: /* loop: ret */
+		fprintf(stderr, "0x%lx: line 223: loop: ret\n",(long)p);
+#line 223 "minor.brg"
 {}
 		break;
 	case 65: /* loop: REPEAT */
-		fprintf(stderr, "0x%lx: line 210: loop: REPEAT\n",(long)p);
-#line 210 "minor.brg"
+		fprintf(stderr, "0x%lx: line 224: loop: REPEAT\n",(long)p);
+#line 224 "minor.brg"
 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 66: /* loop: STOP */
-		fprintf(stderr, "0x%lx: line 211: loop: STOP\n",(long)p);
-#line 211 "minor.brg"
+		fprintf(stderr, "0x%lx: line 225: loop: STOP\n",(long)p);
+#line 225 "minor.brg"
 { p->place = stoplbl[forcnt]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 67: /* block: STMT(instrs,loop) */
-		fprintf(stderr, "0x%lx: line 213: block: STMT(instrs,loop)\n",(long)p);
-#line 213 "minor.brg"
+		fprintf(stderr, "0x%lx: line 227: block: STMT(instrs,loop)\n",(long)p);
+#line 227 "minor.brg"
 {}
 		break;
 	case 68: /* forblock: STMT(instrs,loop) */
-		fprintf(stderr, "0x%lx: line 214: forblock: STMT(instrs,loop)\n",(long)p);
-#line 214 "minor.brg"
+		fprintf(stderr, "0x%lx: line 228: forblock: STMT(instrs,loop)\n",(long)p);
+#line 228 "minor.brg"
 { p->place = repeatlbl[forcnt]; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 		break;
 	case 69: /* instrs: NIL */
-		fprintf(stderr, "0x%lx: line 216: instrs: NIL\n",(long)p);
-#line 216 "minor.brg"
+		fprintf(stderr, "0x%lx: line 230: instrs: NIL\n",(long)p);
+#line 230 "minor.brg"
 {}
 		break;
 	case 70: /* instrs: STMT(instrs,instr) */
-		fprintf(stderr, "0x%lx: line 217: instrs: STMT(instrs,instr)\n",(long)p);
-#line 217 "minor.brg"
+		fprintf(stderr, "0x%lx: line 231: instrs: STMT(instrs,instr)\n",(long)p);
+#line 231 "minor.brg"
 {}
 		break;
 	case 71: /* instr: FI(THEN(if,elifs),else) */
-		fprintf(stderr, "0x%lx: line 219: instr: FI(THEN(if,elifs),else)\n",(long)p);
-#line 219 "minor.brg"
+		fprintf(stderr, "0x%lx: line 233: instr: FI(THEN(if,elifs),else)\n",(long)p);
+#line 233 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(LEFT_CHILD(p))->place)); }
 		break;
 	case 72: /* instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr)) */
-		fprintf(stderr, "0x%lx: line 220: instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr))\n",(long)p);
-#line 220 "minor.brg"
+		fprintf(stderr, "0x%lx: line 234: instr: FOR(UNTIL(init,forcond),STEP(forblock,postexpr))\n",(long)p);
+#line 234 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 		break;
 	case 73: /* instr: PRINT(expr) */
-		fprintf(stderr, "0x%lx: line 221: instr: PRINT(expr)\n",(long)p);
-#line 221 "minor.brg"
+		fprintf(stderr, "0x%lx: line 235: instr: PRINT(expr)\n",(long)p);
+#line 235 "minor.brg"
 { pfPrint(p->info); }
 		break;
 	case 74: /* instr: expr */
-		fprintf(stderr, "0x%lx: line 222: instr: expr\n",(long)p);
-#line 222 "minor.brg"
+		fprintf(stderr, "0x%lx: line 236: instr: expr\n",(long)p);
+#line 236 "minor.brg"
 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 		break;
-	case 75: /* instr: ALLOC(alloc,lval) */
-		fprintf(stderr, "0x%lx: line 223: instr: ALLOC(alloc,lval)\n",(long)p);
-#line 223 "minor.brg"
+	case 75: /* instr: ALLOC(alloc,alloclval) */
+		fprintf(stderr, "0x%lx: line 237: instr: ALLOC(alloc,alloclval)\n",(long)p);
+#line 237 "minor.brg"
 { fprintf(yyout, pfSTORE); }
 		break;
 	case 76: /* alloc: expr */
-		fprintf(stderr, "0x%lx: line 224: alloc: expr\n",(long)p);
-#line 224 "minor.brg"
+		fprintf(stderr, "0x%lx: line 238: alloc: expr\n",(long)p);
+#line 238 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 		break;
 	case 77: /* if: IF(cond,block) */
-		fprintf(stderr, "0x%lx: line 226: if: IF(cond,block)\n",(long)p);
-#line 226 "minor.brg"
+		fprintf(stderr, "0x%lx: line 240: if: IF(cond,block)\n",(long)p);
+#line 240 "minor.brg"
 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
 		break;
 	case 78: /* ifelse: IF(cond,block) */
-		fprintf(stderr, "0x%lx: line 227: ifelse: IF(cond,block)\n",(long)p);
-#line 227 "minor.brg"
+		fprintf(stderr, "0x%lx: line 241: ifelse: IF(cond,block)\n",(long)p);
+#line 241 "minor.brg"
 
 		break;
 	case 79: /* init: trashexpr */
-		fprintf(stderr, "0x%lx: line 229: init: trashexpr\n",(long)p);
-#line 229 "minor.brg"
+		fprintf(stderr, "0x%lx: line 243: init: trashexpr\n",(long)p);
+#line 243 "minor.brg"
 { p->place = forlbl[++forcnt] = ++lbl; repeatlbl[forcnt] = ++lbl; fprintf(yyout, pfLABEL, mklbl(p->place)); }
 		break;
 	case 80: /* forcond: expr */
-		fprintf(stderr, "0x%lx: line 230: forcond: expr\n",(long)p);
-#line 230 "minor.brg"
+		fprintf(stderr, "0x%lx: line 244: forcond: expr\n",(long)p);
+#line 244 "minor.brg"
 { p->place = stoplbl[forcnt] = ++lbl; fprintf(yyout, pfJNZ, mklbl(p->place)); }
 		break;
 	case 81: /* postexpr: trashexpr */
-		fprintf(stderr, "0x%lx: line 231: postexpr: trashexpr\n",(long)p);
-#line 231 "minor.brg"
+		fprintf(stderr, "0x%lx: line 245: postexpr: trashexpr\n",(long)p);
+#line 245 "minor.brg"
 { p->place = forlbl[forcnt--]; fprintf(yyout, pfJMP, mklbl(p->place)); }
 		break;
 	case 82: /* cond: expr */
-		fprintf(stderr, "0x%lx: line 232: cond: expr\n",(long)p);
-#line 232 "minor.brg"
+		fprintf(stderr, "0x%lx: line 246: cond: expr\n",(long)p);
+#line 246 "minor.brg"
 { p->place = ++lbl; fprintf(yyout, pfJZ, mklbl(p->place)); }
 		break;
 	case 83: /* trashexpr: expr */
-		fprintf(stderr, "0x%lx: line 234: trashexpr: expr\n",(long)p);
-#line 234 "minor.brg"
+		fprintf(stderr, "0x%lx: line 248: trashexpr: expr\n",(long)p);
+#line 248 "minor.brg"
 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
 		break;
 	case 84: /* elifs: NIL */
-		fprintf(stderr, "0x%lx: line 236: elifs: NIL\n",(long)p);
-#line 236 "minor.brg"
+		fprintf(stderr, "0x%lx: line 250: elifs: NIL\n",(long)p);
+#line 250 "minor.brg"
 
 		break;
 	case 85: /* elifs: ELIF(elifs,ifelse) */
-		fprintf(stderr, "0x%lx: line 237: elifs: ELIF(elifs,ifelse)\n",(long)p);
-#line 237 "minor.brg"
+		fprintf(stderr, "0x%lx: line 251: elifs: ELIF(elifs,ifelse)\n",(long)p);
+#line 251 "minor.brg"
 { p->place = eliflbl; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(RIGHT_CHILD(p))->place)); }
 		break;
 	case 86: /* else: NIL */
-		fprintf(stderr, "0x%lx: line 239: else: NIL\n",(long)p);
-#line 239 "minor.brg"
+		fprintf(stderr, "0x%lx: line 253: else: NIL\n",(long)p);
+#line 253 "minor.brg"
 
 		break;
 	case 87: /* else: block */
-		fprintf(stderr, "0x%lx: line 240: else: block\n",(long)p);
-#line 240 "minor.brg"
+		fprintf(stderr, "0x%lx: line 254: else: block\n",(long)p);
+#line 254 "minor.brg"
 
 		break;
-	case 88: /* lval: ID */
-		fprintf(stderr, "0x%lx: line 242: lval: ID\n",(long)p);
-#line 242 "minor.brg"
-{ getId(p); }
+	case 88: /* alloclval: ID */
+		fprintf(stderr, "0x%lx: line 256: alloclval: ID\n",(long)p);
+#line 256 "minor.brg"
+{ getAllocId(p); }
 		break;
-	case 89: /* lval: INDEX(lvec,expr) */
-		fprintf(stderr, "0x%lx: line 243: lval: INDEX(lvec,expr)\n",(long)p);
-#line 243 "minor.brg"
+	case 89: /* alloclval: INDEX(alloclval,expr) */
+		fprintf(stderr, "0x%lx: line 257: alloclval: INDEX(alloclval,expr)\n",(long)p);
+#line 257 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
 		break;
-	case 90: /* lvec: ID */
-		fprintf(stderr, "0x%lx: line 244: lvec: ID\n",(long)p);
-#line 244 "minor.brg"
+	case 90: /* lval: ID */
+		fprintf(stderr, "0x%lx: line 259: lval: ID\n",(long)p);
+#line 259 "minor.brg"
 { getId(p); }
 		break;
-	case 91: /* assign: ID */
-		fprintf(stderr, "0x%lx: line 245: assign: ID\n",(long)p);
-#line 245 "minor.brg"
+	case 91: /* lval: INDEX(lvec,expr) */
+		fprintf(stderr, "0x%lx: line 260: lval: INDEX(lvec,expr)\n",(long)p);
+#line 260 "minor.brg"
+{ fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
+		break;
+	case 92: /* lvec: ID */
+		fprintf(stderr, "0x%lx: line 261: lvec: ID\n",(long)p);
+#line 261 "minor.brg"
+{ getId(p); }
+		break;
+	case 93: /* lvecassign: ID */
+		fprintf(stderr, "0x%lx: line 262: lvecassign: ID\n",(long)p);
+#line 262 "minor.brg"
+{ fprintf(yyout, pfDUP); getId(p); }
+		break;
+	case 94: /* assign: ID */
+		fprintf(stderr, "0x%lx: line 263: assign: ID\n",(long)p);
+#line 263 "minor.brg"
 { assignment(p); }
 		break;
-	case 92: /* assign: INDEX(lvec,expr) */
-		fprintf(stderr, "0x%lx: line 246: assign: INDEX(lvec,expr)\n",(long)p);
-#line 246 "minor.brg"
+	case 95: /* assign: INDEX(lvecassign,expr) */
+		fprintf(stderr, "0x%lx: line 264: assign: INDEX(lvecassign,expr)\n",(long)p);
+#line 264 "minor.brg"
 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
 		break;
-	case 93: /* expr: CHARS(NIL,INT) */
-		fprintf(stderr, "0x%lx: line 248: expr: CHARS(NIL,INT)\n",(long)p);
-#line 248 "minor.brg"
+	case 96: /* expr: CHARS(NIL,INT) */
+		fprintf(stderr, "0x%lx: line 266: expr: CHARS(NIL,INT)\n",(long)p);
+#line 266 "minor.brg"
 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 		break;
-	case 94: /* expr: CHARS(NIL,CHAR) */
-		fprintf(stderr, "0x%lx: line 249: expr: CHARS(NIL,CHAR)\n",(long)p);
-#line 249 "minor.brg"
+	case 97: /* expr: CHARS(NIL,CHAR) */
+		fprintf(stderr, "0x%lx: line 267: expr: CHARS(NIL,CHAR)\n",(long)p);
+#line 267 "minor.brg"
 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }
 		break;
-	case 95: /* expr: CHARS(NIL,STR) */
-		fprintf(stderr, "0x%lx: line 250: expr: CHARS(NIL,STR)\n",(long)p);
-#line 250 "minor.brg"
+	case 98: /* expr: CHARS(NIL,STR) */
+		fprintf(stderr, "0x%lx: line 268: expr: CHARS(NIL,STR)\n",(long)p);
+#line 268 "minor.brg"
 { lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(lbl)); outstr(RIGHT_CHILD(p)->value.s); fprintf(yyout, pfTEXT pfADDR, mklbl(lbl)); }
 		break;
-	case 96: /* expr: chars */
-		fprintf(stderr, "0x%lx: line 251: expr: chars\n",(long)p);
-#line 251 "minor.brg"
+	case 99: /* expr: chars */
+		fprintf(stderr, "0x%lx: line 269: expr: chars\n",(long)p);
+#line 269 "minor.brg"
 { fprintf(yyout, pfCHAR pfTEXT pfADDR, 0, mklbl(p->place)); }
 		break;
-	case 97: /* expr: lval */
-		fprintf(stderr, "0x%lx: line 252: expr: lval\n",(long)p);
-#line 252 "minor.brg"
+	case 100: /* expr: lval */
+		fprintf(stderr, "0x%lx: line 270: expr: lval\n",(long)p);
+#line 270 "minor.brg"
 
 		break;
-	case 98: /* expr: READ */
-		fprintf(stderr, "0x%lx: line 253: expr: READ\n",(long)p);
-#line 253 "minor.brg"
+	case 101: /* expr: READ */
+		fprintf(stderr, "0x%lx: line 271: expr: READ\n",(long)p);
+#line 271 "minor.brg"
 { fprintf(yyout, pfCALL pfPUSH, "_readi"); }
 		break;
-	case 99: /* expr: ADDR(lval) */
-		fprintf(stderr, "0x%lx: line 254: expr: ADDR(lval)\n",(long)p);
-#line 254 "minor.brg"
+	case 102: /* expr: ADDR(lval) */
+		fprintf(stderr, "0x%lx: line 272: expr: ADDR(lval)\n",(long)p);
+#line 272 "minor.brg"
 {}
 		break;
-	case 100: /* expr: ADD(expr,expr) */
-		fprintf(stderr, "0x%lx: line 255: expr: ADD(expr,expr)\n",(long)p);
-#line 255 "minor.brg"
+	case 103: /* expr: ADD(expr,expr) */
+		fprintf(stderr, "0x%lx: line 273: expr: ADD(expr,expr)\n",(long)p);
+#line 273 "minor.brg"
 { fprintf(yyout, pfADD); }
 		break;
-	case 101: /* expr: SUB(expr,expr) */
-		fprintf(stderr, "0x%lx: line 256: expr: SUB(expr,expr)\n",(long)p);
-#line 256 "minor.brg"
+	case 104: /* expr: SUB(expr,expr) */
+		fprintf(stderr, "0x%lx: line 274: expr: SUB(expr,expr)\n",(long)p);
+#line 274 "minor.brg"
 { fprintf(yyout, pfSUB); }
 		break;
-	case 102: /* expr: MUL(expr,expr) */
-		fprintf(stderr, "0x%lx: line 257: expr: MUL(expr,expr)\n",(long)p);
-#line 257 "minor.brg"
+	case 105: /* expr: MUL(expr,expr) */
+		fprintf(stderr, "0x%lx: line 275: expr: MUL(expr,expr)\n",(long)p);
+#line 275 "minor.brg"
 { fprintf(yyout, pfMUL); }
 		break;
-	case 103: /* expr: DIV(expr,expr) */
-		fprintf(stderr, "0x%lx: line 258: expr: DIV(expr,expr)\n",(long)p);
-#line 258 "minor.brg"
+	case 106: /* expr: DIV(expr,expr) */
+		fprintf(stderr, "0x%lx: line 276: expr: DIV(expr,expr)\n",(long)p);
+#line 276 "minor.brg"
 { fprintf(yyout, pfDIV); }
 		break;
-	case 104: /* expr: MOD(expr,expr) */
-		fprintf(stderr, "0x%lx: line 259: expr: MOD(expr,expr)\n",(long)p);
-#line 259 "minor.brg"
+	case 107: /* expr: MOD(expr,expr) */
+		fprintf(stderr, "0x%lx: line 277: expr: MOD(expr,expr)\n",(long)p);
+#line 277 "minor.brg"
 { fprintf(yyout, pfMOD); }
 		break;
-	case 105: /* expr: POW(expr,expr) */
-		fprintf(stderr, "0x%lx: line 260: expr: POW(expr,expr)\n",(long)p);
-#line 260 "minor.brg"
+	case 108: /* expr: POW(expr,expr) */
+		fprintf(stderr, "0x%lx: line 278: expr: POW(expr,expr)\n",(long)p);
+#line 278 "minor.brg"
 {}
 		break;
-	case 106: /* expr: EQU(expr,expr) */
-		fprintf(stderr, "0x%lx: line 261: expr: EQU(expr,expr)\n",(long)p);
-#line 261 "minor.brg"
+	case 109: /* expr: EQU(expr,expr) */
+		fprintf(stderr, "0x%lx: line 279: expr: EQU(expr,expr)\n",(long)p);
+#line 279 "minor.brg"
 { fprintf(yyout, pfEQ); }
 		break;
-	case 107: /* expr: NE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 262: expr: NE(expr,expr)\n",(long)p);
-#line 262 "minor.brg"
+	case 110: /* expr: NE(expr,expr) */
+		fprintf(stderr, "0x%lx: line 280: expr: NE(expr,expr)\n",(long)p);
+#line 280 "minor.brg"
 { fprintf(yyout, pfNE); }
 		break;
-	case 108: /* expr: GE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 263: expr: GE(expr,expr)\n",(long)p);
-#line 263 "minor.brg"
+	case 111: /* expr: GE(expr,expr) */
+		fprintf(stderr, "0x%lx: line 281: expr: GE(expr,expr)\n",(long)p);
+#line 281 "minor.brg"
 { fprintf(yyout, pfGE); }
 		break;
-	case 109: /* expr: LE(expr,expr) */
-		fprintf(stderr, "0x%lx: line 264: expr: LE(expr,expr)\n",(long)p);
-#line 264 "minor.brg"
+	case 112: /* expr: LE(expr,expr) */
+		fprintf(stderr, "0x%lx: line 282: expr: LE(expr,expr)\n",(long)p);
+#line 282 "minor.brg"
 { fprintf(yyout, pfLE); }
 		break;
-	case 110: /* expr: LT(expr,expr) */
-		fprintf(stderr, "0x%lx: line 265: expr: LT(expr,expr)\n",(long)p);
-#line 265 "minor.brg"
+	case 113: /* expr: LT(expr,expr) */
+		fprintf(stderr, "0x%lx: line 283: expr: LT(expr,expr)\n",(long)p);
+#line 283 "minor.brg"
 { fprintf(yyout, pfLT); }
 		break;
-	case 111: /* expr: GT(expr,expr) */
-		fprintf(stderr, "0x%lx: line 266: expr: GT(expr,expr)\n",(long)p);
-#line 266 "minor.brg"
+	case 114: /* expr: GT(expr,expr) */
+		fprintf(stderr, "0x%lx: line 284: expr: GT(expr,expr)\n",(long)p);
+#line 284 "minor.brg"
 { fprintf(yyout, pfGT); }
 		break;
-	case 112: /* expr: AND(and,expr) */
-		fprintf(stderr, "0x%lx: line 267: expr: AND(and,expr)\n",(long)p);
-#line 267 "minor.brg"
+	case 115: /* expr: AND(and,expr) */
+		fprintf(stderr, "0x%lx: line 285: expr: AND(and,expr)\n",(long)p);
+#line 285 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 		break;
-	case 113: /* and: expr */
-		fprintf(stderr, "0x%lx: line 268: and: expr\n",(long)p);
-#line 268 "minor.brg"
+	case 116: /* and: expr */
+		fprintf(stderr, "0x%lx: line 286: and: expr\n",(long)p);
+#line 286 "minor.brg"
 { p->place = ++lbl; fprintf(yyout, pfDUP pfJZ pfTRASH, mklbl(p->place), pfWORD); }
 		break;
-	case 114: /* expr: OR(or,expr) */
-		fprintf(stderr, "0x%lx: line 269: expr: OR(or,expr)\n",(long)p);
-#line 269 "minor.brg"
+	case 117: /* expr: OR(or,expr) */
+		fprintf(stderr, "0x%lx: line 287: expr: OR(or,expr)\n",(long)p);
+#line 287 "minor.brg"
 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHILD(p)->place)); }
 		break;
-	case 115: /* or: expr */
-		fprintf(stderr, "0x%lx: line 270: or: expr\n",(long)p);
-#line 270 "minor.brg"
+	case 118: /* or: expr */
+		fprintf(stderr, "0x%lx: line 288: or: expr\n",(long)p);
+#line 288 "minor.brg"
 { p->place = ++lbl; fprintf(yyout, pfDUP pfJNZ pfTRASH, mklbl(p->place), pfWORD); }
 		break;
-	case 116: /* expr: NOT(expr) */
-		fprintf(stderr, "0x%lx: line 271: expr: NOT(expr)\n",(long)p);
-#line 271 "minor.brg"
+	case 119: /* expr: NOT(expr) */
+		fprintf(stderr, "0x%lx: line 289: expr: NOT(expr)\n",(long)p);
+#line 289 "minor.brg"
 { fprintf(yyout, pfIMM pfEQ, 0); }
 		break;
-	case 117: /* expr: UMINUS(expr) */
-		fprintf(stderr, "0x%lx: line 272: expr: UMINUS(expr)\n",(long)p);
-#line 272 "minor.brg"
+	case 120: /* expr: UMINUS(expr) */
+		fprintf(stderr, "0x%lx: line 290: expr: UMINUS(expr)\n",(long)p);
+#line 290 "minor.brg"
 { fprintf(yyout, pfNEG); }
 		break;
-	case 118: /* expr: EQ(expr,assign) */
-		fprintf(stderr, "0x%lx: line 273: expr: EQ(expr,assign)\n",(long)p);
-#line 273 "minor.brg"
+	case 121: /* expr: EQ(expr,assign) */
+		fprintf(stderr, "0x%lx: line 291: expr: EQ(expr,assign)\n",(long)p);
+#line 291 "minor.brg"
 {}
 		break;
-	case 119: /* expr: IDARGS(ID,exprs) */
-		fprintf(stderr, "0x%lx: line 274: expr: IDARGS(ID,exprs)\n",(long)p);
-#line 274 "minor.brg"
+	case 122: /* expr: IDARGS(ID,exprs) */
+		fprintf(stderr, "0x%lx: line 292: expr: IDARGS(ID,exprs)\n",(long)p);
+#line 292 "minor.brg"
 { fprintf(yyout, pfCALL pfTRASH pfPUSH, mkfunc(LEFT_CHILD(p)->value.s), (int)(pfWORD*(RIGHT_CHILD(p)->place))); }
 		break;
-	case 120: /* exprs: COMMA(expr,NIL) */
-		fprintf(stderr, "0x%lx: line 276: exprs: COMMA(expr,NIL)\n",(long)p);
-#line 276 "minor.brg"
+	case 123: /* exprs: COMMA(expr,NIL) */
+		fprintf(stderr, "0x%lx: line 294: exprs: COMMA(expr,NIL)\n",(long)p);
+#line 294 "minor.brg"
 { p->place = 1; }
 		break;
-	case 121: /* exprs: COMMA(expr,exprs) */
-		fprintf(stderr, "0x%lx: line 277: exprs: COMMA(expr,exprs)\n",(long)p);
-#line 277 "minor.brg"
+	case 124: /* exprs: COMMA(expr,exprs) */
+		fprintf(stderr, "0x%lx: line 295: exprs: COMMA(expr,exprs)\n",(long)p);
+#line 295 "minor.brg"
 { p->place = ((LEFT_CHILD(p)->place) + (RIGHT_CHILD(p)->place)); }
 		break;
 	default: break;
@@ -3174,7 +3254,7 @@ int yyselect(NODEPTR_TYPE p)
 }
 
 
-#line 279 "minor.brg"
+#line 297 "minor.brg"
 
 extern char **yynames;
 extern int trace, errors, debugNode;
