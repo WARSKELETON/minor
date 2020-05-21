@@ -140,9 +140,9 @@ fvars: ARGS(fvars, fvar)	1 {}
 vardecl: NUMBER(varid, eqint)					1 {}
 vardecl: STRING(varid, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
 vardecl: ARRAY(arrayid, INTS(vdim, eqvec))		1 {}
-vardecl: NUMBER(ID, NIL)						1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
-vardecl: STRING(ID, NIL)						1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
-vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+vardecl: NUMBER(ID, NIL)						1 { fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
+vardecl: STRING(ID, NIL)						1 { fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 
 varid: ID										1 { fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
 
@@ -231,7 +231,7 @@ else: block
 lval: ID					1 { getId(p); }
 lval: INDEX(lvec, expr)		1 { fprintf(yyout, pfIMM pfMUL pfADD pfLOAD, 4); }
 lvec: ID					1 { getId(p); }
-assign: ID					1 { assignment(RIGHT_CHILD(p)); }
+assign: ID					1 { assignment(p); }
 assign: INDEX(lvec, expr) 	1 { fprintf(yyout, pfIMM pfMUL pfADD pfSTORE, 4); }
 
 expr: CHARS(NIL, INT)	1 { fprintf(yyout, pfIMM, RIGHT_CHILD(p)->value.i); }

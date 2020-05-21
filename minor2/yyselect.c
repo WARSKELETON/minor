@@ -1,5 +1,5 @@
 /*
-generated at Thu May 21 11:24:45 2020
+generated at Thu May 21 11:51:56 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -2641,17 +2641,17 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 27: /* vardecl: NUMBER(ID,NIL) */
 		fprintf(stderr, "0x%lx: line 143: vardecl: NUMBER(ID,NIL)\n",(long)p);
 #line 143 "minor.brg"
-{ fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+{ fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
 		break;
 	case 28: /* vardecl: STRING(ID,NIL) */
 		fprintf(stderr, "0x%lx: line 144: vardecl: STRING(ID,NIL)\n",(long)p);
 #line 144 "minor.brg"
-{ fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+{ fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 		break;
 	case 29: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
 		fprintf(stderr, "0x%lx: line 145: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
 #line 145 "minor.brg"
-{ fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+{ fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
 		break;
 	case 30: /* varid: ID */
 		fprintf(stderr, "0x%lx: line 147: varid: ID\n",(long)p);
@@ -2956,7 +2956,7 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 90: /* assign: ID */
 		fprintf(stderr, "0x%lx: line 234: assign: ID\n",(long)p);
 #line 234 "minor.brg"
-{ assignment(RIGHT_CHILD(p)); }
+{ assignment(p); }
 		break;
 	case 91: /* assign: INDEX(lvec,expr) */
 		fprintf(stderr, "0x%lx: line 235: assign: INDEX(lvec,expr)\n",(long)p);
