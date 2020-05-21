@@ -1,12 +1,10 @@
-Este programa calcula um termo (lido do terminal) da serie de Fibonacci
-
 program
-
-function number fib number n do
-  if n < 2 then return n fi
-  return fib(n-1)+fib(n-2)
-
+    array x[3] := 1, 2
 start
-  "Qual o termo da série de Fibonacci a calcular: "!
-  fib(?)! "\n"!
+    x[0]!
+    x[1]!
+    x[2]!
+    x[2] := 3;
+    x[2]!
+    "\n"!
 end
