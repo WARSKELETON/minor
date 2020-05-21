@@ -19,6 +19,8 @@
 #define TRACE
 static void yytrace(NODEPTR_TYPE p, int eruleno, int cost, int bestcost);
 
+char *dupstr(const char *s);
+
 extern FILE *yyout;
 static int forlbl[20], repeatlbl[20], stoplbl[20], forcnt; /* for labels */
 static char *extrns[100]; /* emit externs at the end only */
@@ -84,17 +86,17 @@ static int cnstCost(Node *var) {
 static void function(char *name, int enter) {
   fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
 }
-static void final() {
-    fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
-	externs();
-}
-void externs() {
+static void externsPrint() {
   int i;
   
   for (i = 0; i < extcnt; i++)
     if (extrns[i])
       fprintf(yyout, pfEXTRN, extrns[i]);
+}
+static void final() {
+    fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
+	externsPrint();
 }
 /* falta const type ftype */
 /* expr: expr */
