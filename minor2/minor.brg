@@ -76,26 +76,17 @@ static void assignment(Node* nm) {
 	}
 }
 static int varCost(Node *var) {
-	Node* p = var->SUB(0);
-	if (RIGHT_CHILD(p) == NIL) {
-		fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-	}
-	else {
-		if (var->info & tCNST) {
-			fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-		}
-		else {
-			fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s);
-		}
-	}
-	return 1;
+	return var->info & tCNST ? 0x7fff : 1;
+}
+static int cnstCost(Node *var) {
+	return var->info & tCNST ? 1 : 0x7fff;
 }
 static void function(char *name, int enter) {
   fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
 }
 static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_println", "_readi");
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
 }
 void externs() {
   int i;
@@ -106,7 +97,7 @@ void externs() {
 }
 /* falta const type ftype */
 /* expr: expr */
-/* println ? 255 truncar */
+/* 255 truncar */
 %}
 %term STMT=';' PRINT='!' ALLOC='#' INDEX='[' IDARGS='(' COMMA=','
 %term ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' POW='^' EQU='=' LT='<' GT='>'
@@ -122,7 +113,8 @@ decls: gdecls 				1 {}
 gdecls: DECL(gdecls, decl)	1 {}
 gdecls: DECL(NIL, decl)		1 {}
 
-decl: VAR(vardecl)			varCost {}
+decl: VAR(vardecl)				varCost {}
+decl: VAR(constvardecl)			cnstCost {}
 decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
 farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
@@ -145,25 +137,34 @@ fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 fvars: ARGS(NIL, fvar)		1 {}
 fvars: ARGS(fvars, fvar)	1 {}
 
-vardecl: NUMBER(ID, eqint)					1 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); }
-vardecl: STRING(ID, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
-vardecl: ARRAY(arrayid, INTS(vdim, eqvec))	1 {}
+vardecl: NUMBER(varid, eqint)					1 {}
+vardecl: STRING(varid, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
+vardecl: ARRAY(arrayid, INTS(vdim, eqvec))		1 {}
+vardecl: NUMBER(ID, NIL)						1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+vardecl: STRING(ID, NIL)						1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
+vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { fprintf(yyout, pfGLOBL pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s, pfOBJ, LEFT_CHILD(p)->value.s); }
 
-arrayid: ID 1 { ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
+varid: ID										1 { fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
+
+constvardecl: NUMBER(constid, eqint)					1 {}
+constvardecl: STRING(constid, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
+constvardecl: ARRAY(constarrayid, INTS(vdim, eqvec))	1 {}
+
+constid: ID			1 { fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); }
+constarrayid: ID 	1 { fprintf(yyout, pfGLOBL pfRODATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
+
+arrayid: ID 1 { fprintf(yyout, pfGLOBL pfDATA pfALIGN pfLABEL, p->value.s, pfOBJ, p->value.s); ++lbl; fprintf(yyout, pfID pfLABEL, mklbl(lbl), mklbl(lbl)); }
 
 vdim: NIL	1 {}
 vdim: INT	1 {}
 
-eqvec: NIL	1 {}
 eqvec: ints	1 {}
 
 ints: INT				1 { fprintf(yyout, pfINTEGER, p->value.i); }
 ints: INTS(ints, INT)	1 { fprintf(yyout, pfINTEGER, RIGHT_CHILD(p)->value.i); }
 
-eqint: NIL	1 {}
-eqint: INT	1 {}
+eqint: INT				1 { fprintf(yyout, pfINTEGER, p->value.i); }
 
-eqstr: NIL		1 {}
 eqstr: chars	1 {}
 
 chars: CHARS(NIL, firstchar)		1 { p->place = RIGHT_CHILD(p)->place; }
