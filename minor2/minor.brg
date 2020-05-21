@@ -84,10 +84,6 @@ static int cnstCost(Node *var) {
 static void function(char *name, int enter) {
   fprintf(yyout, pfTEXT pfALIGN pfGLOBL pfLABEL pfENTER, mkfunc(name), pfFUNC, mkfunc(name), enter * (pfWORD/4));
 }
-static void final() {
-    fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
-}
 void externs() {
   int i;
   
@@ -95,9 +91,14 @@ void externs() {
     if (extrns[i])
       fprintf(yyout, pfEXTRN, extrns[i]);
 }
+static void final() {
+    fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
+	externs();
+}
 /* falta const type ftype */
 /* expr: expr */
-/* 255 truncar */
+/* IDpop no fum da func, 255 truncar */
 %}
 %term STMT=';' PRINT='!' ALLOC='#' INDEX='[' IDARGS='(' COMMA=','
 %term ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' POW='^' EQU='=' LT='<' GT='>'
@@ -115,9 +116,10 @@ gdecls: DECL(NIL, decl)		1 {}
 
 decl: VAR(vardecl)				varCost {}
 decl: VAR(constvardecl)			cnstCost {}
+decl: FUNCTION(funcname, FARGS(funcargs, NIL))			1 { extrns[extcnt++] = dupstr(mkfunc(LEFT_CHILD(LEFT_CHILD(p))->value.s)); }
 decl: FUNCTION(funcname, FARGS(funcargs, eqbody))		1 { fprintf(yyout, pfLEAVE pfRET); }
 
-farg: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
+farg: NUMBER(ID, NIL)	1 { IDnew(p->info, LEFT_CHILD(p)->value.s, pos); pos += 4; }
 farg: STRING(ID, NIL)	1 {}
 farg: ARRAY(ID, INTS(vdim, NIL))	1 {}
 
@@ -130,7 +132,7 @@ funcargs: fargs				1 { pos = 0; }
 funcname: END(ID, INT)	1 { IDpush(); pos = 8; currentfunc = LEFT_CHILD(p)->value.s; }
 funcmain: END(ID, INT)	1 { IDpush(); pos = 0; }
 
-fvar: NUMBER(ID, NIL)	1 { IDnew(RIGHT_CHILD(p)->info, LEFT_CHILD(p)->value.s, pos -= 4); }
+fvar: NUMBER(ID, NIL)	1 { IDnew(p->info, LEFT_CHILD(p)->value.s, pos -= 4); }
 fvar: STRING(ID, NIL)	1 {}
 fvar: ARRAY(ID, INTS(vdim, NIL))	1 {}
 
@@ -178,7 +180,6 @@ char: INT		1 { fprintf(yyout, pfCHAR, p->value.i); }
 char: CHAR		1 { fprintf(yyout, pfCHAR, p->value.i); }
 char: STR		1 { outstr(p->value.s); }
 
-eqbody: NIL	1 {}
 eqbody: body	1 {}
 
 main: START(mainfvars, instrs)	1 { IDpop(); }
