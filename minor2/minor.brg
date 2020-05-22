@@ -113,7 +113,7 @@ static void externsPrint() {
 }
 static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi", "_pow");
 	externsPrint();
 }
 static void initRemaining(int dim) {
@@ -183,10 +183,10 @@ vardecl: NUMBER(varid, eqint)					1 {}
 vardecl: STRING(varid, eqstr)					1 { fprintf(yyout, pfCHAR pfDATA pfID, 0, mklbl(RIGHT_CHILD(p)->place)); }
 vardecl: ARRAY(arrayid, INTS(vdim, eqvec))		1 { initRemaining(LEFT_CHILD(RIGHT_CHILD(p))->value.i); }
 vardecl: ARRAY(arrayid, INTS(NIL, eqvec))		1 {}
-vardecl: NUMBER(ID, NIL)						1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
-vardecl: STRING(ID, NIL)						1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
-vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
-vardecl: ARRAY(ID, INTS(NIL, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+vardecl: NUMBER(ID, NIL)						1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); } }
+vardecl: STRING(ID, NIL)						1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); } }
+vardecl: ARRAY(ID, INTS(vdim, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE pfBYTE, LEFT_CHILD(p)->value.s, pfWORD, 4 * LEFT_CHILD(RIGHT_CHILD(p))->value.i); } }
+vardecl: ARRAY(ID, INTS(NIL, NIL))				1 { if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); } }
 
 varid: ID										1 { checkForward(p->value.s); variable(p); }
 
@@ -244,7 +244,7 @@ instr: FI(THEN(if, elifs), else)					1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHIL
 instr: FOR(UNTIL(init, forcond), STEP(forblock, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 instr: PRINT(expr)									3 { pfPrint(p->info); }
 instr: expr											1 { /* TODO */ fprintf(yyout, pfTRASH, pfWORD); }
-instr: ALLOC(alloc,alloclval)							1 { fprintf(yyout, pfSTORE); }
+instr: ALLOC(alloc,alloclval)						1 { fprintf(yyout, pfSTORE); }
 alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
@@ -285,7 +285,7 @@ expr: SUB(expr, expr)	1 { fprintf(yyout, pfSUB); }
 expr: MUL(expr, expr)	1 { fprintf(yyout, pfMUL); }
 expr: DIV(expr, expr)	1 { fprintf(yyout, pfDIV); }
 expr: MOD(expr, expr)	1 { fprintf(yyout, pfMOD); }
-expr: POW(expr, expr)	1 {}
+expr: POW(expr, expr)	1 { fprintf(yyout, pfCALL pfPUSH, "_pow", 8); }
 expr: EQU(expr, expr)	1 { fprintf(yyout, pfEQ); }
 expr: NE(expr, expr)	1 { fprintf(yyout, pfNE); }
 expr: GE(expr, expr)	1 { fprintf(yyout, pfGE); }

@@ -1,5 +1,5 @@
 /*
-generated at Thu May 21 23:30:17 2020
+generated at Fri May 22 01:01:48 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -130,7 +130,7 @@ static void externsPrint() {
 }
 static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi");
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi", "_pow");
 	externsPrint();
 }
 static void initRemaining(int dim) {
@@ -2718,22 +2718,22 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 30: /* vardecl: NUMBER(ID,NIL) */
 		fprintf(stderr, "0x%lx: line 186: vardecl: NUMBER(ID,NIL)\n",(long)p);
 #line 186 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); }
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); } }
 		break;
 	case 31: /* vardecl: STRING(ID,NIL) */
 		fprintf(stderr, "0x%lx: line 187: vardecl: STRING(ID,NIL)\n",(long)p);
 #line 187 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); } }
 		break;
 	case 32: /* vardecl: ARRAY(ID,INTS(vdim,NIL)) */
 		fprintf(stderr, "0x%lx: line 188: vardecl: ARRAY(ID,INTS(vdim,NIL))\n",(long)p);
 #line 188 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE pfBYTE, LEFT_CHILD(p)->value.s, pfWORD, 4 * LEFT_CHILD(RIGHT_CHILD(p))->value.i); } }
 		break;
 	case 33: /* vardecl: ARRAY(ID,INTS(NIL,NIL)) */
 		fprintf(stderr, "0x%lx: line 189: vardecl: ARRAY(ID,INTS(NIL,NIL))\n",(long)p);
 #line 189 "minor.brg"
-{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else fprintf(yyout, pfBSS pfALIGN pfLABEL, LEFT_CHILD(p)->value.s); }
+{ if (LEFT_CHILD(p)->info & tFWD) extrns[extcnt++] = dupstr(LEFT_CHILD(p)->value.s); else { if (LEFT_CHILD(p)->info & tPUB) fprintf(yyout, pfGLOBL, LEFT_CHILD(p)->value.s, pfOBJ); fprintf(yyout, pfBSS pfALIGN pfLABEL pfBYTE, LEFT_CHILD(p)->value.s, pfWORD); } }
 		break;
 	case 34: /* varid: ID */
 		fprintf(stderr, "0x%lx: line 191: varid: ID\n",(long)p);
@@ -3088,7 +3088,7 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 104: /* expr: POW(expr,expr) */
 		fprintf(stderr, "0x%lx: line 288: expr: POW(expr,expr)\n",(long)p);
 #line 288 "minor.brg"
-{}
+{ fprintf(yyout, pfCALL pfPUSH, "_pow", 8); }
 		break;
 	case 105: /* expr: EQU(expr,expr) */
 		fprintf(stderr, "0x%lx: line 289: expr: EQU(expr,expr)\n",(long)p);
