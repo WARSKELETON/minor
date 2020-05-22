@@ -206,9 +206,9 @@ eqstr: chars	1 {}
 chars: CHARS(NIL, firstchar)		1 { p->place = RIGHT_CHILD(p)->place; }
 chars: CHARS(chars, char)			1 { p->place = LEFT_CHILD(p)->place; }
 
-firstchar: INT		1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
-firstchar: CHAR	    1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
-firstchar: STR		1 { p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
+firstchar: INT		1 { p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
+firstchar: CHAR	    1 { p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
+firstchar: STR		1 { p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
 
 char: INT		1 { fprintf(yyout, pfCHAR, p->value.i); }
 char: CHAR		1 { fprintf(yyout, pfCHAR, p->value.i); }

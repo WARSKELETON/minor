@@ -1,5 +1,5 @@
 /*
-generated at Fri May 22 01:01:48 2020
+generated at Fri May 22 01:37:53 2020
 by $Id: pburg.c,v 2.5 2017/11/16 09:41:42 prs Exp $
 */
 #include <stdio.h>
@@ -2788,17 +2788,17 @@ static void yyreduce(NODEPTR_TYPE p, int goalnt)
 	case 44: /* firstchar: INT */
 		fprintf(stderr, "0x%lx: line 209: firstchar: INT\n",(long)p);
 #line 209 "minor.brg"
-{ p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
+{ p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 45: /* firstchar: CHAR */
 		fprintf(stderr, "0x%lx: line 210: firstchar: CHAR\n",(long)p);
 #line 210 "minor.brg"
-{ p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
+{ p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL pfCHAR, mklbl(p->place), p->value.i); }
 		break;
 	case 46: /* firstchar: STR */
 		fprintf(stderr, "0x%lx: line 211: firstchar: STR\n",(long)p);
 #line 211 "minor.brg"
-{ p->place = lbl++; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
+{ p->place = ++lbl; fprintf(yyout, pfRODATA pfALIGN pfLABEL, mklbl(p->place)); outstr(p->value.s); }
 		break;
 	case 47: /* char: INT */
 		fprintf(stderr, "0x%lx: line 213: char: INT\n",(long)p);
