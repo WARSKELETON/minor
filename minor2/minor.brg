@@ -128,7 +128,7 @@ static void externsPrint() {
 }
 static void final() {
     fprintf(yyout, pfIMM pfPOP pfLEAVE pfRET, 0);
-    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi", "_pow", "_pfstrcmp");
+    fprintf(yyout, pfEXTRN pfEXTRN pfEXTRN pfEXTRN pfEXTRN, "_prints", "_printi", "_readi", "_pfpow", "_pfstrcmp");
 	externsPrint();
 }
 static void initRemaining(int dim) {
@@ -159,12 +159,10 @@ static void variable(Node* var) {
 	fprintf(yyout, pfALIGN pfLABEL, var->value.s);
 }
 static void checkStr(Node* s1, Node* s2) {
-	if (s1->info & tSTR && s2->info & tSTR) {
-		fprintf(yyout, pfCALL pfPUSH pfIMM, "_pfstrcmp", 0);
+	if (tTYPE(s1->info) == tSTR && tTYPE(s2->info) == tSTR) {
+		fprintf(yyout, pfSWAP pfCALL pfTRASH pfPUSH pfIMM, "_pfstrcmp", pfWORD * 2, 0);
 	}
 }
-/* expr: expr */
-/* 255 truncar */
 %}
 %term STMT=';' PRINT='!' ALLOC='#' INDEX='[' IDARGS='(' COMMA=','
 %term ADD='+' SUB='-' MUL='*' DIV='/' MOD='%' POW='^' EQU='=' LT='<' GT='>'
@@ -271,7 +269,7 @@ instr: FI(THEN(if, elifs), else)					1 { fprintf(yyout, pfLABEL, mklbl(LEFT_CHIL
 instr: FOR(UNTIL(init, forcond), STEP(forblock, postexpr))	1 { fprintf(yyout, pfLABEL, mklbl(RIGHT_CHILD(LEFT_CHILD(p))->place)); }
 instr: PRINT(expr)									3 { pfPrint(p->info); }
 instr: expr											1 { fprintf(yyout, pfTRASH, pfWORD); }
-instr: ALLOC(alloc,alloclval)						1 { fprintf(yyout, pfSTORE); }
+instr: ALLOC(alloc,alloclval)						1 { fprintf(yyout, pfSTORE); if (tTYPE(RIGHT_CHILD(p)->info) == tVEC) IDreplace(-1, RIGHT_CHILD(p)->value.s, pos -= LEFT_CHILD(p)->value.i * 4); }
 alloc: expr											1 { fprintf(yyout, pfIMM pfMUL pfALLOC pfSP, pfWORD); }
 
 if: IF(cond, block)		1 { p->place = ++lbl; eliflbl = p->place; fprintf(yyout, pfJMP pfLABEL, mklbl(p->place), mklbl(LEFT_CHILD(p)->place)); }
@@ -312,7 +310,7 @@ expr: SUB(expr, expr)	1 { fprintf(yyout, pfSUB); }
 expr: MUL(expr, expr)	1 { fprintf(yyout, pfMUL); }
 expr: DIV(expr, expr)	1 { fprintf(yyout, pfDIV); }
 expr: MOD(expr, expr)	1 { fprintf(yyout, pfMOD); }
-expr: POW(expr, expr)	1 { fprintf(yyout, pfCALL pfPUSH, "_pow"); }
+expr: POW(expr, expr)	1 { fprintf(yyout, pfCALL pfTRASH pfPUSH, "_pfpow", 8); }
 expr: EQU(expr, expr)	1 { checkStr(RIGHT_CHILD(p), LEFT_CHILD(p)); fprintf(yyout, pfEQ); }
 expr: NE(expr, expr)	1 { checkStr(RIGHT_CHILD(p), LEFT_CHILD(p)); fprintf(yyout, pfNE); }
 expr: GE(expr, expr)	1 { checkStr(RIGHT_CHILD(p), LEFT_CHILD(p)); fprintf(yyout, pfGE); }
